@@ -6,13 +6,10 @@ import Institution
 import Data.Proxy
 import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 import qualified Folly.Formula as F
 
--- | A wrapper for first-order signatures (lists of function/predicate symbols).
--- We keep it phantom; the actual signature is not used in the formulas.
-newtype FOLSig (syms :: [Symbol]) = FOLSig (Proxy syms)
-
--- | Terms: we use Folly's Term type.
+-- | Terms: we use Folly's Term type (which we can inspect via the provided functions).
 type Term = F.Term
 
 -- | Sentences: our own formula GADT built on top of Folly's terms.
@@ -29,36 +26,76 @@ data Formula (syms :: [Symbol]) where
 
 -- | Models: a mapping from predicate symbols to relations and function symbols to functions.
 -- We use String keys (the symbol names) for simplicity.
--- For now, we only handle nullary predicates and constant functions (zero-arity).
+-- Constants are represented as Strings (the constant symbol name).
+-- For a predicate of arity n, the relation is a Set of n-tuples of Strings.
+-- For a function of arity n, the function maps an n-tuple of Strings to a String.
 data FOLModel (syms :: [Symbol]) = FOLModel
-  { predicateInterpretation :: Map.Map String Bool
-  , functionInterpretation  :: Map.Map String String -- very simplified: constant symbol name
+  { predicateInterpretation :: Map.Map String (Set.Set [String])
+  , functionInterpretation  :: Map.Map String ([String] -> String)
   }
+
+-- | A wrapper for first-order signatures (lists of function/predicate symbols).
+-- We keep it phantom; the actual signature is not used in the formulas.
+newtype FOLSig (syms :: [Symbol]) = FOLSig (Proxy syms)
 
 instance Institution (FOLSig syms) where
   type Sentence (FOLSig syms) = Formula syms
   type Model  (FOLSig syms)  = FOLModel syms
-  satisfies _ m s = evalFormula m s
+  satisfies _ m s = case evalFormula m Map.empty s of
+                      Right b -> b
+                      Left _  -> False   -- treat errors as false
 
--- | Evaluate a closed formula in a simple model.
--- This only works for ground formulas (no variables) and ignores arity.
--- For predicates, we treat them as nullary and look up their interpretation.
--- For functions, we treat them as constant symbols and look up their interpretation.
--- This is a toy model; a real implementation would need to handle arity and recursion.
-evalFormula :: FOLModel syms -> Formula syms -> Bool
-evalFormula _ TrueF = True
-evalFormula _ FalseF = False
-evalFormula m (Pred p args) = 
-  let key = symbolVal p
-  in case Map.lookup key (predicateInterpretation m) of
-       Just b -> b -- ignore args for now
-       Nothing -> False
-evalFormula m (Not f) = not (evalFormula m f)
-evalFormula m (And f1 f2) = evalFormula m f1 && evalFormula m f2
-evalFormula m (Or f1 f2)  = evalFormula m f1 || evalFormula m f2
-evalFormula m (Impl f1 f2) = not (evalFormula m f1) || evalFormula m f2
-evalFormula m (Forall p f) = undefined -- would need to enumerate domain
-evalFormula m (Exists p f) = undefined
+-- | Evaluate a term to a constant (String) given a model and a variable assignment.
+-- Returns Left error if the term is not ground (contains a variable) or if a symbol is missing.
+evalTerm :: FOLModel syms -> Map.Map String String -> Term -> Either String String
+evalTerm m rho t
+  | F.isVar t   = case Map.lookup (F.varName t) rho of
+                    Just v -> Right v
+                    Nothing -> Left $ "Undefined variable: " ++ F.varName t
+  | F.isConst t = Right $ F.funcName t   -- constant: funcName gives the constant name
+  | F.isFunc t  = do
+      let f = F.funcName t
+          args = F.funcArgs t
+      let evalTermM = evalTerm m rho
+      argVals <- mapM evalTermM args
+      case Map.lookup f (functionInterpretation m) of
+        Just func -> Right $ func argVals
+        Nothing   -> Left $ "Undefined function symbol: " ++ f
+
+-- | Evaluate a formula to a Boolean given a model and a variable assignment.
+-- Returns Left error if the formula is not closed (contains free variables) or if a predicate is missing.
+evalFormula :: FOLModel syms -> Map.Map String String -> Formula syms -> Either String Bool
+evalFormula _ _ TrueF = Right True
+evalFormula _ _ FalseF = Right False
+evalFormula m rho (Pred p args) = do
+  let evalTermM = evalTerm m rho
+  argVals <- mapM evalTermM args
+  case Map.lookup (symbolVal p) (predicateInterpretation m) of
+    Just rel -> Right $ Set.member argVals rel
+    Nothing  -> Left $ "Undefined predicate symbol: " ++ symbolVal p
+evalFormula m rho (Not f) = do
+  b <- evalFormula m rho f
+  Right $ not b
+evalFormula m rho (And f1 f2) = do
+  b1 <- evalFormula m rho f1
+  b2 <- evalFormula m rho f2
+  Right $ b1 && b2
+evalFormula m rho (Or f1 f2) = do
+  b1 <- evalFormula m rho f1
+  b2 <- evalFormula m rho f2
+  Right $ b1 || b2
+evalFormula m rho (Impl f1 f2) = do
+  b1 <- evalFormula m rho f1
+  b2 <- evalFormula m rho f2
+  Right $ (not b1) || b2
+evalFormula m rho (Forall p f) = do
+  -- For simplicity, we do not support quantifiers in ground formulas.
+  -- We require that the formula f has no free variables (except possibly p, which is bound).
+  -- We will treat quantifiers as ranging over the Herbrand universe of constants appearing in the formula.
+  -- This is a toy implementation; a real implementation would need to consider all possible constants.
+  Left $ "Quantifiers not yet supported in ground formula evaluation: " ++ symbolVal p
+evalFormula m rho (Exists p f) = do
+  Left $ "Quantifiers not yet supported in ground formula evaluation: " ++ symbolVal p
 
 -- | Smart constructors for terms that take a KnownSymbol proxy.
 varTerm :: KnownSymbol sym => Proxy sym -> Term
