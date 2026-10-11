@@ -13,17 +13,12 @@ import System.IO.Unsafe (unsafePerformIO)
 import Data.Tree (Tree(..))
 
 -- | A structural representation of a code change or experiment that can be stored as evidence.
---   We store the TreeSitter Tree and its string representation (of the root node) for equality and hashing.
-data StructuralRep = StructuralRep { getTree :: TS.Tree, getRepString :: String }
-
-instance Show StructuralRep where
-  show (StructuralRep _ rep) = "StructuralRep { rep = \"" ++ rep ++ "\" }"
-
-instance Eq StructuralRep where
-  (StructuralRep _ s1) == (StructuralRep _ s2) = s1 == s2
+--   We store the Data.Tree (converted from TreeSitter) and its root label string for equality and hashing.
+data StructuralRep = StructuralRep { getRepString :: String, getDataTree :: Tree String }
+  deriving (Eq, Show)
 
 instance Hashable StructuralRep where
-  hashWithSalt s (StructuralRep _ str) = hashWithSalt s str
+  hashWithSalt s (StructuralRep str _) = hashWithSalt s str
 
 -- | The type of failure reason (e.g., type error, divergence, missing instance).
 data FailureReason
@@ -62,7 +57,6 @@ addEvidence e (EvidenceStore store) =
   EvidenceStore (HM.insert (evidenceChange e) e store)
 
 -- | Check if a proposed change matches any known evidence (i.e., we have seen this exact structural rep fail).
---   In a more advanced version, we would use tree-diff to check for structural similarity.
 proposesKnownFailure :: StructuralRep -> EvidenceStore sig -> Bool
 proposesKnownFailure rep (EvidenceStore store) = HM.member rep store
 
@@ -94,14 +88,7 @@ recordFailure :: (Institution sig, ToStructuralRep a) => a -> FailureReason -> P
 recordFailure change reason sig store =
   addEvidence (Evidence (toStructuralRep change) reason sig) store
 
--- | A simple instance for TS.Tree (for sketching purposes).
---   We compute the string representation of the root node via unsafePerformIO.
-instance ToStructuralRep TS.Tree where
-  toStructuralRep t = StructuralRep t $ unsafePerformIO $ do
-    rootNode <- TS.treeRootNode t
-    TS.showNodeAsString rootNode
-
--- | Levenshtein distance algorithm for strings.
+-- | Levenshtein distance algorithm for strings (kept for reference, not used in similarity checking now).
 levenshtein :: String -> String -> Int
 levenshtein [] ys = length ys
 levenshtein xs [] = length xs
@@ -117,20 +104,45 @@ editDistance = go
     go (Ins sub) = 1 + editDistanceTree sub
     go (Del sub) = 1 + editDistanceTree sub
     go (Swp l r) = 2 + editDistanceTree l + editDistanceTree r
-    
     editDistanceTree (EditNode _ edits) = sum (map go edits)
 
+-- | Convert a TS.Tree to a Data.Tree.Tree String by traversing the tree and converting each node to its string representation.
+tsTreeToDataTree :: TS.Tree -> Tree String
+tsTreeToDataTree tree = 
+  let rootNode = unsafePerformIO $ TS.treeRootNode tree
+  in tsNodeToDataTree rootNode
+  where
+    tsNodeToDataTree :: TS.Node -> Tree String
+    tsNodeToDataTree node = 
+      let label' = unsafePerformIO $ TS.showNodeAsString node
+          childCount' = unsafePerformIO $ TS.nodeChildCount node
+      in  Node label' [ tsNodeToDataTree (unsafePerformIO $ TS.nodeChild node (fromIntegral i)) | i <- [0..(fromIntegral childCount' - 1)] ]
+
+-- | Extract the root label from a Data.Tree.Tree String.
+getDataTreeRootLabel :: Tree String -> String
+getDataTreeRootLabel (Node label _) = label
+
+-- | A simple instance for TS.Tree (for sketching purposes).
+--   We convert the TS.Tree to a Data.Tree.Tree String and set the string representation to the root label.
+instance ToStructuralRep TS.Tree where
+  toStructuralRep t = 
+    let dt = tsTreeToDataTree t
+        lbl = getDataTreeRootLabel dt
+    in StructuralRep lbl dt
+
 -- | Check if a proposed tree is structurally similar to any known failure in the evidence store.
---   Uses Levenshtein distance on the string representations and returns the evidence if the distance is <= similarityThreshold.
+--   Uses tree-diff to compute the edit distance on the Data.Tree representations and returns the evidence if the distance is <= similarityThreshold.
 proposesSimilarFailure :: TS.Tree -> EvidenceStore sig -> Maybe (Evidence sig)
 proposesSimilarFailure proposedTree (EvidenceStore store) =
   let threshold = 2 :: Int
-      proposedStr = getRepString $ toStructuralRep proposedTree
+      proposedDT = tsTreeToDataTree proposedTree
       found = foldr (\(evRep, ev) acc -> 
                      case acc of
                        Just _ -> acc  -- Already found a match, keep it
                        Nothing -> 
-                         let dist = levenshtein proposedStr (getRepString evRep)
+                         let evTree = getDataTree evRep
+                             diff = treeDiff proposedDT evTree
+                             dist = editDistance diff
                          in if dist <= threshold
                             then Just ev
                             else Nothing) 

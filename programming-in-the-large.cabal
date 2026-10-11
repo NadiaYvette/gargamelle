@@ -2,39 +2,41 @@ cabal-version:      >=1.10
 name:                programming-in-the-large
 version:             0.1.0.0
 synopsis:            Haskell library and toolkit for autonomous programming at large scale
-description:         A project skeleton inspired by Sarutahiko and Polytropos to develop frameworks for autonomous programming in the large by AI coding agents.
-category:            Development
+description:         Provides an Institution framework with instances for first-order logic, equational theories, sheaves, session types, refinement calculus, hyperdoctrines, and evidence preservation with tree-sitter integration.
+category:            Language
 author:              Nadia
 maintainer:          nadia@example.com
-copyright:           2026 Nadia
 license:             EUPL-1.2
 license-file:        LICENSE
 build-type:          Simple
-extra-source-files:  README.md
 
 library
-  exposed-modules:     Core.AST, Institution, Propositional, FirstOrder, Equational, Sheaf, SessionTypes, RefinementCalculus, CEGIS, Evidence
-  -- other-modules:
+  exposed-modules:     Institution
+                       FirstOrder
+                       Equational
+                       Sheaf
+                       SessionTypes
+                       RefinementCalculus
+                       Hyperdoctrine
+                       Evidence
+  other-modules:       
+  build-depends:       base >=4.17 && <5
+                     , containers
+                     , hashable
+                     , hs-tree-sitter
+                     , tree-diff
+                     , unordered-containers
+                     , Folly
+                     , jukebox
+                     , crem
   hs-source-dirs:      src
   default-language:    Haskell2010
-  build-depends:       base >=4.15 && <5
-                     , jukebox
-                     , Folly
-                     , containers
-                     , hashable
-                     , unordered-containers
-                     , hs-tree-sitter
 
-test-suite test-programming-in-the-large
+test-suite tests
   type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
   main-is:             Main.hs
-  default-language:    Haskell2010
-  build-depends:       base >=4.15 && <5
-                     , jukebox
-                     , Folly
-                     , containers
-                     , hashable
-                     , unordered-containers
-                     , hs-tree-sitter
+  hs-source-dirs:      test
+  build-depends:       base
                      , programming-in-the-large
+                     , hspec
+  default-language:    Haskell2010
