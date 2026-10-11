@@ -1,0 +1,28 @@
+cabal-version:      >=1.10
+name:                programming-in-the-large
+version:             0.1.0.0
+synopsis:            Haskell library and toolkit for autonomous programming at large scale
+description:         A project skeleton inspired by Sarutahiko and Polytropos to develop frameworks for autonomous programming in the large by AI coding agents.
+category:            Development
+author:              Nadia
+maintainer:          nadia@example.com
+copyright:           2026 Nadia
+license:             BSD3
+license-file:        LICENSE
+build-type:          Simple
+extra-source-files:  README.md
+
+library
+  exposed-modules:     Core.AST, Institution, Propositional
+  -- other-modules:
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  build-depends:       base >=4.15 && <5
+
+test-suite test-programming-in-the-large
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >=4.15 && <5,
+                       programming-in-the-large

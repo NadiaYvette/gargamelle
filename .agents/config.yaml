@@ -1,0 +1,22 @@
+# Hermes agent configuration for the programming-in-the-large project
+# This config is loaded when the agent is started from within this project directory.
+
+model: auto
+provider: custom
+platform: tui
+
+# Load skills that are useful for this project
+skills:
+  - hermes-agent
+  - code-navigation
+  - contextful
+  - haskell
+
+# Optional: set up a default plugin set (empty for now)
+plugins: []
+
+# Optional: cron jobs (none by default)
+cron: {}
+
+# Optional: persistent memory for this project (empty by default)
+memories: {}
