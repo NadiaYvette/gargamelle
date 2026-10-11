@@ -13,7 +13,7 @@ build-type:          Simple
 extra-source-files:  README.md
 
 library
-  exposed-modules:     Core.AST, Institution, Propositional, FirstOrder, Equational, CEGIS
+  exposed-modules:     Core.AST, Institution, Propositional, FirstOrder, Equational, Sheaf, CEGIS
   -- other-modules:
   hs-source-dirs:      src
   default-language:    Haskell2010

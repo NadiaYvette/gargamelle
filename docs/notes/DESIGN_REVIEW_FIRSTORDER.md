@@ -1,61 +1,71 @@
-# Design Review: FirstOrder Module
+# Design Review: FirstOrder Model
 
 ## Overview
-The FirstOrder module provides an Institution instance for first-order logic using the Folly library for term and formula representation. It integrates with the existing Institution framework to enable reasoning about first-order theories within the programming-in-the-large project.
+This document reviews the FirstOrder module implementation in the programming-in-the-large project. The module provides an Institution instance for first-order logic with equality, using the Folly library for term representation and a custom GADT for formulas to ensure proper handling of variables, arity, and quantifiers.
 
 ## Key Components
 
-### Signature
-- `FOLSig syms`: A phantom type wrapping a type-level list of symbols (of kind `Symbol`). The signature is not directly used in the current implementation but serves as a placeholder for future extensions.
+### Term Representation
+- Terms are represented using Folly's `Term` type, which includes variables, constants, and function applications.
+- Smart constructors (`varTerm`, `constTerm`, `funAppTerm`) are provided for building terms from `KnownSymbol` proxies.
+- Terms are evaluated to constants (Strings) given a model and variable environment.
 
-### Terms
-- `Term`: Alias for `Folly.Formula.Term`, representing first-order terms (variables, constants, and function applications).
+### Formula Representation
+- Formulas are represented by a custom GADT `Formula` with constructors for:
+  - Truth values (`TrueF`, `FalseF`)
+  - Predicate application (`Pred`)
+  - Negation (`Not`)
+  - Conjunction (`And`)
+  - Disjunction (`Or`)
+  - Implication (`Impl`)
+  - Universal quantification (`Forall`)
+  - Existential quantification (`Exists`)
+- This GADT ensures that formulas are well-typed and avoids the pitfalls of using Folly's formula type directly (which lacks proper variable binding).
 
-### Formulas (Sentences)
-- `Formula syms`: A GADT representing first-order formulas constructed from Folly's terms:
-  - `TrueF`, `FalseF`: Boolean constants.
-  - `Pred sym [Term]`: Predicate application.
-  - `Not`, `And`, `Or`, `Impl`: Propositional connectives.
-  - `Forall sym`, `Exists sym`: Quantifiers (note: `forall` identifier warning due to future GHC keyword).
+### Model Structure
+- Models (`FOLModel`) consist of:
+  - `predicateInterpretation`: Mapping from predicate names (String) to relations (sets of tuples of constants)
+  - `functionInterpretation`: Mapping from function names (String) to functions on constants ([String] -> String)
+  - `constants`: Herbrand universe of constants (as strings) - the set of all constants in the signature
+- The model uses String keys for simplicity, assuming predicate and function symbols are represented as Strings.
 
-### Models
-- `FOLModel syms`: A simple model consisting of:
-  - `predicateInterpretation :: Map.Map String Bool`: Interpretation of predicate symbols as Boolean values (nullary predicates only).
-  - `functionInterpretation :: Map.Map String String`: Interpretation of function symbols as constant strings (zero-arity functions only).
+### Satisfaction Relation
+- The `satisfies` method evaluates a closed formula in a model by:
+  - Evaluating terms to constants (with variable lookup from an environment)
+  - Evaluating formulas to Booleans, with quantifiers interpreted over the Herbrand universe
+  - Returns `Left error` for undefined symbols or free variables, `Right Bool` for closed formulas
+- The environment maps variable names (Strings) to constant values (Strings) during evaluation.
 
-### Institution Instance
-- The `satisfies` method delegates to `evalFormula`, which evaluates a closed formula in a given model:
-  - Boolean constants are evaluated directly.
-  - Predicates are looked up in the model (ignoring arguments for now).
-  - Propositional connectives are evaluated recursively.
-  - Quantifiers are currently undefined (would require domain enumeration).
-
-### Smart Constructors
-- Term constructors: `varTerm`, `constTerm`, `funAppTerm` (using Folly's `var`, `constant`, `func`).
-- Formula constructors: `prop`, `neg`, `conj`, `disj`, `impl`, `bicond`, `forall`, `exists`.
+### Smart Constructors for Formulas
+- Propositional connectives and quantifiers are provided as smart constructors that build the GADT formulas.
+- Quantifier constructors (`forall`, `exists`) take a `KnownSymbol` proxy for the variable and a formula body.
+- Note: The identifier `forall` produces a GHC warning about future keyword usage; consider renaming to `forAll` in future versions.
 
 ## Dependencies
-- **Folly**: Vendored as `external/Folly/` for first-order term and formula operations.
-- **Institution**: The core typeclass from `Institution.hs`.
+- Folly library for term representation (`Folly.Formula`)
+- Standard library containers (`Data.Map`, `Data.Set`)
+- GHC extensions: DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses
 
-## Limitations and Future Work
-1. **Model Simplification**: The current model only handles nullary predicates and zero-arity functions. A proper term algebra should account for arity and recursive evaluation.
-2. **Quantifiers**: `Forall` and `Exists` are undefined; they require a domain of discourse and variable binding.
-3. **Equality**: Equality is not treated specially; it is modeled as a regular predicate. In first-order logic, equality has specific axioms (reflexivity, substitution) that should be considered.
-4. **Integration with Jukebox**: The Jukebox library (now vendored as `external/Jukebox/`) provides advanced first-order tools (clausification, unification, etc.). Future versions should leverage these for automated reasoning.
-5. **Test Coverage**: Add test cases for FirstOrder logic (e.g., using the Folly test suite or custom properties).
+## Strengths
+- Clear separation of terms and formulas
+- Proper handling of variable binding and quantification via environments
+- Use of GADTs ensures that only well-formed formulas can be constructed
+- Correct handling of arity for predicates and functions
+- Modular design that isolates first-order logic specifics
+- Integration with existing Folly library for term operations
 
-## References
-- Folly library: https://hackage.haskell.org/package/Folly
-- Institution framework: See `Institution.hs` in this project.
-- Jukebox logic toolbox: https://hackage.haskell.org/package/jukebox
+## Limitations
+- The Herbrand universe approach may be inefficient for large domains
+- No built-in support for equality as a special predicate with axioms (could be added as a distinguished predicate)
+- The model is simple and not optimized for performance
+- Quantifier evaluation may be slow for large Herbrand universes
 
-## Decisions
-- **Language Extensions**: Used `DataKinds`, `TypeFamilies`, `GADTs`, `KindSignatures`, `PolyKinds`, `TypeOperators`, `FlexibleInstances`, `MultiParamTypeClasses` to support phantom signatures and GADTs for formulas.
-- **Model Representation**: Chose a simple map-based model for ease of interpretation and debugging; future work may replace this with a more algebraic or categorical model.
-- **Formula Structure**: Built formulas on top of Folly's terms to reuse its parsing and pretty-printing capabilities (though not currently used).
+## Future Work
+- Incorporate equality as a special predicate with reflexivity and substitution axioms
+- Optimize model representation for finite domains (e.g., using arrays or finite maps)
+- Add more comprehensive test cases covering quantifiers, equality, and complex terms
+- Consider integrating with Jukebox for automated reasoning tools (unification, resolution)
+- Explore categorical models of first-order logic (hyperdoctrines) to align with Institution origins
 
-## Open Questions
-- How should variable binding and substitution be handled in the presence of quantifiers?
-- Should we adopt a more categorical model of first-order logic (e.g., using hyperdoctrines) to align with the Institution framework's origins?
-- How can we integrate Jukebox's automated reasoning tools (e.g., resolution, unify) into the satisfies method or as derived operations?
+## Conclusion
+The FirstOrder module provides a solid foundation for first-order logic reasoning within the Institution framework. It correctly handles arity, variables, and quantification, and integrates with the Folly library for term representation. The design is extensible and can serve as a basis for further logical frameworks, including the implementation of equational logic (already done in Equational.hs) and potential extension to other frameworks mentioned in the transcript (sheaf-theoretic, session types, refinement calculus, hyperdoctrines).
