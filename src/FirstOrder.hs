@@ -9,7 +9,7 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import qualified Folly.Formula as F
 
--- | Terms: we use Folly's Term type (which we can inspect via the provided functions).
+-- | Terms: we use Folly's Term type.
 type Term = F.Term
 
 -- | Sentences: our own formula GADT built on top of Folly's terms.
@@ -24,14 +24,16 @@ data Formula (syms :: [Symbol]) where
   Forall :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
   Exists :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
 
--- | Models: a mapping from predicate symbols to relations and function symbols to functions.
+-- | Models: a mapping from predicate symbols to relations and function symbols to functions,
+-- plus a Herbrand universe of constants (as strings) for quantifier evaluation.
 -- We use String keys (the symbol names) for simplicity.
--- Constants are represented as Strings (the constant symbol name).
+-- Constants are represented as Strings.
 -- For a predicate of arity n, the relation is a Set of n-tuples of Strings.
 -- For a function of arity n, the function maps an n-tuple of Strings to a String.
-data FOLModel (syms :: [Symbol]) = FOLModel
+data FOLModel (xs :: [Symbol]) = FOLModel
   { predicateInterpretation :: Map.Map String (Set.Set [String])
   , functionInterpretation  :: Map.Map String ([String] -> String)
+  , constants               :: Set.Set String -- the Herbrand universe of constants
   }
 
 -- | A wrapper for first-order signatures (lists of function/predicate symbols).
@@ -45,8 +47,8 @@ instance Institution (FOLSig syms) where
                       Right b -> b
                       Left _  -> False   -- treat errors as false
 
--- | Evaluate a term to a constant (String) given a model and a variable assignment.
--- Returns Left error if the term is not ground (contains a variable) or if a symbol is missing.
+-- | Evaluate a term to a constant (String) given a model and an environment (variable assignment).
+-- Returns Left error if a variable is not bound in the environment or if a function symbol is missing.
 evalTerm :: FOLModel syms -> Map.Map String String -> Term -> Either String String
 evalTerm m rho t
   | F.isVar t   = case Map.lookup (F.varName t) rho of
@@ -56,20 +58,18 @@ evalTerm m rho t
   | F.isFunc t  = do
       let f = F.funcName t
           args = F.funcArgs t
-      let evalTermM = evalTerm m rho
-      argVals <- mapM evalTermM args
+      argVals <- mapM (\t' -> evalTerm m rho t') args
       case Map.lookup f (functionInterpretation m) of
         Just func -> Right $ func argVals
         Nothing   -> Left $ "Undefined function symbol: " ++ f
 
--- | Evaluate a formula to a Boolean given a model and a variable assignment.
+-- | Evaluate a formula to a Boolean given a model and an environment (variable assignment).
 -- Returns Left error if the formula is not closed (contains free variables) or if a predicate is missing.
 evalFormula :: FOLModel syms -> Map.Map String String -> Formula syms -> Either String Bool
 evalFormula _ _ TrueF = Right True
 evalFormula _ _ FalseF = Right False
 evalFormula m rho (Pred p args) = do
-  let evalTermM = evalTerm m rho
-  argVals <- mapM evalTermM args
+  argVals <- mapM (\t' -> evalTerm m rho t') args
   case Map.lookup (symbolVal p) (predicateInterpretation m) of
     Just rel -> Right $ Set.member argVals rel
     Nothing  -> Left $ "Undefined predicate symbol: " ++ symbolVal p
@@ -89,13 +89,25 @@ evalFormula m rho (Impl f1 f2) = do
   b2 <- evalFormula m rho f2
   Right $ (not b1) || b2
 evalFormula m rho (Forall p f) = do
-  -- For simplicity, we do not support quantifiers in ground formulas.
-  -- We require that the formula f has no free variables (except possibly p, which is bound).
-  -- We will treat quantifiers as ranging over the Herbrand universe of constants appearing in the formula.
-  -- This is a toy implementation; a real implementation would need to consider all possible constants.
-  Left $ "Quantifiers not yet supported in ground formula evaluation: " ++ symbolVal p
+  let vName = symbolVal p
+      results = map (\c -> evalFormula m (Map.insert vName c rho) f) (Set.toList (constants m))
+  case results of
+    (Left err : _) -> Left err
+    (Right False : _) -> Right False
+    (Right True : rs) -> if all (== Right True) rs
+                           then Right True
+                           else Left "Unexpected error in quantifier evaluation"
+    [] -> Left "No constants in Herbrand universe for universal quantifier"
 evalFormula m rho (Exists p f) = do
-  Left $ "Quantifiers not yet supported in ground formula evaluation: " ++ symbolVal p
+  let vName = symbolVal p
+      results = map (\c -> evalFormula m (Map.insert vName c rho) f) (Set.toList (constants m))
+  case results of
+    (Left err : _) -> Left err
+    (Right True : _) -> Right True
+    (Right False : rs) -> if all (== Right False) rs
+                            then Right False
+                            else Left "Unexpected error in quantifier evaluation"
+    [] -> Left "No constants in Herbrand universe for existential quantifier"
 
 -- | Smart constructors for terms that take a KnownSymbol proxy.
 varTerm :: KnownSymbol sym => Proxy sym -> Term
