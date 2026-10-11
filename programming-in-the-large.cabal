@@ -23,6 +23,7 @@ library
                      , containers
                      , hashable
                      , unordered-containers
+                     , hs-tree-sitter
 
 test-suite test-programming-in-the-large
   type:                exitcode-stdio-1.0
@@ -35,4 +36,5 @@ test-suite test-programming-in-the-large
                      , containers
                      , hashable
                      , unordered-containers
+                     , hs-tree-sitter
                      , programming-in-the-large

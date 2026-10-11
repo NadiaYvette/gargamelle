@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses, GeneralizedNewtypeDeriving, DerivingStrategies #-}
 
 module Evidence where
 
@@ -7,11 +7,14 @@ import Data.Proxy
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
 import Data.Maybe
+import qualified TreeSitter as TS
+import System.IO.Unsafe (unsafePerformIO)
 
 -- | A structural representation of a code change or experiment that can be stored as evidence.
---   In a full implementation, this would be an AST snippet (via tree-sitter) or a normalized diff.
+--   We store the string representation of the root node of the TreeSitter Tree,
+--   computed via unsafePerformIO. This allows Eq, Show, and Hashable to be pure.
 newtype StructuralRep = StructuralRep { getStructuralRep :: String }
-  deriving (Eq, Show)
+  deriving stock (Eq, Show)
 
 instance Hashable StructuralRep where
   hashWithSalt s (StructuralRep str) = hashWithSalt s str
@@ -85,6 +88,9 @@ recordFailure :: (Institution sig, ToStructuralRep a) => a -> FailureReason -> P
 recordFailure change reason sig store =
   addEvidence (Evidence (toStructuralRep change) reason sig) store
 
--- | A simple instance for String (for sketching purposes).
-instance ToStructuralRep String where
-  toStructuralRep = StructuralRep
+-- | A simple instance for TS.Tree (for sketching purposes).
+--   We compute the string representation of the root node via unsafePerformIO.
+instance ToStructuralRep TS.Tree where
+  toStructuralRep t = StructuralRep $ unsafePerformIO $ do
+    rootNode <- TS.treeRootNode t
+    TS.showNodeAsString rootNode
