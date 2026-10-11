@@ -17,16 +17,18 @@ library
   -- other-modules:
   hs-source-dirs:      src
   default-language:    Haskell2010
-  build-depends:       base >=4.15 && <5,
-                       Folly,
-                       containers
+  build-depends:       base >=4.15 && <5
+                     , jukebox
+                     , Folly
+                     , containers
 
 test-suite test-programming-in-the-large
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Main.hs
   default-language:    Haskell2010
-  build-depends:       base >=4.15 && <5,
-                       Folly,
-                       containers,
-                       programming-in-the-large
+  build-depends:       base >=4.15 && <5
+                     , jukebox
+                     , Folly
+                     , containers
+                     , programming-in-the-large

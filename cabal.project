@@ -1,1 +1,1 @@
-packages: . external/Folly
+packages: . external/Folly external/Jukebox

@@ -6,6 +6,7 @@ import Institution
 import Data.Proxy
 import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
 import qualified Data.Map as Map
+import Jukebox.Utils (usort) -- using a function from Jukebox to depend on the library
 
 -- | A wrapper for equational signatures (lists of function symbols).
 newtype EGSym (syms :: [Symbol]) = EGSym (Proxy syms)
@@ -20,7 +21,7 @@ data Term (syms :: [Symbol]) where
 data Equation (syms :: [Symbol]) = Equation (Term syms) (Term syms)
 
 -- | Model: an interpretation of function symbols as functions on a carrier set.
--- Simple toy model: carrier set is just [String] (constants as strings), 
+-- Simple toy model: carrier set is just [String] (constants as strings),
 -- functions map list of strings (interpreted arguments) to string (interpreted result).
 -- We use String keys for simplicity.
 data EqModel (syms :: [Symbol]) = EqModel
