@@ -7,13 +7,13 @@ category:            Development
 author:              Nadia
 maintainer:          nadia@example.com
 copyright:           2026 Nadia
-license:             BSD3
+license:             EUPL-1.2
 license-file:        LICENSE
 build-type:          Simple
 extra-source-files:  README.md
 
 library
-  exposed-modules:     Core.AST, Institution, Propositional, FirstOrder, Equational, Sheaf, SessionTypes, RefinementCalculus, CEGIS
+  exposed-modules:     Core.AST, Institution, Propositional, FirstOrder, Equational, Sheaf, SessionTypes, RefinementCalculus, CEGIS, Evidence
   -- other-modules:
   hs-source-dirs:      src
   default-language:    Haskell2010
@@ -21,6 +21,8 @@ library
                      , jukebox
                      , Folly
                      , containers
+                     , hashable
+                     , unordered-containers
 
 test-suite test-programming-in-the-large
   type:                exitcode-stdio-1.0
@@ -31,4 +33,6 @@ test-suite test-programming-in-the-large
                      , jukebox
                      , Folly
                      , containers
+                     , hashable
+                     , unordered-containers
                      , programming-in-the-large
