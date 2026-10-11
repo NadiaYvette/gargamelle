@@ -23,7 +23,8 @@ A collection of evidence for a given signature, implemented as a HashMap from St
 - Functions to add evidence, check for known failures, and retrieve evidence
 
 ### Key Functions
-- `proposesKnownFailure`: Checks if a change matches any known failure
+- `proposesKnownFailure`: Checks if a change matches any known failure (exact structural rep match)
+- `proposesSimilarFailure`: Checks if a proposed tree is structurally similar to known failures using Levenshtein distance on AST string representations within a similarity threshold
 - `getEvidence`: Retrieves evidence for a structural representation
 - `checkProposal`: Determines if a proposal is safe or conflicts with known evidence
 - `recordFailure`: Records a new piece of evidence after a failed change
