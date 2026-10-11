@@ -6,9 +6,9 @@ import Data.Kind (Type)
 import Data.Proxy
 import GHC.TypeLits (Symbol)
 
--- | An institution is indexed by a signature (here, a type‑level list of Symbols).
+-- | An institution is indexed by a signature (of any kind).
 -- The class provides the associated sentence and model types, and satisfaction.
-class Institution (sig :: [Symbol]) where
+class Institution (sig :: k) where
   -- | Sentences built over the signature.
   type Sentence sig :: Type
 

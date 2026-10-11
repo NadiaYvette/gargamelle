@@ -1,4 +1,1 @@
 packages: .
-extra-deps:
-- ../polytropos/polytropos.cabal
-- ../sarutahiko/sarutahiko.cabal
