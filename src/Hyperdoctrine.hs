@@ -5,6 +5,10 @@ module Hyperdoctrine where
 import Institution
 import Data.Proxy
 import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
+import qualified Data.Map as Map
+import qualified Data.Set as Set
+import qualified Folly.Formula as F
+import qualified FirstOrder as FO
 
 -- | A wrapper for hyperdoctrine signatures (lists of base types?).
 -- We keep it phantom for now.
@@ -34,20 +38,22 @@ data Fiber (syms :: [Symbol]) where
 --   The signature for the fiber is the list of variables (symbols) in the context.
 --   So we need to convert a Context to a type-level list of symbols.
 --   We'll do that with a type family.
-
-type family ContextToList (ctx :: Context k) :: [Symbol] where
+--
+--   However, note that Context is already indexed by [Symbol]. We can simply use the index.
+--   We'll change the HDModel to take the list of symbols directly.
+--
+type family ContextToList (ctx :: [Symbol]) :: [Symbol] where
   ContextToList '[] = '[]
-  ContextToList ('(sym ': syms)) = sym ': (ContextToList syms)
+  ContextToList (x ': xs) = x ': ContextToList xs
 
--- | The fiber over a context is the set of FirstOrder formulas over the variables in the context.
-type Fiber (ctx :: Context Symbol) = Formula (ContextToList ctx)
+
 
 -- | Model: a hyperdoctrine model consists of:
 --   For each context, a first-order model (interpreting the variables as constants?).
 --   Actually, in a hyperdoctrine, the models are assignments to the variables.
---   We'll reuse FirstOrder's model, but we need to parameterize by the context.
-data HDModel (ctx :: Context Symbol) = HDModel
-  { foModel :: FOLModel (ContextToList ctx)
+--   We'll reuse FirstOrder's model, but we need to parameterize by the list of symbols.
+data HDModel (syms :: [Symbol]) = HDModel
+  { foModel :: FO.FOLModel syms
   }
 
 -- | Institution instance for the hyperdoctrine.
@@ -62,9 +68,9 @@ instance Institution (HDCSig syms) where
   -- We'll need to adjust the Instance to work with Context.
   -- Given time, we'll keep it simple and use the phantom signature as before, and leave the fiber as FirstOrder formulas.
   -- This is not a full hyperdoctrine but a placeholder.
-  type Sentence (HDCSig syms) = Formula syms
-  type Model  (HDCSig syms)  = FOLModel syms
-  satisfies _ m s = case evalFormula m Map.empty s of
+  type Sentence (HDCSig syms) = FO.Formula syms
+  type Model  (HDCSig syms)  = FO.FOLModel syms
+  satisfies _ m s = case FO.evalFormula m Map.empty s of
                       Right b -> b
                       Left _  -> False
 
