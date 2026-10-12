@@ -1,4 +1,4 @@
-# Implementation Plans for programming-in-the-large Roadmap
+# Implementation Plans for gargamelle Roadmap
 
 This document provides detailed implementation plans for each milestone in the project roadmap.
 
@@ -30,7 +30,7 @@ This document provides detailed implementation plans for each milestone in the p
 - `src/Effect/Handlers.hs`: Type class for handling strands and instances for production and test.
 
 ### Dependencies
-- Add `kernmantle` to `programming-in-the-large.cabal`.
+- Add `kernmantle` to `gargamelle.cabal`.
 
 ### Testing
 - Unit tests for each strand handler in both production and test modes.
@@ -57,7 +57,7 @@ This document provides detailed implementation plans for each milestone in the p
 - `src/Effect/Strand/Beam.hs`: Implementation of the `QueryBeam` strand and its handler.
 
 ### Dependencies
-- Update `programming-in-the-large.cabal` and `cabal.project` to include the Beam packages.
+- Update `gargamelle.cabal` and `cabal.project` to include the Beam packages.
 
 ### Testing
 - Test the schema and queries with an in-memory SQLite database.
@@ -245,7 +245,7 @@ All milestones are `[AUTONOMOUS-MACHINE]` – the agent can implement, test, and
 
 ## Immediate Next Steps
 
-1. Add Beam and Kernmantle dependencies to `programming-in-the-large.cabal`.
+1. Add Beam and Kernmantle dependencies to `gargamelle.cabal`.
 2. Scaffold `src/Effect/` modules (M1).
 3. Update `cabal.project` to include local Beam and Kernmantle if needed (they are on Hackage).
 4. Begin implementing strand definitions and handlers (M1).
