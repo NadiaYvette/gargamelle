@@ -45,7 +45,15 @@ Build a principled, effect‑typed infrastructure for institution‑theoretic re
 - Use Crem state machines to guide the synthesize-verify-refine loop between neural suggestions, Liquid Haskell verification, and structural similarity checks.
 - **Files:** `src/Synthesis/SynquidAdapter.hs`, `src/Synthesis/LLMClient.hs`, `src/Workflow/SynthesisLoop.hs`
 
-### M6: Documentation & Design Reviews
+### M6: Institution-Theoretic Implementations
+- Implement institution (co)morphisms between core institutions (Evidence, FirstOrder, RefinementCalculus, Kernmantle, Beam, Crem).
+- Develop conservative extensions/refinements to safely evolve signatures and specifications.
+- Construct colimits, pushouts, and pullbacks of diagrams of institutions for gluing local specs into global correctness conditions.
+- Model institution nets/graphs to represent wiring of multiple subsystems and compute propagation of changes.
+- Provide functors from a time/change category to **Inst** to capture evolving specifications over successive versions or runs.
+- **Files:** `src/Institution/Morphisms.hs`, `src/Institution/Extensions.hs`, `src/Institution/Limits.hs`, `src/Institution/Graph.hs`, `src/Institution/Dynamic.hs`
+
+### M7: Documentation & Design Reviews
 - Update `docs/notes/DESIGN_REVIEW_EVIDENCE.md` with Kernmantle integration.
 - Add `docs/notes/DESIGN_REVIEW_WORKFLOW_EFFECTS.md` (already exists).
 - Write tutorial: `docs/transcripts/KERNELMANTLE_TUTORIAL.md`.
