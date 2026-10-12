@@ -138,8 +138,8 @@ impl = Impl
 bicond :: Formula syms -> Formula syms -> Formula syms
 bicond p q = Or (And p q) (And (Not p) (Not q))
 
-forall :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
-forall p f = Forall p f
+forallFOL :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
+forallFOL p f = Forall p f
 
-exists :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
-exists p f = Exists p f
+existsFOL :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
+existsFOL p f = Exists p f

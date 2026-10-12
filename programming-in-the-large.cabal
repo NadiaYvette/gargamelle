@@ -1,4 +1,4 @@
-cabal-version:      >=1.10
+cabal-version:       3.0
 name:                programming-in-the-large
 version:             0.1.0.0
 synopsis:            Haskell library and toolkit for autonomous programming at large scale
