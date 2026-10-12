@@ -4,7 +4,7 @@
 **Project:** programming-in-the-large (Institution framework with evidence tracking)
 
 ## Vision
-Build a principled, effect‑typed infrastructure for institution‑theoretic reasoning, structural counter‑example tracking, and autonomous synthesis loops, leveraging Kernmantle for config‑time analyzable workflows, Beam for persistence, and Crem for state‑machine orchestration.
+Build a principled, effect‑typed infrastructure for institution‑theoretic reasoning, structural counter‑example tracking, and autonomous synthesis loops, leveraging Kernmantle for config‑time analyzable workflows, Beam for persistence, Crem for state‑machine orchestration, Liquid Haskell for formal refinement verification, and Synquid / LLM-assisted SaaS for program synthesis.
 
 ## Milestones
 
@@ -29,14 +29,23 @@ Build a principled, effect‑typed infrastructure for institution‑theoretic re
   `ProposeChange → SandboxRun → CollectEvidence → SimilarityCheck → StateTransition`.
 - **Files:** `src/Sandbox/Effect.hs`, `src/Sandbox/Handler.hs`, `src/Workflow/Synthesis.hs`
 
-### M4: Integration & Validation
+### M4: Integration & Validation (including Formal Verification)
 - Compose the full synthesis workflow as a Kernmantle Rope.
 - Write end‑to‑end tests using `tasty` and `hedgehog`.
 - Ensure config‑time analysis catches missing resources (bad DB URL, missing sandbox binary).
 - Verify test interpreter returns deterministic results.
-- **Files:** `test/Workflow/SynthesisSpec.hs`, `test/Persistence/SchemaSpec.hs`
+- **Optional Formal Verification via Liquid Haskell:**
+  - Annotate core data structures and pure validation rules in `src/Evidence.hs` and `src/RefinementCalculus.hs` with refinement types (`{v:t | p v}`).
+  - Integrate `liquid` checks into the build pipeline to verify critical invariants at compile time via SMT (Z3).
+- **Files:** `test/Workflow/SynthesisSpec.hs`, `test/Persistence/SchemaSpec.hs`, refined modules in `src/`
 
-### M5: Documentation & Design Reviews
+### M5: Program Synthesis & LLM/Neural Assistance (Synquid & SaaS Integration)
+- Integrate **Synquid** or type-driven synthesis components to automatically generate functions/code snippets from polymorphic refinement types.
+- Combine neural networks / LLM SaaS endpoints as an advisory synthesis strand (`SuggestChanges` / `NeuralSynthesizer`) inside Kernmantle workflows.
+- Use Crem state machines to guide the synthesize-verify-refine loop between neural suggestions, Liquid Haskell verification, and structural similarity checks.
+- **Files:** `src/Synthesis/SynquidAdapter.hs`, `src/Synthesis/LLMClient.hs`, `src/Workflow/SynthesisLoop.hs`
+
+### M6: Documentation & Design Reviews
 - Update `docs/notes/DESIGN_REVIEW_EVIDENCE.md` with Kernmantle integration.
 - Add `docs/notes/DESIGN_REVIEW_WORKFLOW_EFFECTS.md` (already exists).
 - Write tutorial: `docs/transcripts/KERNELMANTLE_TUTORIAL.md`.
