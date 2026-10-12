@@ -1,0 +1,12 @@
+session:
+  command: cabal repl --enable-multi-repl
+  targets:
+    - lib:programming-in-the-large
+  test_targets:
+    - test:tests
+  watch_dirs:
+    - src
+    - test
+  repl_build_dir: dist-newstyle/tricorder
+  test_timeout: 15
+  idle_timeout_seconds: 600

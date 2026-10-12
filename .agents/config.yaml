@@ -5,18 +5,26 @@ model: auto
 provider: custom
 platform: tui
 
-# Load skills that are useful for this project
+# Skills loaded for programming-in-the-large
 skills:
   - hermes-agent
   - code-navigation
   - contextful
   - haskell
+  - haskell-professional
+  - hls-troubleshooting
+  - project-setup-haskell
+  - extensible-record-effects-parsing
+  - keiro-workflow
+  - tricorder
+  - systematic-debugging
+  - test-driven-development
 
-# Optional: set up a default plugin set (empty for now)
+# Default plugin set
 plugins: []
 
-# Optional: cron jobs (none by default)
+# Cron jobs configuration
 cron: {}
 
-# Optional: persistent memory for this project (empty by default)
+# Project persistent memory seeds
 memories: {}
