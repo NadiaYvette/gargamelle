@@ -1,11 +1,11 @@
-# Programming in the Large
+# Gargamelle
 
 A Haskell library and toolkit for orchestrating autonomous programming campaigns at scale, inspired by Sarutahiko (effect‑based workflow orchestration) and Polytropos (extensible records/variants via GHC plugins).
 
 ## Directory layout
 
-- `src/` – Haskell source code (core language, plugins, libraries)
-- `packages/` – Optional separate Cabal packages
+- `packages/gargamelle/src/` – Haskell source code (core language, plugins, libraries)
+- `packages/` – Optional separate Cabal packages (currently only gargamelle)
 - `bin/` – Executables (orchestrator, REPL, code‑generation tools)
 - `docs/transcripts/` – Tutorial‑style write‑ups
 - `docs/notes/` – Design reviews, meeting minutes
