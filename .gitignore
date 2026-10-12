@@ -1,0 +1,12 @@
+dist-newstyle/
+.ghc.environment.*
+*.hi
+*.o
+cabal.project.freeze
+.ghc-pkg-env/
+run-smoke.sh
+tags
+TAGS
+.yamaarashi/
+.contextful/
+.ok/
