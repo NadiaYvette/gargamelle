@@ -1,7 +1,7 @@
-# Roadmap: programming-in-the-large
+# Roadmap: gargamelle
 
 **Status:** DRAFT · 2026-10-12  
-**Project:** programming-in-the-large (Institution framework with evidence tracking)
+**Project:** gargamelle (Institution framework with evidence tracking)
 
 ## Vision
 Build a principled, effect‑typed infrastructure for institution‑theoretic reasoning, structural counter‑example tracking, and autonomous synthesis loops, leveraging Kernmantle for config‑time analyzable workflows, Beam for persistence, Crem for state‑machine orchestration, Liquid Haskell for formal refinement verification, and Synquid / LLM-assisted SaaS for program synthesis.
@@ -63,7 +63,7 @@ Build a principled, effect‑typed infrastructure for institution‑theoretic re
 All milestones are `[AUTONOMOUS-MACHINE]` – the agent can implement, test, and verify without interactive human participation.
 
 ## Immediate Next Steps
-1. Add Beam and Kernmantle dependencies to `programming-in-the-large.cabal`.
+1. Add Beam and Kernmantle dependencies to `gargamelle.cabal`.
 2. Scaffold `src/Effect/` modules.
 3. Update `cabal.project` to include local Beam and Kernmantle if needed (they are on Hackage).
 4. Begin implementing strand definitions and handlers.
