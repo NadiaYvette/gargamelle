@@ -223,6 +223,24 @@ This document provides detailed implementation plans for each milestone in the p
 
 ## Execution Mode
 
+## Code Quality Checks
+
+To maintain a high standard of code quality, we enforce the following checks:
+
+1. **GHC warnings**: Build with `-Wall` (and optionally `-Werror`) to ensure no warnings.
+2. **HLint**: Run `hlint .` and ensure no hints remain (or fix them).
+   - Use the custom hint files from `~/src/polytropos/.hlint.yaml` if available.
+3. **Stan**: Run Stan (the Haskell linter) with rules from `~/src/polytropos/rules/stan/` and ensure warning clean.
+4. **Brittany**: Format code with Brittany and ensure the formatted code matches the source (i.e., no diff).
+   - Use the config file `~/src/polytropos/.brittany` if present.
+5. **Haddock**: Generate documentation with `cabal haddock` and ensure no warnings (except possibly about GHC internals).
+6. **Liquid Haskell** (optional but recommended): Run `liquid` to verify refinement types;
+   - Use the liquid configuration from `~/src/polytropos/liquid/` if available.
+
+These checks should be run as part of the continuous integration (or local development) pipeline.
+Before starting a milestone, ensure the codebase passes all checks.
+
+
 All milestones are `[AUTONOMOUS-MACHINE]` – the agent can implement, test, and verify without interactive human participation.
 
 ## Immediate Next Steps
