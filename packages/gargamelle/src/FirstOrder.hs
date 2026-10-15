@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
 
 module FirstOrder where
 
@@ -58,7 +58,7 @@ evalTerm m rho t
   | F.isFunc t  = do
       let f = F.funcName t
           args = F.funcArgs t
-      argVals <- mapM (\t' -> evalTerm m rho t') args
+      argVals <- mapM (evalTerm m rho) args
       case Map.lookup f (functionInterpretation m) of
         Just func -> Right $ func argVals
         Nothing   -> Left $ "Undefined function symbol: " ++ f
@@ -69,7 +69,7 @@ evalFormula :: FOLModel syms -> Map.Map String String -> Formula syms -> Either 
 evalFormula _ _ TrueF = Right True
 evalFormula _ _ FalseF = Right False
 evalFormula m rho (Pred p args) = do
-  argVals <- mapM (\t' -> evalTerm m rho t') args
+  argVals <- mapM (evalTerm m rho) args
   case Map.lookup (symbolVal p) (predicateInterpretation m) of
     Just rel -> Right $ Set.member argVals rel
     Nothing  -> Left $ "Undefined predicate symbol: " ++ symbolVal p
@@ -87,7 +87,7 @@ evalFormula m rho (Or f1 f2) = do
 evalFormula m rho (Impl f1 f2) = do
   b1 <- evalFormula m rho f1
   b2 <- evalFormula m rho f2
-  Right $ (not b1) || b2
+  Right $ not b1 || b2
 evalFormula m rho (Forall p f) = do
   let vName = symbolVal p
       results = map (\c -> evalFormula m (Map.insert vName c rho) f) (Set.toList (constants m))
@@ -117,11 +117,11 @@ constTerm :: KnownSymbol sym => Proxy sym -> Term
 constTerm p = F.constant (symbolVal p)
 
 funAppTerm :: KnownSymbol sym => Proxy sym -> [Term] -> Term
-funAppTerm p args = F.func (symbolVal p) args
+funAppTerm p = F.func (symbolVal p)
 
 -- | Smart constructors for formulas that take KnownSymbol proxies.
 prop :: KnownSymbol sym => Proxy sym -> [Term] -> Formula syms
-prop p args = Pred p args
+prop = Pred
 
 neg :: Formula syms -> Formula syms
 neg = Not
@@ -139,7 +139,7 @@ bicond :: Formula syms -> Formula syms -> Formula syms
 bicond p q = Or (And p q) (And (Not p) (Not q))
 
 forallFOL :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
-forallFOL p f = Forall p f
+forallFOL = Forall
 
 existsFOL :: KnownSymbol sym => Proxy sym -> Formula syms -> Formula syms
-existsFOL p f = Exists p f
+existsFOL = Exists

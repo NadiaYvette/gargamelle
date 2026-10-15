@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
 
 module Hyperdoctrine where
 
@@ -52,7 +52,7 @@ type family ContextToList (ctx :: [Symbol]) :: [Symbol] where
 --   For each context, a first-order model (interpreting the variables as constants?).
 --   Actually, in a hyperdoctrine, the models are assignments to the variables.
 --   We'll reuse FirstOrder's model, but we need to parameterize by the list of symbols.
-data HDModel (syms :: [Symbol]) = HDModel
+newtype HDModel (syms :: [Symbol]) = HDModel
   { foModel :: FO.FOLModel syms
   }
 
@@ -79,4 +79,4 @@ nil :: Context '[]
 nil = Nil
 
 cons :: KnownSymbol sym => Proxy sym -> Context syms -> Context (sym ': syms)
-cons p ctx = Cons p ctx
+cons = Cons

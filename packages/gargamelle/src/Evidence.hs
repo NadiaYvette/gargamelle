@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses, GeneralizedNewtypeDeriving, DerivingStrategies #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses, DerivingStrategies #-}
 
 module Evidence where
 
@@ -85,8 +85,8 @@ proposeChange change sig store =
 
 -- | After attempting a change (e.g., building/testing), if it fails, we can record the evidence.
 recordFailure :: (Institution sig, ToStructuralRep a) => a -> FailureReason -> Proxy sig -> EvidenceStore sig -> EvidenceStore sig
-recordFailure change reason sig store =
-  addEvidence (Evidence (toStructuralRep change) reason sig) store
+recordFailure change reason sig =
+  addEvidence (Evidence (toStructuralRep change) reason sig)
 
 -- | Levenshtein distance algorithm for strings (kept for reference, not used in similarity checking now).
 levenshtein :: String -> String -> Int

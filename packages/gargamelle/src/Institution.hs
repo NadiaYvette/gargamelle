@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, PolyKinds, KindSignatures, TypeFamilies #-}
+{-# LANGUAGE DataKinds, PolyKinds, TypeFamilies #-}
 
 module Institution where
 
