@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes #-}
 
 module Propositional where
 
@@ -45,7 +45,7 @@ instance Show (SentProp atoms) where
   show (Impl f g) = "(" ++ show f ++ " → " ++ show g ++ ")"
 
 showSym :: KnownSymbol sym => Proxy sym -> String
-showSym p = symbolVal p
+showSym = symbolVal
 
 -- | Institution instance for propositional logic.
 -- The signature is the list of atoms.

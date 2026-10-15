@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
 
 module RefinementCalculus where
 
@@ -38,7 +38,7 @@ instance Institution (RCSig syms) where
   type Sentence (RCSig syms) = RCSentence syms
   type Model  (RCSig syms)  = RCModel syms
   satisfies _ m (Refine spec1 spec2) =
-    let impl p q = FO.impl p q  -- implication from FirstOrder smart constructors
+    let impl = FO.impl  -- implication from FirstOrder smart constructors
         pre1 = pre spec1
         pre2 = pre spec2
         post1 = post spec1

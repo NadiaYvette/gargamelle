@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
 
 module Sheaf where
 
@@ -26,7 +26,7 @@ data SheafSentence (syms :: [Symbol]) where
 
 -- | Model: a sheaf assignment to open sets.
 -- We use a simple map from open set names (symbols) to sets of sections.
-data SheafModel (syms :: [Symbol]) = SheafModel
+newtype SheafModel (syms :: [Symbol]) = SheafModel
   { sections :: Map.Map String (Set.Set String) -- open set -> set of section names
   }
 
@@ -40,7 +40,7 @@ evalTerm m (Section s) = symbolVal s -- section evaluates to its name
 
 -- Smart constructors
 section :: KnownSymbol sym => Proxy sym -> Term syms
-section p = Section p
+section = Section
 
 sectEq :: Term syms -> Term syms -> SheafSentence syms
 sectEq = SectEq

@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, KindSignatures, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
 
 module SessionTypes where
 
@@ -26,7 +26,7 @@ data STSentence (syms :: [Symbol]) where
 
 -- | Model: a session type environment mapping channels to their current state.
 -- We use a simple map from channel names to a string representing the state.
-data STSModel (syms :: [Symbol]) = STSModel
+newtype STSModel (syms :: [Symbol]) = STSModel
   { channels :: Map.Map String String -- channel name -> current state (e.g., "ready", "sent", "received")
   }
 
@@ -34,14 +34,14 @@ instance Institution (STSSig syms) where
   type Sentence (STSSig syms) = STSentence syms
   type Model  (STSSig syms)  = STSModel syms
   satisfies _ m (ChanEq t1 t2) = evalTerm m t1 == evalTerm m t2
-  satisfies _ m (Ready t)      = evalTerm m t `Map.lookup` (channels m) == Just "ready"
+  satisfies _ m (Ready t)      = evalTerm m t `Map.lookup` channels m == Just "ready"
 
 evalTerm :: STSModel syms -> Term syms -> String
 evalTerm m (Chan s) = symbolVal s -- channel evaluates to its name
 
 -- Smart constructors
 chan :: KnownSymbol sym => Proxy sym -> Term syms
-chan p = Chan p
+chan = Chan
 
 chanEq :: Term syms -> Term syms -> STSentence syms
 chanEq = ChanEq
