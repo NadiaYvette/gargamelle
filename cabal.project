@@ -1,1 +1,2 @@
-packages: . external/Folly external/Jukebox /home/nyc/src/hs-tree-sitter/hs-tree-sitter /home/nyc/src/tree-diff /home/nyc/src/crem
+with-compiler: ghc-9.10.3
+packages: . external/Folly external/Jukebox /home/nyc/src/hs-tree-sitter/hs-tree-sitter /home/nyc/src/tree-diff /home/nyc/src/crem /home/nyc/src/beam/beam-core /home/nyc/src/beam/beam-migrate /home/nyc/src/beam/beam-sqlite

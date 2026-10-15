@@ -2,6 +2,8 @@
 
 A Haskell library and toolkit for orchestrating autonomous programming campaigns at scale, inspired by Sarutahiko (effect‑based workflow orchestration) and Polytropos (extensible records/variants via GHC plugins).
 
+The name “Gargamelle” comes from François Rabelais’ 1534 novel *Gargantua* (part 2 of the pentalogy *Gargantua and Pantagruel*). Gargamelle is the mother of the giant Gargantua, evoking the idea of a “mother of giants” – a fitting metaphor for a system that orchestrates large‑scale, autonomous programming campaigns.
+
 ## Directory layout
 
 - `packages/gargamelle/src/` – Haskell source code (core language, plugins, libraries)
