@@ -4,11 +4,10 @@ module Institution where
 
 import Data.Kind (Type)
 import Data.Proxy
-import GHC.TypeLits (Symbol)
 
 -- | An institution is indexed by a signature (of any kind).
 -- The class provides the associated sentence and model types, and satisfaction.
-class Institution (sig :: k) where
+class Institution (sig :: Type) where
   -- | Sentences built over the signature.
   type Sentence sig :: Type
 

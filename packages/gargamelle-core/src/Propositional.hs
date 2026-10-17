@@ -7,6 +7,9 @@ import GHC.TypeLits
 import Data.Kind (Type)
 import Data.Proxy
 
+-- | A wrapper for propositional signatures (lists of atoms).
+newtype PropSig (atoms :: [Symbol]) = PropSig (Proxy atoms)
+
 -- | Sentences over a given set of atoms (signature is the atom list).
 data SentProp (atoms :: [Symbol]) where
   Top   :: SentProp atoms
@@ -49,7 +52,7 @@ showSym = symbolVal
 
 -- | Institution instance for propositional logic.
 -- The signature is the list of atoms.
-instance Institution (xs :: [Symbol]) where
-  type Sentence xs = SentProp xs
-  type Model  xs  = ModProp xs
+instance Institution (PropSig xs) where
+  type Sentence (PropSig xs) = SentProp xs
+  type Model  (PropSig xs)  = ModProp xs
   satisfies _ = satProp
