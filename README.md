@@ -141,6 +141,7 @@ Gargamelle supports Cabal, Stack, and Nix across GHC 9.6, 9.8, 9.10, 9.12, and 9
 - [`docs/MAINTAINER_GUIDE.md`](docs/MAINTAINER_GUIDE.md) — Invariants, governance, and quality gates.
 - [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](docs/developer/BUILD_SYSTEMS_MATRIX.md) — Cabal, Stack, and Nix matrix.
 - [`docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md`](docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md) — Canonical v2.0 design blueprint.
+- [`docs/FRAMEWORK_RECOMMENDATIONS.md`](docs/FRAMEWORK_RECOMMENDATIONS.md) — Framework recommendations: 5-volume treatise curriculum, package monographs, and literate tooling.
 - [`docs/registers/PACKAGES.md`](docs/registers/PACKAGES.md) — Complete package registry and provenance.
 
 ---

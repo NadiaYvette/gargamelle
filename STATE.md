@@ -105,6 +105,18 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit & Integration Test Suite**: 6 new integration tests in `packages/gargamelle-workflow/test/Main.hs`, 100% green. Preserved 100% backward compatibility across all 20 existing workflow integration tests (26 total examples in workflow, 79 total examples across all 8 active packages, 0 failures).
 - **Physical Verification Gates**: `bin/gargamelle-verify` passes all 4 physical gates (Bubblewrap isolation, SQLite file locking, clean HLint with 0 hints, all 26 test suite assertions). Zero compiler warnings under GHC 9.14.1 (`-Wall -Werror`).
 
+### Multi-Compiler Matrix & Build System Infrastructure [COMPLETED]
+- **Multi-GHC Compatibility**: GHC 9.6.7, 9.8.4, 9.10.3, 9.12.4, and 9.14.1 verified across all 11 packages.
+- **Cabal**: Multi-compiler project overlays (`cabal.project.ghc-{9.6,9.8,9.10,9.12,9.14}`) importing `cabal.project` with explicit `with-compiler` directives; `tested-with` declarations added to all 11 package cabal files.
+- **Stack**: Standalone configurations (`stack.yaml`, `stack-ghc-{9.6,9.8,9.10,9.12,9.14}.yaml`) referencing LTS resolvers (`lts-22.44`, `lts-23.12`) with `allow-newer` and `extra-deps`.
+- **Nix**: Full declarative native build and developer shell via `default.nix`, `shell.nix` (bundling GHC, C libraries, bwrap, and z3), and `flake.nix`.
+- **Documentation**: Documented in [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](docs/developer/BUILD_SYSTEMS_MATRIX.md).
+
+### Basic Documentation Suite & Expository Framework [COMPLETED]
+- **README Overhaul**: Scholarly rewrite covering Rabelaisian naming provenance, plain-English motivation for institutions and cellular sheaves, tier map, 11-package register, and verification commands.
+- **Core Guides**: `docs/INDEX.md`, `docs/NEWBIE_GUIDE.md`, `docs/TUTORIAL.md` (5-lesson interactive walkthrough), `docs/MAINTAINER_GUIDE.md`, and `docs/registers/PACKAGES.md`.
+- **Expository & Tutorial Framework**: Authoritative specification in [`docs/FRAMEWORK_RECOMMENDATIONS.md`](docs/FRAMEWORK_RECOMMENDATIONS.md) and [`docs/notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md`](docs/notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md) specifying the 3-tier hierarchy, 5-volume treatise curriculum (`docs/textbook/`), standardized package monographs (`packages/gargamelle-*/README.md`), and literate test tooling.
+
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:
 - **Phase 1**: Substrate & Observable Verifier Core (`gargamelle-logic`, `gargamelle-model`) [COMPLETED]
