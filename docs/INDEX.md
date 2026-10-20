@@ -25,6 +25,8 @@ Status: LIVING DOCUMENT · v0.1 · 2026-10-05
 | `notes/KERNMANTLE_POLYTROPOS_PORT_PLAN.md` | plan | draft | cross-cutting | — |
 | `notes/ADOPTION_BARRIERS_AND_MITIGATIONS.md` | design | draft | cross-cutting | — |
 | `notes/TUTORIAL_EXAMPLES_EVALUATION.md` | strategy | live | cross-cutting | — |
+| `notes/CATEGORICAL_FOUNDATIONS_SURVEY.md` | notes | live | cross-cutting | Canonical survey of higher categories, proarrow, cellular sheaves, Hackage repertoire, and 100% observability |
+| `notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` | design | draft | cross-cutting | v2.0 comprehensive architectural blueprint: Institutions, cellular sheaves, 10-package suite, and CEGIS loop |
 | `tools/MODERNIZER_AND_LINTER_GUIDE.md` | guide | live | cross-cutting | HLint rules, Retrie rewrites, Stan inspections, and modernization CLI |
 | `tools/FORMAL_VERIFICATION_AND_SYNTHESIS_GUIDE.md` | guide | live | cross-cutting | LiquidHaskell formal verification, Synquid synthesis, and Tricorder continuous diagnostics |
 | `tools/SOURCE_FORMATTERS_AND_LAYOUT_GUIDE.md` | guide | live | cross-cutting | Fourmolu, Ormolu, Brittany, and Floskell configurations, fixtures, and runner |
@@ -36,6 +38,9 @@ Status: LIVING DOCUMENT · v0.1 · 2026-10-05
 | `transcripts/gemini-optimising-language-design-for-AI.md` | transcript | live | cross-cutting | — |
 | `transcripts/gemini-scaling-autonomous-coding.md` | transcript | live | cross-cutting | — |
 | `transcripts/discord-adoption-barriers-row-types.md` | transcript | live | cross-cutting | — |
+| `transcripts/gemini-modelling-institutions.md` | transcript | live | cross-cutting | Ideation dialogue: institutions, pushouts, and ATP replacement |
+| `transcripts/google-search-category-theory.md` | transcript | live | cross-cutting | Recovered dialogue: n-ary arrows, higher categories, and peeling conjugation |
+| `transcripts/gemini-advanced-functional-programming.md` | transcript | live | cross-cutting | Comprehensive 7-layer functional programming blueprint: sheaves, Hackage repertoire, and observability |
 
 ## Part 2 — Reading paths
 
