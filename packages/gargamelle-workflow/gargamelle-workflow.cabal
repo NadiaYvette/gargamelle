@@ -25,7 +25,14 @@ library
     gargamelle-evidence,
     gargamelle-effect,
     gargamelle-persistence,
-    gargamelle-sandbox
+    gargamelle-sandbox,
+    gargamelle-sheaf,
+    gargamelle-model,
+    gargamelle-logic,
+    sqlite-simple,
+    beam-core,
+    beam-sqlite,
+    lattices
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -42,9 +49,13 @@ test-suite tests
     gargamelle-effect,
     gargamelle-persistence,
     gargamelle-sandbox,
+    gargamelle-sheaf,
+    gargamelle-model,
+    gargamelle-logic,
     gargamelle-workflow,
     hspec,
     text,
+    containers,
     beam-core,
     beam-sqlite,
     sqlite-simple,
@@ -52,4 +63,6 @@ test-suite tests
     directory,
     filepath,
     process,
-    tree-diff
+    tree-diff,
+    lattices
+

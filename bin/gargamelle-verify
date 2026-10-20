@@ -41,7 +41,7 @@ verify_hlint() {
 verify_tests() {
   echo "=== [4/4] Full Cabal Test Suite ==="
   (cd "${REPO_ROOT}" && cabal test gargamelle-workflow:test:tests >/dev/null)
-  echo "  [+] All 20 test suite assertions PASSED."
+  echo "  [+] All 26 test suite assertions PASSED."
 }
 
 verify_sandbox

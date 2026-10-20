@@ -1,10 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
 import Test.Hspec
 import Control.Arrow (Kleisli(..), arr, (>>>))
+import Data.Text (Text)
 import qualified Data.Text as T
 import Database.SQLite.Simple (open, close)
 import Database.Beam
@@ -21,6 +23,18 @@ import Workflow.Synthesis
 import System.Directory (doesDirectoryExist)
 import System.FilePath ((</>))
 import Data.TreeDiff (Expr(..))
+import Gargamelle.Sheaf
+import Algebra.Lattice (Lattice(..), BoundedMeetSemiLattice(..))
+
+data ContractLevel = Unconstrained | StandardSecurity | HighIntegrity | Contradiction
+  deriving (Eq, Ord, Show)
+
+instance Lattice ContractLevel where
+  (/\) = max
+  (\/) = min
+
+instance BoundedMeetSemiLattice ContractLevel where
+  top = Unconstrained
 
 main :: IO ()
 main = hspec $ do
@@ -240,3 +254,207 @@ main = hspec $ do
       computeExprSimilarity astA astB `shouldBe` 1.0
       isAstStructurallySimilar 0.8 astA astB `shouldBe` True
       isAstStructurallySimilar 0.8 astA astDifferent `shouldBe` False
+
+  describe "Phase 6: End-to-End Sheaf-Gated CEGIS Workflow" $ do
+    it "transitions Crem Mealy state machine into StateSheafCheck and completes on harmonic section" $ do
+      let machine = createSynthesisMachine
+      let commands =
+            [ CmdProposeCandidate "sheaf_patch_v1"
+            , CmdRunSandbox (0, "compilation ok", "")
+            , CmdEvaluateEvidence (Just "Sandbox clean pass; checking sheaves")
+            , CmdCheckSimilarityWithSheaf False
+            , CmdEvaluateSheaf True []
+            ]
+      let (events, _) = runSynthesisBatch machine commands
+      events `shouldBe`
+        [ EvtCandidateProposed "sheaf_patch_v1"
+        , EvtSandboxCompleted (0, "compilation ok")
+        , EvtEvidenceRecorded "Sandbox clean pass; checking sheaves"
+        , EvtSimilarityChecked False
+        , EvtSheafHarmonicVerified "Harmonic global section verified; H^1 = 0"
+        ]
+
+    it "transitions Crem machine back to StatePropose when H1 cohomological obstructions are reported" $ do
+      let machine = createSynthesisMachine
+      let obs = ["Boundary obstruction on edge e1: src=HighIntegrity /= tgt=StandardSecurity"]
+      let commands =
+            [ CmdProposeCandidate "incompatible_aspect_patch"
+            , CmdRunSandbox (0, "compilation ok", "")
+            , CmdEvaluateEvidence (Just "Evaluating interface boundaries")
+            , CmdCheckSimilarityWithSheaf False
+            , CmdEvaluateSheaf False obs
+            , CmdProposeCandidate "repaired_aspect_patch"
+            ]
+      let (events, _) = runSynthesisBatch machine commands
+      events `shouldBe`
+        [ EvtCandidateProposed "incompatible_aspect_patch"
+        , EvtSandboxCompleted (0, "compilation ok")
+        , EvtEvidenceRecorded "Evaluating interface boundaries"
+        , EvtSimilarityChecked False
+        , EvtSheafObstructionsDetected obs
+        , EvtCandidateProposed "repaired_aspect_patch"
+        ]
+
+    it "runs end-to-end Sheaf-Gated CEGIS verifying H0 global section into Beam SQLite" $ do
+      conn <- open ":memory:"
+      let (complex :: CellComplex Text Text) = fromEdges [("e1", "ModA", "ModB")]
+      let sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ e -> e)
+      let spec = fromListCochain0 [("ModA", "ProtocolV2"), ("ModB", "ProtocolV2")]
+      let config = SheafCEGISConfig
+            { cegisDbConn        = conn
+            , cegisRunId         = 201
+            , cegisCandidateName = "candidate_harmonic_201"
+            , cegisChangeRep     = "ast_rep_protocol_v2"
+            , cegisSig           = "Institution.Protocol"
+            , cegisLimits        = defaultLimits { limitTimeoutSeconds = 5 }
+            , cegisSandboxCmd    = ("echo", ["synthesizing-clean"])
+            , cegisComplex       = complex
+            , cegisSheaf         = sheaf
+            , cegisCandidateSpec = spec
+            , cegisTimestamp     = 1800000
+            }
+      (outcome, events) <- runSheafGatedCEGIS config
+      case outcome of
+        SheafCEGISSuccess (GlobalSection sec) msg -> do
+          msg `shouldBe` "Harmonic global section verified; H^1 = 0"
+          lookupCochain0 "ModA" sec `shouldBe` Just "ProtocolV2"
+          lookupCochain0 "ModB" sec `shouldBe` Just "ProtocolV2"
+        _ -> expectationFailure "Expected SheafCEGISSuccess"
+
+      length events `shouldBe` 5
+
+      -- Verify Beam SQLite persistence of verified evidence and run lifecycle
+      mEv <- findEvidenceByRep conn "ast_rep_protocol_v2"
+      case mEv of
+        Just ev -> evidenceReason ev `shouldBe` "Harmonic global section verified; H^1 = 0"
+        Nothing -> expectationFailure "Expected verified evidence record in Beam SQLite"
+
+      runs <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
+        r <- all_ (dbRuns evidenceDb)
+        guard_ (runId r ==. val_ 201)
+        pure r
+      fmap runStatus runs `shouldBe` Just "SUCCESS"
+      close conn
+
+    it "runs end-to-end Sheaf-Gated CEGIS detecting H1 boundary obstructions and recording counterexamples" $ do
+      conn <- open ":memory:"
+      let (complex :: CellComplex Text Text) = fromEdges [("edge_api", "ServiceAuth", "ServiceBilling")]
+      let sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ e -> e)
+      let spec = fromListCochain0 [("ServiceAuth", "AuthTokenBearer"), ("ServiceBilling", "OAuth2Secret")]
+      let config = SheafCEGISConfig
+            { cegisDbConn        = conn
+            , cegisRunId         = 202
+            , cegisCandidateName = "candidate_mismatch_202"
+            , cegisChangeRep     = "ast_rep_mismatch_auth_billing"
+            , cegisSig           = "Institution.Microservices"
+            , cegisLimits        = defaultLimits { limitTimeoutSeconds = 5 }
+            , cegisSandboxCmd    = ("echo", ["building-candidate"])
+            , cegisComplex       = complex
+            , cegisSheaf         = sheaf
+            , cegisCandidateSpec = spec
+            , cegisTimestamp     = 1800100
+            }
+      (outcome, events) <- runSheafGatedCEGIS config
+      case outcome of
+        SheafCEGISObstruction [obs] -> do
+          obstructedEdge obs `shouldBe` "edge_api"
+          sourceRestriction obs `shouldBe` "AuthTokenBearer"
+          targetRestriction obs `shouldBe` "OAuth2Secret"
+        _ -> expectationFailure "Expected SheafCEGISObstruction with 1 obstruction"
+
+      length events `shouldBe` 5
+
+      mEv <- findEvidenceByRep conn "ast_rep_mismatch_auth_billing"
+      case mEv of
+        Just ev -> do
+          evidenceSig ev `shouldBe` "Institution.Microservices"
+          T.isInfixOf "edge_api" (evidenceReason ev) `shouldBe` True
+        Nothing -> expectationFailure "Expected obstruction evidence record in Beam SQLite"
+
+      cxs <- findCounterexamplesFor conn (202 * 10)
+      length cxs `shouldBe` 1
+
+      runs <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
+        r <- all_ (dbRuns evidenceDb)
+        guard_ (runId r ==. val_ 202)
+        pure r
+      fmap runStatus runs `shouldBe` Just "OBSTRUCTED_H1"
+      close conn
+
+    it "bypasses sandbox execution and immediately retries on cached Beam SQLite prior failure" $ do
+      conn <- open ":memory:"
+      initEvidenceDb conn
+      insertEvidenceRecord conn 901 "Institution.FO" "known_broken_hash" "PriorTypeCheckMismatch" 1800050
+
+      let (complex :: CellComplex Text Text) = fromEdges [("e1", "v1", "v2")]
+      let sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ e -> e)
+      let spec = fromListCochain0 [("v1", "ContractA"), ("v2", "ContractA")]
+      let config = SheafCEGISConfig
+            { cegisDbConn        = conn
+            , cegisRunId         = 203
+            , cegisCandidateName = "candidate_cached_fail"
+            , cegisChangeRep     = "known_broken_hash"
+            , cegisSig           = "Institution.FO"
+            , cegisLimits        = defaultLimits
+            , cegisSandboxCmd    = ("false", [])
+            , cegisComplex       = complex
+            , cegisSheaf         = sheaf
+            , cegisCandidateSpec = spec
+            , cegisTimestamp     = 1800200
+            }
+      (outcome, events) <- runSheafGatedCEGIS config
+      outcome `shouldBe` SheafCEGISPriorFailureFound "PriorTypeCheckMismatch"
+      events `shouldBe`
+        [ EvtCandidateProposed "candidate_cached_fail"
+        , EvtSandboxCompleted (0, "cached-prior-check")
+        , EvtEvidenceRecorded "PriorTypeCheckMismatch"
+        , EvtSynthesisRetry "Similar known failure detected, proposing alternative"
+        ]
+
+      runs <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
+        r <- all_ (dbRuns evidenceDb)
+        guard_ (runId r ==. val_ 203)
+        pure r
+      fmap runStatus runs `shouldBe` Just "RETRY_PRIOR_FAILURE"
+      close conn
+
+    it "reconciles boundary discrepancies via Knaster-Tarski Store diffusion during CEGIS" $ do
+      conn <- open ":memory:"
+      let (complex :: CellComplex Text Text) = fromEdges [("e1", "ModuleA", "ModuleB"), ("e2", "ModuleB", "ModuleC")]
+      let sheaf = symmetricSheaf (\_ (c :: ContractLevel) -> c) (\_ e -> e)
+      let initialSpec = fromListCochain0
+            [ ("ModuleA", HighIntegrity)
+            , ("ModuleB", StandardSecurity)
+            , ("ModuleC", Unconstrained)
+            ]
+
+      let config = SheafCEGISConfig
+            { cegisDbConn        = conn
+            , cegisRunId         = 204
+            , cegisCandidateName = "diffusing_contract_candidate"
+            , cegisChangeRep     = "ast_rep_contract_diffusion"
+            , cegisSig           = "Institution.Security"
+            , cegisLimits        = defaultLimits { limitTimeoutSeconds = 5 }
+            , cegisSandboxCmd    = ("echo", ["diffusion-ok"])
+            , cegisComplex       = complex
+            , cegisSheaf         = sheaf
+            , cegisCandidateSpec = initialSpec
+            , cegisTimestamp     = 1800300
+            }
+      (outcome, events) <- runSheafGatedCEGISWithDiffusion 10 config
+      case outcome of
+        SheafCEGISSuccess (GlobalSection sec) msg -> do
+          msg `shouldBe` "Harmonic global section attained via cellular diffusion; H^1 = 0"
+          lookupCochain0 "ModuleA" sec `shouldBe` Just HighIntegrity
+          lookupCochain0 "ModuleB" sec `shouldBe` Just HighIntegrity
+          lookupCochain0 "ModuleC" sec `shouldBe` Just HighIntegrity
+        _ -> expectationFailure "Expected SheafCEGISSuccess via diffusion"
+
+      length events `shouldBe` 5
+
+      runs <- runBeamSqlite conn $ runSelectReturningOne $ select $ do
+        r <- all_ (dbRuns evidenceDb)
+        guard_ (runId r ==. val_ 204)
+        pure r
+      fmap runStatus runs `shouldBe` Just "SUCCESS_DIFFUSED"
+      close conn

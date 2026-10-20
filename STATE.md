@@ -96,9 +96,20 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit Test Suite**: 7 new tests in `packages/gargamelle-effect/test/Main.hs`, 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall -Werror`), 0 HLint hints across all packages. Total test suite passes: 73 examples (0 regressions).
 
-## Next Actions (v2.0 Architectural Redesign: Phase 6)
-- **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**:
-  - Update `gargamelle-workflow`'s Crem Mealy state machine to receive $H^1$ obstruction feedback from `gargamelle-sheaf`.
-  - Wire Bubblewrap execution and Beam SQLite persistence into the sheaf-gated pipeline.
-  - Preserve all 20 existing integration tests in `gargamelle-workflow:test:tests`.
+### Phase 6: End-to-End Sheaf-Gated CEGIS Workflow [COMPLETED]
+- **Packages**: `packages/gargamelle-workflow` (`Workflow.Synthesis`)
+- **Sheaf-Gated Crem Mealy State Machine**: Extended Crem Mealy state machine topology with `StateSheafCheck` (`StateSimilarityCheck -> StateSheafCheck -> StateComplete`), supporting Sheaf-gated verification commands (`CmdCheckSimilarityWithSheaf`, `CmdTransitionToSheafCheck`, `CmdEvaluateSheaf`).
+- **Homological Fault Localization ($H^1$ Feedback)**: Direct integration with `gargamelle-sheaf`'s coboundary operator $$\delta^0 : C^0 \to C^1$$ (`locateObstructions`). When $H^1 = 0$, confirms certified global sections ($H^0$); when boundary discrepancies occur ($H^1 \neq 0$), translates obstructions to `EvtSheafObstructionsDetected`, routing exact failing module interfaces back to `StatePropose` to guide targeted repair.
+- **End-to-End Pipeline Wiring (`runSheafGatedCEGIS`)**: Fully integrates Bubblewrap container namespace isolation (`executeSandboxed`), Beam SQLite database schemas (`startRunRecord`, `completeRunRecord`, `insertEvidenceRecord`, `findEvidenceByRep`, `insertCounterexample`), and Sheaf cohomological obstruction localization into a unified pipeline.
+- **Knaster-Tarski Lattice Diffusion CEGIS (`runSheafGatedCEGISWithDiffusion`)**: Integrated Store comonad cellular diffusion (`diffuseUntilHarmonic`) over contract meet semi-lattices (`Algebra.Lattice.Op`), reconciling interface discrepancies prior to reporting persistent boundary faults.
+- **GHC-Style Unit & Integration Test Suite**: 6 new integration tests in `packages/gargamelle-workflow/test/Main.hs`, 100% green. Preserved 100% backward compatibility across all 20 existing workflow integration tests (26 total examples in workflow, 79 total examples across all 8 active packages, 0 failures).
+- **Physical Verification Gates**: `bin/gargamelle-verify` passes all 4 physical gates (Bubblewrap isolation, SQLite file locking, clean HLint with 0 hints, all 26 test suite assertions). Zero compiler warnings under GHC 9.14.1 (`-Wall -Werror`).
 
+## Architectural Redesign v2.0 Status: FULLY COMPLETED
+All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:
+- **Phase 1**: Substrate & Observable Verifier Core (`gargamelle-logic`, `gargamelle-model`) [COMPLETED]
+- **Phase 2**: Category Core & Institutions (`gargamelle-core`) [COMPLETED]
+- **Phase 3**: SMT Z3 Pipe & Presheaf DPO Rewriting (`gargamelle-fol`, `gargamelle-equational`) [COMPLETED]
+- **Phase 4**: Cellular Sheaves & Homological Fault Localization (`gargamelle-sheaf`) [COMPLETED]
+- **Phase 5**: Polytropos-Kernmantle Rope & Optics (`gargamelle-effect`, upstreamed to `polytropos` & `kernmantle`) [COMPLETED]
+- **Phase 6**: End-to-End Sheaf-Gated CEGIS Workflow (`gargamelle-workflow`) [COMPLETED]
