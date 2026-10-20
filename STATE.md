@@ -88,14 +88,18 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit Test Suite**: 9 new tests in `packages/gargamelle-sheaf/test/Main.hs`, 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall -Werror`), 0 HLint hints across all packages. Total test suite passes: 66 examples (0 regressions).
 
-## Next Actions (v2.0 Architectural Redesign: Phase 5)
-- **Phase 5: Polytropos-Kernmantle Rope & Optics**:
-  - Update `gargamelle-effect` to route over `Polytropos.Variant` and `Record`.
-  - Implement `deriveRouter` jump table using flat array tags ($O(1)$ dispatch).
-  - Fuse intermediate array transformations via `kan-extensions:Coyoneda`.
-  - Wire Profunctor optics (`Prism`, `Lens`) for effect strand inspection.
+### Phase 5: Polytropos-Kernmantle Rope & Optics [COMPLETED]
+- **Packages**: `packages/gargamelle-effect` (`Effect.Rope`, `Effect.Strand`, `Effect.Handlers`, `Effect.Strand.Beam`, `Gargamelle.Effect`, `Gargamelle.Effect.Router`, `Gargamelle.Effect.Optics`, `Gargamelle.Effect.Fusion`, `Gargamelle.Effect.Rope`)
+- **Polytropos $O(1)$ Variant Router (`VariantRouter`)**: Constant-time jump table routing open variant effect requests (`Variant s`) directly to core arrow handlers indexed by unboxed constructor tags (`repTag`), completely eliminating case cascades and binary search. Integrated with `Rope` via `routeVariantRope`.
+- **Profunctor Optics for Open Data**: Zero-cost lenses (`typedSlotLens`, `slotLens`) and prisms (`typedVariantPrism`, `variantPrism`) operating directly on Polytropos's unboxed `SmallArray` memory representation with pure in-place slot updating (`updateSmallArray`).
+- **Coyoneda Pipeline Fusion**: Fused intermediate mapping operations over effect pipelines and payload slots via `Data.Functor.Coyoneda` (`fuseMap`, `fuseRope`, `fuseRopeMap`), eliminating intermediate array allocations.
+- **Strict Backward Compatibility**: Preserved all existing strands, handlers (`productionHandlers`, `pureMockHandlers`, `beamSqliteHandlers`), and Rope arrow pipelines.
+- **GHC-Style Unit Test Suite**: 7 new tests in `packages/gargamelle-effect/test/Main.hs`, 100% green.
+- **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall -Werror`), 0 HLint hints across all packages. Total test suite passes: 73 examples (0 regressions).
+
+## Next Actions (v2.0 Architectural Redesign: Phase 6)
 - **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**:
-  - Update `gargamelle-workflow`'s Crem Mealy state machine to receive $H^1$ obstruction feedback.
-  - Wire Bubblewrap execution and Beam SQLite persistence into the pipeline.
+  - Update `gargamelle-workflow`'s Crem Mealy state machine to receive $H^1$ obstruction feedback from `gargamelle-sheaf`.
+  - Wire Bubblewrap execution and Beam SQLite persistence into the sheaf-gated pipeline.
   - Preserve all 20 existing integration tests in `gargamelle-workflow:test:tests`.
 

@@ -1,7 +1,7 @@
 cabal-version: 3.0
 name: gargamelle-effect
 version: 0.1.0.0
-synopsis: Kernmantle Arrow Rope effect orchestration layer
+synopsis: Kernmantle Arrow Rope effect orchestration layer with Polytropos O(1) routers, optics, and fusion
 license: EUPL-1.2
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
@@ -13,13 +13,21 @@ library
     Effect.Handlers
     Effect.Rope
     Effect.Strand.Beam
+    Gargamelle.Effect
+    Gargamelle.Effect.Router
+    Gargamelle.Effect.Optics
+    Gargamelle.Effect.Fusion
+    Gargamelle.Effect.Rope
   hs-source-dirs: src
   default-language: Haskell2010
-  ghc-options: -Wall
+  ghc-options: -Wall -Wcompat -Wredundant-constraints
   build-depends:
     base >= 4.14 && < 5,
     text,
     containers,
+    primitive >= 0.8,
+    profunctors >= 5.6,
+    kan-extensions >= 5.2,
     polytropos-core,
     gargamelle-core,
     gargamelle-persistence,
@@ -30,3 +38,22 @@ library
     directory,
     filepath,
     process
+
+test-suite tests
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs: test
+  default-language: Haskell2010
+  ghc-options: -Wall
+  build-depends:
+    base >= 4.14 && < 5,
+    gargamelle-effect,
+    gargamelle-core,
+    gargamelle-persistence,
+    polytropos-core,
+    primitive,
+    profunctors,
+    kan-extensions,
+    containers,
+    text,
+    hspec >= 2.10
