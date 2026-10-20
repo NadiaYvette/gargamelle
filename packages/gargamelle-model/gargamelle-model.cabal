@@ -28,7 +28,7 @@ library
     indexed-profunctors >= 0.1,
     constraints >= 0.14,
     lattices >= 2.2,
-    polytropos-core >= 0.1,
+    polytropos-core >= 0.1.0.1,
     gargamelle-logic
 
 test-suite tests
@@ -41,7 +41,7 @@ test-suite tests
     base >= 4.18 && < 5,
     gargamelle-model,
     gargamelle-logic,
-    polytropos-core,
+    polytropos-core >= 0.1.0.1,
     contravariant,
     lattices,
     hspec >= 2.10

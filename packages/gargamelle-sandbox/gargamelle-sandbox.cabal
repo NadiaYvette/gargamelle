@@ -26,5 +26,5 @@ library
     directory,
     filepath,
     process,
-    polytropos-core,
+    polytropos-core >= 0.1.0.1,
     gargamelle-core

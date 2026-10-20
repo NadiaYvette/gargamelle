@@ -26,7 +26,7 @@ library
     base >= 4.18 && < 5,
     containers >= 0.6,
     process >= 1.6,
-    polytropos-core,
+    polytropos-core >= 0.1.0.1,
     gargamelle-core,
     gargamelle-model
 

@@ -27,5 +27,5 @@ library
     beam-core,
     beam-sqlite,
     sqlite-simple,
-    polytropos-core,
+    polytropos-core >= 0.1.0.1,
     gargamelle-core

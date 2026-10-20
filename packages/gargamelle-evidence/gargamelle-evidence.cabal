@@ -25,7 +25,7 @@ library
     unordered-containers,
     hashable,
     text,
-    polytropos-core,
+    polytropos-core >= 0.1.0.1,
     gargamelle-core,
     hs-tree-sitter,
     tree-diff
