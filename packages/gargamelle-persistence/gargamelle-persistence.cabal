@@ -6,6 +6,12 @@ license: EUPL-1.2
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
 build-type: Simple
+tested-with:
+  GHC == 9.6.7,
+  GHC == 9.8.4,
+  GHC == 9.10.3,
+  GHC == 9.12.4,
+  GHC == 9.14.1
 
 library
   exposed-modules:

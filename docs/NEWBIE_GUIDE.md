@@ -1,4 +1,4 @@
-# `programming-in-the-large` Newbie Quickstart & Token-Conservation Guide
+# Gargamelle Newbie Quickstart & Token-Conservation Guide
 
 **Audience:** New human contributors and AI coding assistant drivers (Antigravity, Claude Code, Cursor, Aider).  
 **Parent Strategy:** [`docs/notes/DOC_STRATEGY.md`](notes/DOC_STRATEGY.md)  
@@ -10,154 +10,81 @@
 
 ## 0. Learning the Concepts First: Start with `TUTORIAL.md`
 
-If you are new to `programming-in-the-large` and want to understand how open records and variants work, read the **5-Lesson Interactive Tutorial** in [`docs/TUTORIAL.md`](TUTORIAL.md):
+If you are new to `gargamelle` and want to understand how categorical institutions, cellular sheaves, and sheaf-gated CEGIS work, read the **5-Lesson Interactive Tutorial** in [`docs/TUTORIAL.md`](TUTORIAL.md):
 
-- **Lesson 1:** Constructing Records (`emptyRecord`, `insertField`, `REC { ... }`)
-- **Lesson 2:** Accessing & Updating Fields (`r.field` dot syntax, `setField`, `REC_UPD`)
-- **Lesson 3:** Working with Open Variants (`Variant`, `injectVariant`, `VAR { ... }`, pattern matching)
-- **Lesson 4:** Structural Subtyping in Practice (`projectRecord`, `widenVariant`, `narrowVariant`)
-- **Lesson 5:** Extensible Pipelines & Total Elimination (`eliminateUniform`, `matchVariant`)
-- **Addendum A:** Live worked Nanopass compiler pass (`cabal run example-nanopass`)
+- **Lesson 1:** Observable Morphisms & Free Verifier ASTs (`ObsMor`, `VerifierAST`, `Divisible`, `Decidable`)
+- **Lesson 2:** Categorical Institutions & Pushout Feature Weaving (`Institution`, `weaveAspect`, `reductMod`)
+- **Lesson 3:** Streaming SMT Pipes & First-Order Verification (`verifyZ3Formula`, Herbrand structures)
+- **Lesson 4:** Cellular Sheaves & Homological Fault Localization (`CellComplex`, `CellularSheaf`, `coboundary`, `locateObstructions`)
+- **Lesson 5:** Store Comonad Diffusion & Sheaf-Gated CEGIS (`diffuseUntilHarmonic`, `runSheafGatedCEGIS`)
 
-Once you are comfortable with the concepts, use this guide for repository navigation and token conservation.
+Once you are comfortable with the concepts, use this guide for repository navigation, test execution, and token conservation.
 
 ---
 
 ## 1. The Core Invariant: Never Dump Whole Modules
 
-In a Haskell codebase with typechecker plugins and extensive Core AST generation, dumping full 500-line source modules into the conversation context wastes 2,500–4,000 tokens per turn and causes the **"lost in the middle" attention collapse**.
+In a multi-package Haskell codebase with category-theoretic equipment, type-level singletons, and large ASTs, dumping full source modules into the conversation context wastes 2,500–4,000 tokens per turn and causes attention degradation.
 
 Always follow the **Progressive Disclosure Funnel**:
 
 ```
-Level 0: Global Navigation  (docs/INDEX.md, ./tags)       →   ~10–50 tokens
-Level 1: Structural Outline (ast-grep, sg patterns)       →   ~100–250 tokens
-Level 2: Targeted Slice     (view_file Start/EndLine)     →   ~200–500 tokens
+Level 0: Global Navigation  (docs/INDEX.md, packages/ overview)   →   ~10–50 tokens
+Level 1: Structural Outline (module export lists, type headers)   →   ~100–250 tokens
+Level 2: Targeted Slice     (view_file StartLine / EndLine)       →   ~200–500 tokens
 ```
 
 ---
 
-## 2. Fast Symbol Navigation (Level 0 — <15 tokens)
+## 2. Fast Package & Symbol Navigation (Level 0 — <20 tokens)
 
-Before opening any file, find the symbol's exact location in `./tags`:
+Before opening any file, identify which package owns the concept:
+
+| If you are looking for... | Look in package | Main Source Files |
+| :--- | :--- | :--- |
+| `ObsMor`, `VerifierAST`, `Evidence` | `packages/gargamelle-model` | `src/Gargamelle/Model/Observable.hs`, `Verifier.hs` |
+| `AGContract`, `LogicAST`, Galois | `packages/gargamelle-logic` | `src/Gargamelle/Logic/Contract.hs`, `AST.hs` |
+| `Institution`, `PushoutWeaving` | `packages/gargamelle-core` | `src/Gargamelle/Core/Institution.hs`, `Weaving.hs` |
+| First-Order logic, Z3 SMT pipe | `packages/gargamelle-fol` | `src/Gargamelle/FOL/Z3.hs`, `FirstOrder.hs` |
+| Equational logic, DPO rewriting | `packages/gargamelle-equational` | `src/Gargamelle/Equational/DPO.hs` |
+| Rope arrows, $O(1)$ router, optics | `packages/gargamelle-effect` | `src/Gargamelle/Effect/Router.hs`, `Optics.hs` |
+| Bubblewrap sandboxing | `packages/gargamelle-sandbox` | `src/Sandbox/Handler.hs`, `Effect.hs` |
+| Beam SQLite persistence | `packages/gargamelle-persistence` | `src/Persistence/Beam.hs`, `Schema.hs` |
+| Cell complexes, sheaves, $H^1$ obs | `packages/gargamelle-sheaf` | `src/Gargamelle/Sheaf/Diffusion.hs`, `Cohomology.hs` |
+| Crem Mealy machine, CEGIS pipeline | `packages/gargamelle-workflow` | `src/Workflow/Synthesis.hs` |
+
+Next, view **only** the relevant lines using `view_file` (e.g. 50–100 lines around the function or type definition).
+
+---
+
+## 3. Fast Build & Verification Commands
+
+All packages are configured under `cabal.project`.
 
 ```bash
-grep -w "^<SymbolName>" tags
-```
+# 1. Quick compile check of a single package
+cabal build gargamelle-workflow
 
-*Examples:*
-```bash
-grep -w "^Rep" tags           # packages/programming-in-the-large-core/src/Polytropos/Core.hs
-grep -w "^RowRep" tags        # packages/programming-in-the-large-core/src/Polytropos/Core.hs
-grep -w "^solveRowEq" tags    # packages/programming-in-the-large-plugin/src/Polytropos/Plugin.hs
-grep -w "^fieldAt" tags       # packages/programming-in-the-large-core/src/Polytropos/Core.hs
-```
+# 2. Run the deterministic physical verification gate (Milestones M1–M3 + Phase 6)
+./bin/gargamelle-verify
 
-This immediately returns the exact file path and line number in $<15$ tokens.
+# 3. Run all test suites across all 8 active packages
+cabal test gargamelle-logic gargamelle-model gargamelle-core gargamelle-fol \
+           gargamelle-equational gargamelle-sheaf gargamelle-effect gargamelle-workflow
 
-Next, view **only** the relevant lines using `view_file` (e.g. ±20 lines around the symbol definition).
-
-To regenerate the index after adding new functions or types:
-```bash
-./bin/generate-tags
+# 4. Check HLint static analysis (0 hints enforced)
+hlint packages/gargamelle-*/src
 ```
 
 ---
 
-## 3. Instant Compiler Verification with Tweag's Tricorder (<50 tokens)
+## 4. Commit Attribution Guidelines
 
-Do **NOT** run `cabal build all` or full test sweeps after small edits. A full cabal build dumps 200–500 lines of terminal logs (~2,500 tokens).
-
-Instead, query the in-memory background GHCi daemon:
-
-```bash
-# Query machine-readable compiler errors and warnings in JSON (<50 tokens)
-tricorder status --json
-
-# Block until current incremental compilation finishes
-tricorder status --wait --json
-
-# Inspect dependency source code directly without downloading tarballs
-tricorder source <Module.Name>
-```
-
-If your REPL supports the Model Context Protocol (configured via [`.mcp.json`](../.mcp.json) or [`.agents/mcp.json`](../.agents/mcp.json)):
-- Call MCP tool `status(wait: true)`.
-
-### Tier 0 POSIX Fallback
-If the `tricorder` daemon is not running:
-```bash
-cabal build all --dry-run   # Quick dependency/plan check
-cabal test all              # Full test execution
-```
-
----
-
-## 4. Structural Code Audits with `ast-grep` (<300 tokens)
-
-When refactoring or searching across packages, query the Concrete Syntax Tree directly using `sg`:
-
-```bash
-# Find all typeclass declarations
-sg -p 'class $CLASS $PARAM where $$$METHODS' packages/
-
-# Find all TcPlugin constraint solvers
-sg -p 'solve$NAME state ct cls tys = $$$BODY' packages/
-
-# Find all test cases
-sg -p 'testCase $NAME $BODY' packages/
-```
-
----
-
-## 5. Local Search with Contextful
-
-When searching for conceptual topics across notes and code:
-
-```bash
-# Query with token-budgeted evidence pack
-cxf query "<query>" --budget 2000
-
-# Quick search hits
-cxf search "<query>" --limit 10
-```
-
----
-
-## 6. Testing & Quality Gates
-
-Run the test suites:
-```bash
-# Core representation & eliminator tests (37 tests)
-cabal test --jobs=20 programming-in-the-large-core-test
-
-# Typechecker plugin smoke tests (54 tests)
-cabal test --jobs=20 programming-in-the-large-plugin-smoke
-
-# Run the live Nanopass tutorial executable
-cabal run --jobs=20 example-nanopass
-
-# Complete workspace suite (14 packages, ~180 tests)
-cabal test --jobs=20 all
-```
-
----
-
-## 7. Git Commit Attribution Protocol
-
-Commits must follow the `sarutahiko` attribution schema enforced by `.githooks/commit-msg`:
-
-```
-<Imperative subject line>
-
-<Why this change was made in the body>
-
-Assisted-by: <Tool> (<Provider> / <Model>)
-Orchestrated-by: <Engine>
-```
-
-*Examples:*
-- `Assisted-by: Antigravity (Anthropic / claude-4.6-opus)`
-- `Assisted-by: Freebuff`
-
-**Inviolable rule:** Never use `Co-authored-by:` or `Signed-off-by:` for AI assistants. Only human developers can certify the DCO.
+Commits must follow the Linux kernel RFC 2822 trailer format:
+- Descriptive-imperative subject line (e.g., `feat(sheaf): add comonadic diffusion runner`).
+- Explanatory body explaining *why* the change was made.
+- AI attribution trailer:
+  ```
+  Assisted-by: Antigravity (Google / gemini-3.8-pro)
+  ```
+- **Never** use `Co-authored-by:` or `Signed-off-by:` for AI assistants (reserved for human DCO certifiers).

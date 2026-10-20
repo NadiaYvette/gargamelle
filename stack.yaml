@@ -1,0 +1,45 @@
+# Default Stack configuration for Gargamelle (GHC 9.14.1 primary toolchain)
+snapshot:
+  compiler: ghc-9.14.1
+
+system-ghc: true
+install-ghc: false
+allow-newer: true
+
+packages:
+  - packages/gargamelle-core
+  - packages/gargamelle-logic
+  - packages/gargamelle-model
+  - packages/gargamelle-fol
+  - packages/gargamelle-equational
+  - packages/gargamelle-evidence
+  - packages/gargamelle-effect
+  - packages/gargamelle-persistence
+  - packages/gargamelle-sandbox
+  - packages/gargamelle-sheaf
+  - packages/gargamelle-workflow
+  - ../beam/beam-core
+  - ../beam/beam-migrate
+  - ../beam/beam-sqlite
+  - ../crem
+  - ../tree-diff
+  - ../hs-tree-sitter/hs-tree-sitter
+  - ../polytropos/packages/polytropos-core
+  - ../polytropos/packages/polytropos-plugin
+  - ../polytropos/packages/polytropos-profunctors
+  - ../kernmantle/kernmantle
+  - ../proarrow/proarrow
+  - ../proarrow/proarrow-equipment
+
+extra-deps:
+  - lattices-2.2.1.1
+  - singletons-base-3.4
+  - singletons-th-3.4
+  - th-desugar-1.18
+  - sqlite-simple-0.4.19.0
+  - direct-sqlite-2.3.29
+  - profunctors-5.6.3
+  - comonad-5.0.10
+  - indexed-profunctors-0.1.1.1
+  - primitive-0.9.1.0
+  - ghc-tcplugin-api-0.20.1.0
