@@ -136,12 +136,13 @@ Gargamelle supports Cabal, Stack, and Nix across GHC 9.6, 9.8, 9.10, 9.12, and 9
 ## Documentation Index
 
 - [`docs/INDEX.md`](docs/INDEX.md) — Corpus inventory and reading maps.
+- [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](docs/DOCUMENTATION_ROLLOUT_PLAN.md) — Staged roll-out plan: easiest parts first for forge review, deferring treatise to co-development with sarutahiko.
+- [`docs/FRAMEWORK_RECOMMENDATIONS.md`](docs/FRAMEWORK_RECOMMENDATIONS.md) — Framework recommendations: 5-volume treatise curriculum, package monographs, and literate tooling.
 - [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — Interactive worked tutorial from Institutions to Sheaf CEGIS.
 - [`docs/NEWBIE_GUIDE.md`](docs/NEWBIE_GUIDE.md) — Repository navigation and token conservation guide.
 - [`docs/MAINTAINER_GUIDE.md`](docs/MAINTAINER_GUIDE.md) — Invariants, governance, and quality gates.
 - [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](docs/developer/BUILD_SYSTEMS_MATRIX.md) — Cabal, Stack, and Nix matrix.
 - [`docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md`](docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md) — Canonical v2.0 design blueprint.
-- [`docs/FRAMEWORK_RECOMMENDATIONS.md`](docs/FRAMEWORK_RECOMMENDATIONS.md) — Framework recommendations: 5-volume treatise curriculum, package monographs, and literate tooling.
 - [`docs/registers/PACKAGES.md`](docs/registers/PACKAGES.md) — Complete package registry and provenance.
 
 ---

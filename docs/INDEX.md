@@ -14,6 +14,7 @@
 | `TUTORIAL.md` | tutorial | live | cross-cutting | 5-lesson hands-on walkthrough: ObsMor, Institutions, Z3, Sheaves, and Crem CEGIS |
 | `MAINTAINER_GUIDE.md` | guide | live | cross-cutting | Governance, observability doctrine, 4 physical verification gates, and commit trailers |
 | `developer/BUILD_SYSTEMS_MATRIX.md`| guide | live | cross-cutting | Multi-compiler matrix (GHC 9.6–9.14) across Cabal, Stack, and Nix |
+| `DOCUMENTATION_ROLLOUT_PLAN.md`| plan | live | cross-cutting | Staged roll-out: easiest parts first for forge review, deferring treatise to co-development with sarutahiko |
 | `FRAMEWORK_RECOMMENDATIONS.md`| specification | live | cross-cutting | Recommendations for 5-volume textbook curriculum, package monographs, and literate tooling |
 | `notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md`| design | blessed | cross-cutting | Canonical v2.0 blueprint: 6 implementation phases, 11 packages, Hackage repertoire |
 | `notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md`| proposal| blessed | cross-cutting | Detailed framework specification, chapter syllabi, and literate tooling |
@@ -55,4 +56,4 @@
    `notes/DOC_STRATEGY.md` (precedence rule §4: code wins at runtime; notes corrected regardless).
 
 7. **Authoring Expository & Tutorial Materials:**  
-   `FRAMEWORK_RECOMMENDATIONS.md` → `notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md` → `TUTORIAL.md` → `notes/DOC_STRATEGY.md`.
+   `DOCUMENTATION_ROLLOUT_PLAN.md` → `FRAMEWORK_RECOMMENDATIONS.md` → `notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md` → `TUTORIAL.md` → `notes/DOC_STRATEGY.md`.

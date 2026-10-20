@@ -116,6 +116,7 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **README Overhaul**: Scholarly rewrite covering Rabelaisian naming provenance, plain-English motivation for institutions and cellular sheaves, tier map, 11-package register, and verification commands.
 - **Core Guides**: `docs/INDEX.md`, `docs/NEWBIE_GUIDE.md`, `docs/TUTORIAL.md` (5-lesson interactive walkthrough), `docs/MAINTAINER_GUIDE.md`, and `docs/registers/PACKAGES.md`.
 - **Expository & Tutorial Framework**: Authoritative specification in [`docs/FRAMEWORK_RECOMMENDATIONS.md`](docs/FRAMEWORK_RECOMMENDATIONS.md) and [`docs/notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md`](docs/notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md) specifying the 3-tier hierarchy, 5-volume treatise curriculum (`docs/textbook/`), standardized package monographs (`packages/gargamelle-*/README.md`), and literate test tooling.
+- **Staged Documentation Roll-Out Plan**: Established [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](docs/DOCUMENTATION_ROLLOUT_PLAN.md), prioritizing easiest high-visibility parts first for multi-forge review (`github`, `gitcode`, `disroot`, `framagit`, `rad`) and deferring the 5-volume treatise to be co-developed with consumer projects (principally `sarutahiko`).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:
