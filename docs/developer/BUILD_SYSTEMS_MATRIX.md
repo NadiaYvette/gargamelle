@@ -88,10 +88,10 @@ The project references peer repositories configured in `cabal.project`:
 
 ## 4. Verification Gates
 
-All changes must pass four verification gates before release:
+All changes must pass the deterministic verification gates before release:
 
 ```bash
-# 1. Physical Verification Suite (Sandbox, Beam, HLint, Full Test Suite)
+# 1. Deterministic Physical Verification Suite (6 Gates: Sandbox, Beam, HLint, Tests, Tagref, CLOC density)
 ./bin/gargamelle-verify
 
 # 2. Multi-Package Full Test Matrix (79 total examples across all 8 active packages)

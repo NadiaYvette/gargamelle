@@ -3,10 +3,10 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 # Interactive Tutorial: Practical Institutions, Cellular Sheaves & CEGIS
 
-**Status:** LIVING TUTORIAL · v2.0 · 2026-10-20  
+**Status:** LIVING TUTORIAL · v2.1 · 2026-10-21  
 **Audience:** Haskell Developers, Logicians, Verification Engineers, AI Assistants  
 **Prerequisites:** Familiarity with typed functional programming and basic category/order theory.  
-**Related Guides:** [`docs/NEWBIE_GUIDE.md`](NEWBIE_GUIDE.md) · [`docs/MAINTAINER_GUIDE.md`](MAINTAINER_GUIDE.md) · [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](developer/BUILD_SYSTEMS_MATRIX.md)  
+**Related Guides:** [`docs/NEWBIE_GUIDE.md`](NEWBIE_GUIDE.md) · [`docs/MAINTAINER_GUIDE.md`](MAINTAINER_GUIDE.md) · [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](DOCUMENTATION_ROLLOUT_PLAN.md) · [`docs/FRAMEWORK_RECOMMENDATIONS.md`](FRAMEWORK_RECOMMENDATIONS.md) · [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](developer/BUILD_SYSTEMS_MATRIX.md)  
 
 ---
 

@@ -2,6 +2,8 @@
 
 **Autonomous Synthesis Orchestration, Categorical Institutions, Cellular Sheaves, and Homological Fault Localization for Haskell.**
 
+**Mirrors:** [GitHub](https://github.com/NadiaYvette/gargamelle) · [GitCode](https://gitcode.com/NadiaYvette/gargamelle) · [Disroot](https://git.disroot.org/NadiaYvette/gargamelle) · [Framagit](https://framagit.org/NadiaYvette/gargamelle) · [Radicle Web](https://radicle.network/nodes/iris.radicle.network/rad:zqykaqjnoA8a1harMdQVsigC7VwH)
+
 `gargamelle` is a formally grounded, multi-tier Haskell engine designed to orchestrate autonomous programming and program synthesis campaigns at scale. It synthesizes, verifies, executes, and repairs software systems across heterogeneous domains by combining:
 1. **Goguen-Burstall Institutions & Pushouts (`gargamelle-core`):** Universal semantics and non-invasive feature weaving ($B \amalg_C W$) preserving satisfaction across arbitrary logics.
 2. **Homological Fault Localization via Cellular Sheaves (`gargamelle-sheaf`):** Topological obstruction theory mapping failing cross-module boundaries directly to non-vanishing $H^1$ cohomology classes.
@@ -121,8 +123,8 @@ cabal test gargamelle-logic gargamelle-model gargamelle-core gargamelle-fol \
            gargamelle-equational gargamelle-sheaf gargamelle-effect gargamelle-workflow
 ```
 
-### 2. Deterministic Verification Gate
-Execute the physical verification harness exercising Bubblewrap isolation, Beam SQLite file locking, HLint static analysis, and the full test suite:
+### 2. Deterministic Physical Verification Gate (6 Gates)
+Execute the deterministic physical verification harness exercising Bubblewrap container isolation, Beam SQLite file locking, HLint cleanliness, full test suite assertions, mechanical Tagref cross-referencing, and CLOC comment density tracking:
 
 ```bash
 ./bin/gargamelle-verify

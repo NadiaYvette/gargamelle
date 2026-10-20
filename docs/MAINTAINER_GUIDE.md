@@ -3,9 +3,10 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 # Gargamelle Maintainer Guide & Architectural Governance
 
-**Status:** LIVING DOCUMENT · v2.0 · 2026-10-20  
+**Status:** LIVING DOCUMENT · v2.1 · 2026-10-21  
 **Audience:** Maintainers, Subsystem Leads, Ecosystem Contributors, AI Assistant Drivers  
 **Canonical Strategy:** [`docs/notes/DOC_STRATEGY.md`](notes/DOC_STRATEGY.md) · [`docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md`](notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md)  
+**Roll-Out Plan:** [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](DOCUMENTATION_ROLLOUT_PLAN.md) · **Framework Spec:** [`docs/FRAMEWORK_RECOMMENDATIONS.md`](FRAMEWORK_RECOMMENDATIONS.md)  
 **Corpus Inventory:** [`docs/INDEX.md`](INDEX.md) · **Package Register:** [`docs/registers/PACKAGES.md`](registers/PACKAGES.md)  
 **Newbie Guide:** [`docs/NEWBIE_GUIDE.md`](NEWBIE_GUIDE.md) · **Tutorial:** [`docs/TUTORIAL.md`](TUTORIAL.md)  
 **Build Systems Matrix:** [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](developer/BUILD_SYSTEMS_MATRIX.md)  
@@ -33,17 +34,19 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 2. Verification Gates & Quality Control
 
-Before any change is committed to master, it must pass four strict gates:
+Before any change is committed to master, it must pass all six physical verification gates:
 
-### Gate 1: The Deterministic Physical Verification Harness
+### Gate 1: The Deterministic Physical Verification Harness (6 Gates)
 ```bash
 ./bin/gargamelle-verify
 ```
-Checks:
-1. Bubblewrap Linux namespace container sandbox isolation (`/usr/bin/bwrap`).
-2. Beam SQLite on-disk database creation, schema migrations, and file locking.
-3. Clean HLint static analysis run across all package sources (0 hints).
-4. All test suite assertions passed with 0 failures.
+Checks executed in sequence:
+1. **Bubblewrap Container Sandboxing:** Enforces physical namespace isolation (`/usr/bin/bwrap`) with `/usr/bin/timeout` and temp mount scoping.
+2. **On-Disk Beam Persistence:** Validates real SQLite file locking, schema creation, and transaction integrity.
+3. **HLint Static Analysis:** Zero hints enforced across `packages/gargamelle-*/src`.
+4. **Full Test Suite Assertions:** All 26 workflow integration and milestone assertions pass with 0 failures.
+5. **Tagref Cross-Reference Gate:** Zero dangling references and zero duplicate tags across code, monographs, and docs.
+6. **CLOC Comment Density Gate:** Tracks progress toward and maintains the **50%+ comment density target** across packages.
 
 ### Gate 2: Full Multi-Package Test Suite
 ```bash
@@ -81,3 +84,32 @@ Assisted-by: Antigravity (Google / gemini-3.8-pro)
 - **Allowed Trailers for AI Tools:** `Assisted-by:` and optional `Orchestrated-by:`.
 - **Forbidden Trailers for AI Tools:** `Co-authored-by:` and `Signed-off-by:`. Only human maintainers may certify the Developer Certificate of Origin (DCO).
 - Enforced automatically by `.githooks/commit-msg`.
+
+---
+
+## 4. Multi-Mirror Git Hosting & Synchronization Protocol
+
+All changes landing on `master` must be synchronized across all five git hosting mirrors under the account `NadiaYvette` (SourceHut excluded per anti-AI TOS):
+
+| Remote Name | Platform | Remote Push Command | Web View / Explorer |
+| :--- | :--- | :--- | :--- |
+| **`github`** | GitHub | `git push github master` | [github.com/NadiaYvette/gargamelle](https://github.com/NadiaYvette/gargamelle) |
+| **`gitcode`** | GitCode | `git push gitcode master` | [gitcode.com/NadiaYvette/gargamelle](https://gitcode.com/NadiaYvette/gargamelle) |
+| **`framagit`** | GitLab | `git push framagit master` | [framagit.org/NadiaYvette/gargamelle](https://framagit.org/NadiaYvette/gargamelle) |
+| **`disroot`** | Forgejo | `git push disroot master` | [git.disroot.org/NadiaYvette/gargamelle](https://git.disroot.org/NadiaYvette/gargamelle) |
+| **`rad`** | Radicle | `git push rad master && rad sync` | [Radicle Web View](https://radicle.network/nodes/iris.radicle.network/rad:zqykaqjnoA8a1harMdQVsigC7VwH) |
+
+### Synchronized Multi-Push One-Liner:
+```bash
+git push github master && git push gitcode master && git push framagit master && git push disroot master && git push rad master && rad sync
+```
+
+---
+
+## 5. Documentation Roll-Out Governance
+
+Follow the staged strategy defined in [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](DOCUMENTATION_ROLLOUT_PLAN.md):
+- **Phase 1 (Immediate):** Polish root README, orientation guides, and multi-compiler matrices for multi-forge rendering.
+- **Phase 2 (Monographs):** Author standardized 6-part `README.md` monographs for all 11 packages in `packages/gargamelle-*/`, paired with in-code GHC Notes, `tagref` labels, and the 50%+ comment density target.
+- **Phase 3 (Verification Tooling):** Implement `./bin/gargamelle-doccheck` (multi-GHC literate testing across GHC 9.6–9.14), deterministic Markdown link checks, and hyperlinked Haddock cross-reference verification.
+- **Phase 4 (Foundational Treatise):** Author the 5-volume textbook curriculum in `docs/textbook/` concurrently with real consumer libraries (particularly [`sarutahiko`](~/src/sarutahiko)).

@@ -2,8 +2,8 @@
 
 **Audience:** New human contributors and AI coding assistant drivers (Antigravity, Claude Code, Cursor, Aider).  
 **Parent Strategy:** [`docs/notes/DOC_STRATEGY.md`](notes/DOC_STRATEGY.md)  
-**Corpus Inventory:** [`docs/INDEX.md`](INDEX.md)  
-**Interactive Tutorial:** [`docs/TUTORIAL.md`](TUTORIAL.md)  
+**Corpus Inventory:** [`docs/INDEX.md`](INDEX.md) · **Roll-Out Plan:** [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](DOCUMENTATION_ROLLOUT_PLAN.md)  
+**Interactive Tutorial:** [`docs/TUTORIAL.md`](TUTORIAL.md) · **Framework Spec:** [`docs/FRAMEWORK_RECOMMENDATIONS.md`](FRAMEWORK_RECOMMENDATIONS.md)  
 **Maintainer Guide:** [`docs/MAINTAINER_GUIDE.md`](MAINTAINER_GUIDE.md)  
 
 ---
@@ -38,12 +38,13 @@ Level 2: Targeted Slice     (view_file StartLine / EndLine)       →   ~200–5
 
 ## 2. Fast Package & Symbol Navigation (Level 0 — <20 tokens)
 
-Before opening any file, identify which package owns the concept:
+Before opening any file, identify which package owns the concept across the 11 packages:
 
 | If you are looking for... | Look in package | Main Source Files |
 | :--- | :--- | :--- |
 | `ObsMor`, `VerifierAST`, `Evidence` | `packages/gargamelle-model` | `src/Gargamelle/Model/Observable.hs`, `Verifier.hs` |
 | `AGContract`, `LogicAST`, Galois | `packages/gargamelle-logic` | `src/Gargamelle/Logic/Contract.hs`, `AST.hs` |
+| TreeDiff, AST similarity, Evidence | `packages/gargamelle-evidence` | `src/Evidence.hs` |
 | `Institution`, `PushoutWeaving` | `packages/gargamelle-core` | `src/Gargamelle/Core/Institution.hs`, `Weaving.hs` |
 | First-Order logic, Z3 SMT pipe | `packages/gargamelle-fol` | `src/Gargamelle/FOL/Z3.hs`, `FirstOrder.hs` |
 | Equational logic, DPO rewriting | `packages/gargamelle-equational` | `src/Gargamelle/Equational/DPO.hs` |
@@ -65,7 +66,7 @@ All packages are configured under `cabal.project`.
 # 1. Quick compile check of a single package
 cabal build gargamelle-workflow
 
-# 2. Run the deterministic physical verification gate (Milestones M1–M3 + Phase 6)
+# 2. Run the deterministic physical verification gate (6 gates: Sandbox, Beam, HLint, Tests, Tagref, CLOC density)
 ./bin/gargamelle-verify
 
 # 3. Run all test suites across all 8 active packages

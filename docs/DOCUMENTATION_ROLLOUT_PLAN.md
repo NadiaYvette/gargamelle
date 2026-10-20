@@ -104,17 +104,17 @@ While Radicle is fundamentally a peer-to-peer git gossip protocol over Heartwood
   - **Content:** Architectural tier map, 11-package register, Rabelaisian naming rationale, plain-English conceptual explanations, and deterministic verification quickstarts.
   - **Forge Verification:** Confirmed rendering of ASCII diagrams, math notation, and package table across GitHub, GitCode, Disroot, Framagit, and Radicle.
 
-- [ ] **Milestone 1.2: Core Orientation Guides Polish**
+- [x] **Milestone 1.2: Core Orientation Guides Polish**
   - **Artifacts:**
     - [`docs/INDEX.md`](INDEX.md) (Corpus inventory and curated reading paths)
     - [`docs/NEWBIE_GUIDE.md`](NEWBIE_GUIDE.md) (Progressive disclosure funnel & token conservation)
     - [`docs/TUTORIAL.md`](TUTORIAL.md) (5-lesson interactive walkthrough from ObsMor to Crem CEGIS)
-    - [`docs/MAINTAINER_GUIDE.md`](MAINTAINER_GUIDE.md) (Governance, 4 physical verification gates, commit attribution)
-  - **Action:** Verify all intra-corpus relative links resolve cleanly on all four web forges. Ensure tables and headers follow `DOC_STRATEGY.md` status metadata conventions.
+    - [`docs/MAINTAINER_GUIDE.md`](MAINTAINER_GUIDE.md) (Governance, 6 physical verification gates, commit attribution, multi-mirror protocol)
+  - **Forge Verification:** All intra-corpus relative links verified; tables and metadata updated to `2026-10-21` following `DOC_STRATEGY.md` status metadata conventions.
 
-- [ ] **Milestone 1.3: Multi-Compiler & Matrix Documentation**
+- [x] **Milestone 1.3: Multi-Compiler & Matrix Documentation**
   - **Artifact:** [`docs/developer/BUILD_SYSTEMS_MATRIX.md`](developer/BUILD_SYSTEMS_MATRIX.md)
-  - **Action:** Verify copy-pasteable build commands for Cabal, Stack, and Nix across GHC 9.6, 9.8, 9.10, 9.12, and 9.14.
+  - **Action:** Verified copy-pasteable build commands for Cabal, Stack, and Nix across GHC 9.6, 9.8, 9.10, 9.12, and 9.14; updated verification gates section.
 
 ---
 

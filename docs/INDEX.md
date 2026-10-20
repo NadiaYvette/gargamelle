@@ -1,6 +1,6 @@
 # docs/INDEX.md — Corpus Inventory and Reading Map
 
-**Status:** LIVING DOCUMENT · v2.0 · 2026-10-20  
+**Status:** LIVING DOCUMENT · v2.1 · 2026-10-21  
 **Parent Strategy:** [`notes/DOC_STRATEGY.md`](notes/DOC_STRATEGY.md)  
 
 ---
