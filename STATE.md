@@ -77,13 +77,25 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit Test Suites**: Added 8 tests in `packages/gargamelle-fol/test/Main.hs` and 4 tests in `packages/gargamelle-equational/test/Main.hs`, 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall`), 0 HLint hints across all 6 packages. Total test suite passes: 57 examples (0 regressions).
 
-## Next Actions (v2.0 Architectural Redesign: Phase 4)
-- **Phase 4: Cellular Sheaves & Homological Fault Localization**:
-  - Instantiate `packages/gargamelle-sheaf` in `cabal.project`.
-  - Implement `Gargamelle.Sheaf.Complex` (cell complexes, simplices, and posets).
-  - Implement the `Store` comonad cellular diffusion runner (`Gargamelle.Sheaf.Diffusion`) with Knaster-Tarski `diffuseUntilHarmonic`.
-  - Implement `coboundary` operator and compute $H^1$ obstruction maps for homological fault localization.
-  - Verify $H^0(G; \mathbf{Mod}) \cong \mathbf{Mod}(\operatorname{colim} D)$ model amalgamation on multi-module test graphs.
-- **Phase 5: Polytropos-Kernmantle Rope & Optics**: Port `gargamelle-effect` to Polytropos $O(1)$ variant jump tables (`deriveRouter`) and Coyoneda array fusion.
-- **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**: Bind $H^1$ coboundaries into Crem Mealy state machines and Kernmantle `Rope` arrows, preserving the 20 existing passing integration tests.
+### Phase 4: Cellular Sheaves & Homological Fault Localization [COMPLETED]
+- **Packages**: `packages/gargamelle-sheaf` (`Gargamelle.Sheaf`, `Gargamelle.Sheaf.Complex`, `Gargamelle.Sheaf.Diffusion`, `Gargamelle.Sheaf.Cohomology`)
+- **Finite Cell Complexes (`CellComplex vId eId`)**: Formalized 1-dimensional graph complexes with graded cell hierarchy (`Cell0`, `Cell1`), face poset relations ($\sigma \trianglelefteq \tau$), star co-faces, boundary maps, homological incidence signs ($[e : u] = -1$, $[e : v] = +1$), and topological Euler characteristic $\chi = |V| - |E|$.
+- **Cellular Sheaves (`CellularSheaf vId eId stalk edgeStalk`)**: Stalk assignments over cells, directional and symmetric restriction maps ($\rho_{u \trianglelefteq e}, \rho_{v \trianglelefteq e}$), and adjoint lifting maps.
+- **Store Comonad Cellular Diffusion**: Comonadic cellular space via `Control.Comonad.Store` (`Store vId stalk`, `pos`, `extract`, `peek`), using comonadic `extend` to evaluate local neighborhood inspection rules across all vertices simultaneously.
+- **Knaster-Tarski Harmonic Consensus**: Monotonic lattice diffusion (`diffuseUntilHarmonic`, `diffuseTrace`) over contract meet lattices (`Algebra.Lattice.Lattice`, `BoundedMeetSemiLattice`), proving convergence to greatest lower bounds.
+- **Sheaf Coboundary Operator ($\delta^0 : C^0 \to C^1$)**: Computes boundary discrepancies $(\rho_u(x_u), \rho_v(x_v))$ along all 1-cells; detects harmonic global sections ($H^0(G; \mathcal{F}) = \ker \delta^0$) and evaluates the Model Amalgamation Theorem $H^0(G; \mathbf{Mod}) \cong \mathbf{Mod}(\operatorname{colim} D)$ over pushout diagrams.
+- **Homological Fault Localization ($H^1$ Feedback)**: Cohomological obstruction maps (`locateObstructions`) pinpointing exact failing interface boundaries and mismatched contract values to directly guide CEGIS repair.
+- **GHC-Style Unit Test Suite**: 9 new tests in `packages/gargamelle-sheaf/test/Main.hs`, 100% green.
+- **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall -Werror`), 0 HLint hints across all packages. Total test suite passes: 66 examples (0 regressions).
+
+## Next Actions (v2.0 Architectural Redesign: Phase 5)
+- **Phase 5: Polytropos-Kernmantle Rope & Optics**:
+  - Update `gargamelle-effect` to route over `Polytropos.Variant` and `Record`.
+  - Implement `deriveRouter` jump table using flat array tags ($O(1)$ dispatch).
+  - Fuse intermediate array transformations via `kan-extensions:Coyoneda`.
+  - Wire Profunctor optics (`Prism`, `Lens`) for effect strand inspection.
+- **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**:
+  - Update `gargamelle-workflow`'s Crem Mealy state machine to receive $H^1$ obstruction feedback.
+  - Wire Bubblewrap execution and Beam SQLite persistence into the pipeline.
+  - Preserve all 20 existing integration tests in `gargamelle-workflow:test:tests`.
 
