@@ -88,12 +88,11 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit Test Suite**: 9 new tests in `packages/gargamelle-sheaf/test/Main.hs`, 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall -Werror`), 0 HLint hints across all packages. Total test suite passes: 66 examples (0 regressions).
 
-### Phase 5: Polytropos-Kernmantle Rope & Optics [COMPLETED]
+### Phase 5: Polytropos-Kernmantle Rope & Optics [COMPLETED & UPSTREAMED]
 - **Packages**: `packages/gargamelle-effect` (`Effect.Rope`, `Effect.Strand`, `Effect.Handlers`, `Effect.Strand.Beam`, `Gargamelle.Effect`, `Gargamelle.Effect.Router`, `Gargamelle.Effect.Optics`, `Gargamelle.Effect.Fusion`, `Gargamelle.Effect.Rope`)
-- **Polytropos $O(1)$ Variant Router (`VariantRouter`)**: Constant-time jump table routing open variant effect requests (`Variant s`) directly to core arrow handlers indexed by unboxed constructor tags (`repTag`), completely eliminating case cascades and binary search. Integrated with `Rope` via `routeVariantRope`.
-- **Profunctor Optics for Open Data**: Zero-cost lenses (`typedSlotLens`, `slotLens`) and prisms (`typedVariantPrism`, `variantPrism`) operating directly on Polytropos's unboxed `SmallArray` memory representation with pure in-place slot updating (`updateSmallArray`).
-- **Coyoneda Pipeline Fusion**: Fused intermediate mapping operations over effect pipelines and payload slots via `Data.Functor.Coyoneda` (`fuseMap`, `fuseRope`, `fuseRopeMap`), eliminating intermediate array allocations.
-- **Strict Backward Compatibility**: Preserved all existing strands, handlers (`productionHandlers`, `pureMockHandlers`, `beamSqliteHandlers`), and Rope arrow pipelines.
+- **Upstreamed to `polytropos`**: Created native satellite package `packages/polytropos-profunctors` in `polytropos` (commit `52f6030`), providing pure `Strong` lenses, `Choice` prisms, compile-time `FieldIndex` `fieldLens`, `ConstructorIndex` `ctorPrism`, and `typedSlotLens`/`typedVariantPrism` delegating to `Polytropos.Core.setFieldAt`.
+- **Upstreamed to `kernmantle`**: Implemented `Control.Kernmantle.Rope.Variant` ($O(1)$ jump-table routing, `routeVariantWith`, and `branchRope` multi-way branching over open variants) and `Control.Kernmantle.Rope.Fusion` (Coyoneda pipeline fusion for `Rope`) on branch `polytropos-port` (commit `862b3cd`).
+- **Clean Consumption in `gargamelle-effect`**: Refactored `Gargamelle.Effect.Optics`, `Gargamelle.Effect.Router`, and `Gargamelle.Effect.Fusion` to re-export and adapt upstreamed modules, eliminating redundant code while preserving 100% backward compatibility.
 - **GHC-Style Unit Test Suite**: 7 new tests in `packages/gargamelle-effect/test/Main.hs`, 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall -Werror`), 0 HLint hints across all packages. Total test suite passes: 73 examples (0 regressions).
 
