@@ -1,13 +1,11 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, TypeOperators, FlexibleInstances, MultiParamTypeClasses, BlockArguments #-}
 
 module Hyperdoctrine where
 
 import Institution
 import Data.Proxy
-import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
+import GHC.TypeLits (Symbol, KnownSymbol)
 import qualified Data.Map as Map
-import qualified Data.Set as Set
-import qualified Folly.Formula as F
 import qualified FirstOrder as FO
 
 -- | A wrapper for hyperdoctrine signatures (lists of base types?).

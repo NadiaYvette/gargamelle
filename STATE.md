@@ -68,12 +68,22 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit Test Suite**: 8 dedicated tests in `packages/gargamelle-core/test/Main.hs`, 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall`), 0 HLint hints across all packages. Total test suite passes: 45 examples across logic, model, core, and workflow (0 regressions).
 
-## Next Actions (v2.0 Architectural Redesign: Phase 3)
-- **Phase 3: SMT Z3 Pipe & Presheaf DPO Rewriting**:
-  - Retire legacy `external/Folly` and `external/Jukebox` dependencies from active build plan.
-  - Implement direct typed Z3 SMT solver pipe in `gargamelle-logic` or `gargamelle-fol` using modern SMTLIB2 / Z3 CLI interaction.
-  - Implement double-pushout (DPO) rule transformation and presheaf rewriting using `Proarrow.Tools.DPO`.
-- **Phase 4: Cellular Sheaves & Homological Fault Localization**: Implement `gargamelle-sheaf` Store cellular automaton and $H^1$ obstruction feedback.
+### Phase 3: SMT Z3 Pipe & Presheaf DPO Rewriting [COMPLETED]
+- **Packages**: `packages/gargamelle-fol` (`FirstOrder`, `Hyperdoctrine`, `RefinementCalculus`, `Gargamelle.FOL.Z3`), `packages/gargamelle-equational` (`Equational`, `Gargamelle.Equational.DPO`)
+- **Retired Legacy ATP Submodules**: Completely removed `external/Folly` and `external/Jukebox` from `cabal.project` and package dependencies, eliminating legacy tab warnings and ancient unmaintained code.
+- **Native First-Order Representation**: Replaced Folly's external term structure with native first-order terms (`Var`, `Const`, `Func`), preserving full backward compatibility across `FirstOrder`, `Hyperdoctrine`, and `RefinementCalculus`.
+- **Host Z3 4.16.0 Streaming SMT Pipe**: Implemented `Gargamelle.FOL.Z3` with typed SMT-LIB2 generation, direct streaming process pipe to host Z3, model extraction into `Map String String`, and validity verification mapping tautology proofs to `VerifiedSection` and countermodels to `Counterexample`.
+- **Double-Pushout (DPO) Algebraic Rewriting**: Implemented `Gargamelle.Equational.DPO` leveraging `Proarrow.Tools.DPO (Rule, dpoStep, HasPushoutComplements)`, with grounded evaluation over finite types (`FINHASK`) and algebraic equational rules, rigorously enforcing gluing conditions (refusing non-injective identification of kept and deleted elements).
+- **GHC-Style Unit Test Suites**: Added 8 tests in `packages/gargamelle-fol/test/Main.hs` and 4 tests in `packages/gargamelle-equational/test/Main.hs`, 100% green.
+- **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall`), 0 HLint hints across all 6 packages. Total test suite passes: 57 examples (0 regressions).
+
+## Next Actions (v2.0 Architectural Redesign: Phase 4)
+- **Phase 4: Cellular Sheaves & Homological Fault Localization**:
+  - Instantiate `packages/gargamelle-sheaf` in `cabal.project`.
+  - Implement `Gargamelle.Sheaf.Complex` (cell complexes, simplices, and posets).
+  - Implement the `Store` comonad cellular diffusion runner (`Gargamelle.Sheaf.Diffusion`) with Knaster-Tarski `diffuseUntilHarmonic`.
+  - Implement `coboundary` operator and compute $H^1$ obstruction maps for homological fault localization.
+  - Verify $H^0(G; \mathbf{Mod}) \cong \mathbf{Mod}(\operatorname{colim} D)$ model amalgamation on multi-module test graphs.
 - **Phase 5: Polytropos-Kernmantle Rope & Optics**: Port `gargamelle-effect` to Polytropos $O(1)$ variant jump tables (`deriveRouter`) and Coyoneda array fusion.
 - **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**: Bind $H^1$ coboundaries into Crem Mealy state machines and Kernmantle `Rope` arrows, preserving the 20 existing passing integration tests.
 

@@ -1,12 +1,11 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses, BlockArguments #-}
 
 module RefinementCalculus where
 
 import Institution
 import Data.Proxy
-import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
+import GHC.TypeLits (Symbol)
 import qualified FirstOrder as FO
-import qualified Data.Map as Map
 
 -- | A wrapper for refinement calculus signatures (lists of variables?).
 -- We keep it phantom for now.

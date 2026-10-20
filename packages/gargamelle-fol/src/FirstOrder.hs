@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses, BlockArguments #-}
 
 module FirstOrder where
 
@@ -7,10 +7,47 @@ import Data.Proxy
 import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import qualified Folly.Formula as F
 
--- | Terms: we use Folly's Term type.
-type Term = F.Term
+-- | Native First-Order Terms: variables, constants, and function applications.
+data Term
+  = Var String
+  | Const String
+  | Func String [Term]
+  deriving (Eq, Ord, Show)
+
+isVar :: Term -> Bool
+isVar (Var _) = True
+isVar _       = False
+
+varName :: Term -> String
+varName (Var v) = v
+varName _       = error "FirstOrder.varName: not a variable"
+
+isConst :: Term -> Bool
+isConst (Const _) = True
+isConst _         = False
+
+isFunc :: Term -> Bool
+isFunc (Func _ _) = True
+isFunc _          = False
+
+funcName :: Term -> String
+funcName (Const c)  = c
+funcName (Func f _) = f
+funcName _          = error "FirstOrder.funcName: not a function or constant"
+
+funcArgs :: Term -> [Term]
+funcArgs (Func _ args) = args
+funcArgs _             = []
+
+var :: String -> Term
+var = Var
+
+constant :: String -> Term
+constant = Const
+
+func :: String -> [Term] -> Term
+func = Func
 
 -- | Sentences: our own formula GADT built on top of Folly's terms.
 data Formula (syms :: [Symbol]) where
@@ -51,17 +88,18 @@ instance Institution (FOLSig syms) where
 -- Returns Left error if a variable is not bound in the environment or if a function symbol is missing.
 evalTerm :: FOLModel syms -> Map.Map String String -> Term -> Either String String
 evalTerm m rho t
-  | F.isVar t   = case Map.lookup (F.varName t) rho of
+  | isVar t   = case Map.lookup (varName t) rho of
                     Just v -> Right v
-                    Nothing -> Left $ "Undefined variable: " ++ F.varName t
-  | F.isConst t = Right $ F.funcName t   -- constant: funcName gives the constant name
-  | F.isFunc t  = do
-      let f = F.funcName t
-          args = F.funcArgs t
+                    Nothing -> Left $ "Undefined variable: " ++ varName t
+  | isConst t = Right $ funcName t   -- constant: funcName gives the constant name
+  | isFunc t  = do
+      let f = funcName t
+          args = funcArgs t
       argVals <- mapM (evalTerm m rho) args
       case Map.lookup f (functionInterpretation m) of
-        Just func -> Right $ func argVals
+        Just fn   -> Right $ fn argVals
         Nothing   -> Left $ "Undefined function symbol: " ++ f
+  | otherwise = Left "Unknown term construct"
 
 -- | Evaluate a formula to a Boolean given a model and an environment (variable assignment).
 -- Returns Left error if the formula is not closed (contains free variables) or if a predicate is missing.
@@ -111,13 +149,13 @@ evalFormula m rho (Exists p f) = do
 
 -- | Smart constructors for terms that take a KnownSymbol proxy.
 varTerm :: KnownSymbol sym => Proxy sym -> Term
-varTerm p = F.var (symbolVal p)
+varTerm p = var (symbolVal p)
 
 constTerm :: KnownSymbol sym => Proxy sym -> Term
-constTerm p = F.constant (symbolVal p)
+constTerm p = constant (symbolVal p)
 
 funAppTerm :: KnownSymbol sym => Proxy sym -> [Term] -> Term
-funAppTerm p = F.func (symbolVal p)
+funAppTerm p = func (symbolVal p)
 
 -- | Smart constructors for formulas that take KnownSymbol proxies.
 prop :: KnownSymbol sym => Proxy sym -> [Term] -> Formula syms

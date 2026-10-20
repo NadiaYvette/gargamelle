@@ -14,8 +14,6 @@ packages:
   packages/gargamelle-persistence
   packages/gargamelle-sandbox
   packages/gargamelle-workflow
-  external/Folly
-  external/Jukebox
   /home/nyc/src/hs-tree-sitter/hs-tree-sitter
   /home/nyc/src/tree-diff
   /home/nyc/src/crem

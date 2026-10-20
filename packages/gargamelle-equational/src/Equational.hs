@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DataKinds, TypeFamilies, GADTs, PolyKinds, FlexibleInstances, MultiParamTypeClasses, BlockArguments #-}
 
 module Equational where
 
@@ -6,7 +6,6 @@ import Institution
 import Data.Proxy
 import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
 import qualified Data.Map as Map
-import Jukebox.Utils (usort) -- using a function from Jukebox to depend on the library
 
 -- | A wrapper for equational signatures (lists of function symbols).
 newtype EGSym (syms :: [Symbol]) = EGSym (Proxy syms)
@@ -35,8 +34,8 @@ instance Institution (EGSym syms) where
   satisfies _ m (Equation lhs rhs) = evalTerm m lhs == evalTerm m rhs
 
 evalTerm :: EqModel syms -> Term syms -> String
-evalTerm m (Var x) = symbolVal x -- variable evaluates to its name (string)
-evalTerm m (Const c) = symbolVal c
+evalTerm _ (Var x) = symbolVal x -- variable evaluates to its name (string)
+evalTerm _ (Const c) = symbolVal c
 evalTerm m (FunApp f args) =
   let key = symbolVal f
       argVals = map (evalTerm m) args

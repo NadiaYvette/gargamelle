@@ -1,7 +1,7 @@
 cabal-version: 3.0
 name: gargamelle-equational
 version: 0.1.0.0
-synopsis: Equational logic institution interfacing with Jukebox
+synopsis: Equational logic institution and presheaf DPO rewriting for gargamelle
 license: EUPL-1.2
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
@@ -10,11 +10,26 @@ build-type: Simple
 library
   exposed-modules:
     Equational
+    Gargamelle.Equational.DPO
   hs-source-dirs: src
+  default-language: Haskell2010
+  ghc-options: -Wall -Wcompat
+  build-depends:
+    base >= 4.18 && < 5,
+    containers >= 0.6,
+    proarrow >= 0.2,
+    gargamelle-core
+
+test-suite tests
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs: test
   default-language: Haskell2010
   ghc-options: -Wall
   build-depends:
-    base >= 4.14 && < 5,
-    containers,
+    base >= 4.18 && < 5,
+    containers >= 0.6,
+    proarrow,
+    gargamelle-equational,
     gargamelle-core,
-    jukebox
+    hspec >= 2.10
