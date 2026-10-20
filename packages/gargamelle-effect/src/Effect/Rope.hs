@@ -74,34 +74,34 @@ ropeFromCore c = Rope $ const c
 
 -- | Lifting individual strands into Rope arrows:
 
-logInfoRope :: Arrow core => Text -> Rope core mantle () ()
+logInfoRope :: Text -> Rope core mantle () ()
 logInfoRope msg = Rope $ \h -> handleLogMsg h (LogInfo msg)
 
-logWarnRope :: Arrow core => Text -> Rope core mantle () ()
+logWarnRope :: Text -> Rope core mantle () ()
 logWarnRope msg = Rope $ \h -> handleLogMsg h (LogWarn msg)
 
-logErrorRope :: Arrow core => Text -> Rope core mantle () ()
+logErrorRope :: Text -> Rope core mantle () ()
 logErrorRope msg = Rope $ \h -> handleLogMsg h (LogError msg)
 
-readFileRope :: Arrow core => FilePath -> Rope core mantle () (Either Text Text)
+readFileRope :: FilePath -> Rope core mantle () (Either Text Text)
 readFileRope fp = Rope $ \h -> handleReadFile h (ReadTextFile fp)
 
-writeFileRope :: Arrow core => FilePath -> Text -> Rope core mantle () (Either Text ())
+writeFileRope :: FilePath -> Text -> Rope core mantle () (Either Text ())
 writeFileRope fp txt = Rope $ \h -> handleWriteFile h (WriteTextFile fp txt)
 
-runSandboxRope :: Arrow core => FilePath -> [String] -> Rope core mantle () (Int, Text, Text)
+runSandboxRope :: FilePath -> [String] -> Rope core mantle () (Int, Text, Text)
 runSandboxRope cmd args = Rope $ \h -> handleSandbox h (RunCommand cmd args)
 
-queryEvidenceRope :: Arrow core => Text -> Rope core mantle () (Maybe Text)
+queryEvidenceRope :: Text -> Rope core mantle () (Maybe Text)
 queryEvidenceRope k = Rope $ \h -> handleQueryBeam h (QueryEvidence k)
 
-storeEvidenceRope :: Arrow core => Text -> Text -> Rope core mantle () Bool
+storeEvidenceRope :: Text -> Text -> Rope core mantle () Bool
 storeEvidenceRope k v = Rope $ \h -> handleQueryBeam h (StoreEvidence k v)
 
-getRandomWordRope :: Arrow core => Rope core mantle () Word64
+getRandomWordRope :: Rope core mantle () Word64
 getRandomWordRope = Rope $ \h -> handleRandom h GetRandomWord
 
-getTimestampRope :: Arrow core => Rope core mantle () Word64
+getTimestampRope :: Rope core mantle () Word64
 getTimestampRope = Rope $ \h -> handleTimer h GetTimestamp
 
 -- | Static Config-Time Analysis:

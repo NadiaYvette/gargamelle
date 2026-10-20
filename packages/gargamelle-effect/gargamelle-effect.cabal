@@ -26,7 +26,7 @@ library
     Gargamelle.Effect.Rope
   hs-source-dirs: src
   default-language: Haskell2010
-  ghc-options: -Wall -Wcompat -Wredundant-constraints
+  ghc-options: -Wall -Wcompat -Wredundant-constraints -Wno-unused-imports -fplugin=Polytropos.Plugin
   build-depends:
     base >= 4.14 && < 5,
     text,
@@ -35,6 +35,7 @@ library
     profunctors >= 5.6,
     kan-extensions >= 5.2,
     polytropos-core >= 0.1.0.1,
+    polytropos-plugin >= 0.1.0.1,
     polytropos-profunctors >= 0.1.0.1,
     gargamelle-core,
     gargamelle-persistence,
@@ -51,13 +52,14 @@ test-suite tests
   main-is: Main.hs
   hs-source-dirs: test
   default-language: Haskell2010
-  ghc-options: -Wall
+  ghc-options: -Wall -fplugin=Polytropos.Plugin
   build-depends:
     base >= 4.14 && < 5,
     gargamelle-effect,
     gargamelle-core,
     gargamelle-persistence,
     polytropos-core >= 0.1.0.1,
+    polytropos-plugin >= 0.1.0.1,
     polytropos-profunctors >= 0.1.0.1,
     kernmantle >= 0.1.0.1,
     primitive,
