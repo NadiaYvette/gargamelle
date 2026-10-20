@@ -1,7 +1,7 @@
 cabal-version: 3.0
 name: gargamelle-core
 version: 0.1.0.0
-synopsis: Core Institution class and base logical structures for gargamelle
+synopsis: Core Institution class, categorical pushouts, and macro-architecture for gargamelle
 license: EUPL-1.2
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
@@ -10,6 +10,10 @@ build-type: Simple
 library
   exposed-modules:
     Institution
+    Gargamelle.Core.Institution
+    Gargamelle.Core.Weaving
+    Gargamelle.Core.Discovery
+    Gargamelle.Core.Colimit
     Propositional
     SessionTypes
     Sheaf
@@ -17,8 +21,29 @@ library
     Core.AST
   hs-source-dirs: src
   default-language: Haskell2010
+  ghc-options: -Wall -Wcompat -Wredundant-constraints
+  build-depends:
+    base >= 4.18 && < 5,
+    containers >= 0.6,
+    polytropos-core >= 0.1,
+    proarrow >= 0.2,
+    proarrow-equipment,
+    gargamelle-logic,
+    gargamelle-model,
+    lattices >= 2.2,
+    contravariant >= 1.5
+
+test-suite tests
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs: test
+  default-language: Haskell2010
   ghc-options: -Wall
   build-depends:
-    base >= 4.14 && < 5,
-    containers,
-    polytropos-core
+    base >= 4.18 && < 5,
+    gargamelle-core,
+    gargamelle-logic,
+    gargamelle-model,
+    containers >= 0.6,
+    proarrow,
+    hspec >= 2.10

@@ -37,7 +37,7 @@ instance Institution (STSSig syms) where
   satisfies _ m (Ready t)      = evalTerm m t `Map.lookup` channels m == Just "ready"
 
 evalTerm :: STSModel syms -> Term syms -> String
-evalTerm m (Chan s) = symbolVal s -- channel evaluates to its name
+evalTerm _ (Chan s) = symbolVal s -- channel evaluates to its name
 
 -- Smart constructors
 chan :: KnownSymbol sym => Proxy sym -> Term syms

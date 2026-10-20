@@ -36,7 +36,7 @@ instance Institution (SheafSig syms) where
   satisfies _ m (SectEq t1 t2) = evalTerm m t1 == evalTerm m t2
 
 evalTerm :: SheafModel syms -> Term syms -> String
-evalTerm m (Section s) = symbolVal s -- section evaluates to its name
+evalTerm _ (Section s) = symbolVal s -- section evaluates to its name
 
 -- Smart constructors
 section :: KnownSymbol sym => Proxy sym -> Term syms

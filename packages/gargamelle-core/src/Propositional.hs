@@ -4,7 +4,6 @@ module Propositional where
 
 import Institution
 import GHC.TypeLits
-import Data.Kind (Type)
 import Data.Proxy
 
 -- | A wrapper for propositional signatures (lists of atoms).
@@ -29,8 +28,8 @@ instance Show (ModProp atoms) where
 
 -- | Satisfaction: evaluate the formula under the truth assignment.
 satProp :: ModProp atoms -> SentProp atoms -> Bool
-satProp m Top = True
-satProp m Bot = False
+satProp _ Top = True
+satProp _ Bot = False
 satProp m (Atom p) = getVal m p
 satProp m (Neg f) = not (satProp m f)
 satProp m (Conj f g) = satProp m f && satProp m g

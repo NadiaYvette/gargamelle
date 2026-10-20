@@ -56,13 +56,23 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
 - **GHC-Style Unit Test Suite**: 17 new tests (8 in `gargamelle-logic:test:tests`, 9 in `gargamelle-model:test:tests`), 100% green.
 - **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall`), 0 HLint hints across both new packages. Total test suite passes: 37 examples, 0 failures.
 
-## Next Actions (v2.0 Architectural Redesign: Phase 2)
-- **Phase 2: Category Core & Institutions**:
-  - Add `proarrow` and `proarrow-equipment` to `cabal.project`.
-  - Refactor `gargamelle-core:Institution` into kind-indexed signatures (`type Sig i :: Type`, `type (~>) :: CAT (Sig i)`).
-  - Implement `Institution.Weaving` for pushout feature weaving ($B \amalg_C W$) and model amalgamation.
-  - Implement pullback protocol discovery ($A \times_E B$) and colimit change propagation factorizers.
-- **Phase 3: SMT Z3 Pipe & Presheaf DPO Rewriting**: Retire `external/Folly` and `external/Jukebox`, connect Z3 4.16.0 pipe, and use `Proarrow.Tools.DPO`.
+### Phase 2: Category Core & Institutions [COMPLETED]
+- **Packages**: `packages/gargamelle-core` (`Gargamelle.Core.Institution`, `Gargamelle.Core.Weaving`, `Gargamelle.Core.Discovery`, `Gargamelle.Core.Colimit`)
+- **Proarrow Category Integration**: Vendored and linked `proarrow` and `proarrow-equipment` into `cabal.project`, fully verified under GHC 9.14.1.
+- **Categorical Institutions**: Kind-indexed signatures (`type Sig i :: Type`), covariant sentence translation (`translateSen`), contravariant model reduction via observable morphisms (`reductMod`), and Goguen-Burstall satisfaction condition verification (`satisfactionVerifier` emitting inspectable Free `Verifier` ASTs).
+- **Institution Comorphisms**: Stepwise refinement passes parameterized by defunctionalized type-level signature translations (`InstitutionComorphism`).
+- **Pushout Feature Weaving ($B \amalg_C W$)**: Non-invasive feature composition combining base logic $B$ and aspect $W$ over shared interface $C$, with model amalgamation (`PushoutWeaving`, `weaveAspect`, `AmalgamatedModel`).
+- **Pullback Protocol Discovery ($A \times_E B$)**: Protocol and interface discovery and candidate factorization (`discoverInterface`, `factorInterface`).
+- **Colimit Change Propagation**: Cocones and mediating semantic delta factorizers (`factorSemanticDelta`).
+- **Backward Compatibility**: `Institution.hs` re-exports both legacy types (`Institution`, `Propositional`, `SessionTypes`, `Sheaf`) and modern categorical interfaces.
+- **GHC-Style Unit Test Suite**: 8 dedicated tests in `packages/gargamelle-core/test/Main.hs`, 100% green.
+- **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall`), 0 HLint hints across all packages. Total test suite passes: 45 examples across logic, model, core, and workflow (0 regressions).
+
+## Next Actions (v2.0 Architectural Redesign: Phase 3)
+- **Phase 3: SMT Z3 Pipe & Presheaf DPO Rewriting**:
+  - Retire legacy `external/Folly` and `external/Jukebox` dependencies from active build plan.
+  - Implement direct typed Z3 SMT solver pipe in `gargamelle-logic` or `gargamelle-fol` using modern SMTLIB2 / Z3 CLI interaction.
+  - Implement double-pushout (DPO) rule transformation and presheaf rewriting using `Proarrow.Tools.DPO`.
 - **Phase 4: Cellular Sheaves & Homological Fault Localization**: Implement `gargamelle-sheaf` Store cellular automaton and $H^1$ obstruction feedback.
 - **Phase 5: Polytropos-Kernmantle Rope & Optics**: Port `gargamelle-effect` to Polytropos $O(1)$ variant jump tables (`deriveRouter`) and Coyoneda array fusion.
 - **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**: Bind $H^1$ coboundaries into Crem Mealy state machines and Kernmantle `Rope` arrows, preserving the 20 existing passing integration tests.

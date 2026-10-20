@@ -11,10 +11,7 @@ import Database.Beam
 import Database.Beam.Sqlite
 import Persistence.Schema
 import Persistence.Beam
-import Persistence.Queries
-import Effect.Strand.Beam
 
-import Effect.Strand
 import Effect.Handlers
 import Effect.Rope
 
@@ -35,7 +32,7 @@ main = hspec $ do
     it "executes sequential Rope arrows under pure mock handlers" $ do
       let pipeline = logInfoRope "start-workflow"
                  >>> getRandomWordRope
-                 >>> arr (\w -> w + 1)
+                 >>> arr (+ 1)
       let (Kleisli runner) = runRope pipeline pureMockHandlers
       res <- case runner () of
         Right val -> pure val
