@@ -27,6 +27,7 @@ Status: LIVING DOCUMENT · v0.1 · 2026-10-05
 | `notes/TUTORIAL_EXAMPLES_EVALUATION.md` | strategy | live | cross-cutting | — |
 | `notes/CATEGORICAL_FOUNDATIONS_SURVEY.md` | notes | live | cross-cutting | Canonical survey of higher categories, proarrow, cellular sheaves, Hackage repertoire, and 100% observability |
 | `notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` | design | draft | cross-cutting | v2.0 comprehensive architectural blueprint: Institutions, cellular sheaves, 10-package suite, and CEGIS loop |
+| `notes/HASK2_UNSATURATED_TYPE_FAMILIES.md` | notes | live | cross-cutting | Resolves the folklore Hask2 2-category obstacle via Proarrow equipments, defunctionalization, and ObsMor |
 | `tools/MODERNIZER_AND_LINTER_GUIDE.md` | guide | live | cross-cutting | HLint rules, Retrie rewrites, Stan inspections, and modernization CLI |
 | `tools/FORMAL_VERIFICATION_AND_SYNTHESIS_GUIDE.md` | guide | live | cross-cutting | LiquidHaskell formal verification, Synquid synthesis, and Tricorder continuous diagnostics |
 | `tools/SOURCE_FORMATTERS_AND_LAYOUT_GUIDE.md` | guide | live | cross-cutting | Fourmolu, Ormolu, Brittany, and Floskell configurations, fixtures, and runner |
