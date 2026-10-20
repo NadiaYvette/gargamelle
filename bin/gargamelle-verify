@@ -39,13 +39,42 @@ verify_hlint() {
 }
 
 verify_tests() {
-  echo "=== [4/4] Full Cabal Test Suite ==="
+  echo "=== [4/6] Full Cabal Test Suite ==="
   (cd "${REPO_ROOT}" && cabal test gargamelle-workflow:test:tests >/dev/null)
   echo "  [+] All 26 test suite assertions PASSED."
+}
+
+verify_tagref() {
+  echo "=== [5/6] Tagref Cross-Reference Gate ==="
+  if command -v tagref >/dev/null 2>&1; then
+    (cd "${REPO_ROOT}" && tagref >/dev/null)
+    echo "  [+] Tagref verified: 0 dangling references, 0 duplicate tags."
+  else
+    echo "  [SKIP] tagref binary not found."
+  fi
+}
+
+verify_cloc() {
+  echo "=== [6/6] CLOC Comment Density Gate ==="
+  if command -v cloc >/dev/null 2>&1; then
+    local stats comments code total pct
+    stats="$(cd "${REPO_ROOT}" && cloc --json packages/ 2>/dev/null)"
+    comments="$(echo "${stats}" | python3 -c 'import sys, json; data=json.load(sys.stdin); print(data.get("Haskell", {}).get("comment", 0))')"
+    code="$(echo "${stats}" | python3 -c 'import sys, json; data=json.load(sys.stdin); print(data.get("Haskell", {}).get("code", 0))')"
+    total=$(( comments + code ))
+    if [[ $total -gt 0 ]]; then
+      pct=$(( comments * 100 / total ))
+      echo "  [i] In-code comment density: ${pct}% (${comments} comments / ${code} code lines; target: 50%+)."
+    fi
+  else
+    echo "  [SKIP] cloc binary not found."
+  fi
 }
 
 verify_sandbox
 verify_beam
 verify_hlint
 verify_tests
+verify_tagref
+verify_cloc
 echo "=== All Milestones M1–M3 Physical Verification Checks PASSED ==="

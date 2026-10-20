@@ -3,7 +3,7 @@ SPDX-License-Identifier: EUPL-1.2
 -->
 # Staged Documentation Roll-Out Plan
 
-**Status:** PLAN · v1.0 · 2026-10-20  
+**Status:** PLAN · v1.1 · 2026-10-21  
 **Authors:** Nadia Yvette Chambers & Antigravity (Google / gemini-3.8-pro)  
 **Parent Strategy:** [`notes/DOC_STRATEGY.md`](notes/DOC_STRATEGY.md)  
 **Reference Specification:** [`FRAMEWORK_RECOMMENDATIONS.md`](FRAMEWORK_RECOMMENDATIONS.md)  
@@ -14,13 +14,13 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 1. Executive Summary & Roll-Out Philosophy
 
-This document outlines the **Staged Documentation Roll-Out Plan** for the Gargamelle suite.
+This document defines the **Staged Documentation Roll-Out Plan** for the Gargamelle suite.
 
-If *"roll-out"* sounds incongruously informal in an enterprise or scholarly setting, *"implementation"* sounds ontologically odder when applied to prose, pedagogical monographs, and mathematical treatises. Documentation is not simply an implementation artifact; it is an epistemic interface between mathematical theory, systems engineering, human developers, and autonomous agents.
+If *"roll-out"* sounds incongruously informal in an enterprise or scholarly setting, *"implementation"* sounds ontologically odder when applied to prose, pedagogical monographs, and mathematical treatises. Documentation is not simply an implementation artifact; it is an epistemic interface connecting mathematical theory, systems engineering, human developers, and autonomous agents.
 
-### The Sequencing Strategy: Easiest First, Treatise Grounded in Consumers
+### The Sequencing Strategy: Easiest First, Progressive Depth, Treatise Grounded in Consumers
 
-The core thesis of this roll-out plan is **progressive disclosure and immediate forge verifiability**:
+The core thesis of this roll-out plan is **progressive disclosure, immediate forge verifiability, and mechanical cross-reference integrity**:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -29,29 +29,38 @@ The core thesis of this roll-out plan is **progressive disclosure and immediate 
 │   • Align NEWBIE_GUIDE, TUTORIAL, MAINTAINER_GUIDE, and INDEX.md       │
 │   • Immediate visual feedback on GitHub, GitCode, Disroot, Framagit    │
 ├────────────────────────────────────────────────────────────────────────┤
-│ PHASE 2: Standardized Package Monographs (11 Packages)                 │
+│ PHASE 2: Standardized Package Monographs & In-Code Architecture        │
 │   • Uniform 6-part anatomical template in packages/gargamelle-*/README │
-│   • High structure, bounded scope, immediate per-package forge landing │
-│   • Ordered by architectural tier (Substrate → Logics → Sheaf/Workflow)│
+│   • GHC Notes architecture with mechanical tagref validation           │
+│   • High comment density target (50%+) via cloc across packages/*/src  │
+│   • Haddock standards: Unicode math, law citations, worked examples    │
+│   • Ordered by architectural tier (Substrates → Logics → Sheaves)      │
 ├────────────────────────────────────────────────────────────────────────┤
-│ PHASE 3: Programmatic Verification Harness & Tooling                   │
-│   • Typecheck literate Haskell code blocks via cabal-docspec / unlit   │
-│   • mdBook scaffold with MathJax and Mermaid support                   │
-│   • Hyperlinked Haddock cross-reference verification                   │
+│ PHASE 3: Programmatic Verification Harness & Multi-GHC Tooling         │
+│   • Multi-GHC literate doc-testing (GHC 9.6–9.14 via docspec/unlit)   │
+│   • Mechanical tagref zero-dangling-reference verification             │
+│   • cloc comment density tracking in physical verification harness     │
+│   • mdBook scaffold with MathJax, Mermaid, and Haddock cross-links     │
 ├────────────────────────────────────────────────────────────────────────┤
-│ PHASE 4: The 5-Volume Foundational Treatise (Highest Depth)            │
-│   • Authored concurrently with consumer libraries (especially          │
-│     sarutahiko) to ground abstract theory in real synthesis campaigns  │
-│   • 24 chapters across Institutions, Observability, Sheaves, Effects,  │
-│     and CEGIS                                                          │
+│ PHASE 4: The 5-Volume Foundational Treatise (Package Clusters)         │
+│   • Comprehensive exposition of Gargamelle package clusters & theory   │
+│   • Co-developed with sarutahiko as the primary reference consumer     │
+│   • Designed for modular extensibility by third-party consumers        │
+│   • Bidirectional interlinking: in-code GHC Notes ↔ mdBook chapters    │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **Easiest Parts First (Phases 1 & 2):**  
-   We begin by establishing clean, high-visibility markdown documents at the root and within each of the 11 package directories. By pushing these immediately to our five public git hosting mirrors (`github`, `gitcode`, `disroot`, `framagit`, and `rad`), we can visually inspect formatting, typography, MathJax formulas, Mermaid diagrams, tables, and link resolutions across distinct web frontends without waiting for hundreds of pages of textbook prose.
+   We begin by establishing clean, high-visibility markdown documents at the repository root and within each of the 11 package directories. Pushing these immediately to our five public git hosting mirrors (`github`, `gitcode`, `disroot`, `framagit`, and `rad`) allows us to visually inspect formatting, typography, MathJax formulas, Mermaid diagrams, tables, and link resolutions across distinct web frontends without waiting for hundreds of pages of textbook prose.
 
-2. **Heavy Pedagogical Prose Sequenced Concurrently with Consumers (Phase 4):**  
-   The most voluminous and demanding component—the 5-volume foundational textbook in `docs/textbook/`—is deliberately deferred to Phase 4. Writing textbook-level pedagogical material in a vacuum leads to sterile, speculative exposition. Instead, authoring these volumes **concurrently with consumer projects (principally [`sarutahiko`](~/src/sarutahiko))** ensures that every mathematical definition, categorical diagram, sheaf coboundary computation, and CEGIS loop is grounded in real, empirical autonomous coding campaigns.
+2. **In-Code Documentation Architecture & High Comment Density (Phase 2):**  
+   The intrinsic mathematical difficulty of Gargamelle (Goguen-Burstall institutions, proarrow equipments, cellular sheaves, coboundary operators $\delta^0$, Store comonad diffusions, unboxed variant jump tables, and Bubblewrap Linux namespaces) demands exceptional explanatory depth. Following `polytropos`, we adopt a **50%+ comment density target** (measured via `cloc packages/`). This density grows naturally as a by-product of formal GHC Notes (`{- Note [...] ~~~~ [tag:<slug>] -}`), `tagref` cross-referencing, law statements, and bidirectional links leading back to the `mdBook`.
+
+3. **Multi-GHC Literate Verification (Phase 3):**  
+   Rather than locking doc-testing to a single compiler version, literate code snippets in documentation and package monographs are validated across our complete compiler matrix (GHC 9.6, 9.8, 9.10, 9.12, and 9.14), ensuring code examples remain portable and robust against compiler drift.
+
+4. **Treatise Grounded in Package Clusters and Consumer Perspectives (Phase 4):**  
+   The 5-volume foundational textbook in `docs/textbook/` is organized directly around Gargamelle's package clusters and theoretical pillars. It is developed concurrently with real consumer integrations—principally [`sarutahiko`](~/src/sarutahiko)—which provides concrete, empirical case studies of an autonomous coding orchestrator invoking Gargamelle, while preserving uncoupled generality for other current and future consumers.
 
 ---
 
@@ -65,7 +74,14 @@ Gargamelle mirrors across five distinct git hosting environments, each with its 
 | **`gitcode`** | [`gitcode.com/NadiaYvette/gargamelle`](https://gitcode.com/NadiaYvette/gargamelle) | GitCode GFM Dialect | KaTeX / MathJax | Mermaid codeblocks | UTF-8 mathematical symbols ($\amalg, \times, \delta^0, \models$), table column wrapping. |
 | **`disroot`** | [`git.disroot.org/NadiaYvette/gargamelle`](https://git.disroot.org/NadiaYvette/gargamelle) | Forgejo Markdown Engine | KaTeX syntax | Mermaid codeblocks | Monospace code styling, relative hyperlink paths to `docs/` and `packages/`. |
 | **`framagit`** | [`framagit.org/NadiaYvette/gargamelle`](https://framagit.org/NadiaYvette/gargamelle) | GitLab Flavored Markdown (GLFM) | GLFM Math (`$` or `math` block) | GitLab Mermaid parser | Table borders, codeblock copy buttons, cross-repository references. |
-| **`rad`** | `rad://zqykaqjnoA8a1harMdQVsigC7VwH` | Radicle Heartwood / Terminal | Pure ASCII / UTF-8 Markdown | Plain text fallback | Pure terminal markdown readability (`rad patch`, `rad show`, text browser). |
+| **`rad`** | `rad://zqykaqjnoA8a1harMdQVsigC7VwH` | Radicle Heartwood / Web Gateway | Pure ASCII / UTF-8 Markdown | Plain text fallback | Pure terminal markdown (`rad show`), plus HTTP seed node web explorers (see below). |
+
+### Remark on Viewing Radicle in a Web Browser
+While Radicle is fundamentally a peer-to-peer git gossip protocol over Heartwood (navigated locally via terminal commands such as `rad show`, `rad patch`, and `git-remote-rad`), repositories pushed to Radicle seed nodes **can be viewed in a web browser** via public or private seed web gateways:
+1. **Public Seed Node Web Explorers:** Public seed nodes provide HTTP web gateways that render the repository tree, commit history, and Markdown files in a browser:
+   - Web URL for Gargamelle: [`https://radicle.network/nodes/iris.radicle.network/rad:zqykaqjnoA8a1harMdQVsigC7VwH`](https://radicle.network/nodes/iris.radicle.network/rad:zqykaqjnoA8a1harMdQVsigC7VwH)
+   - Alternative seed web gateway: `https://app.radicle.xyz/nodes/<seed-domain>/rad:zqykaqjnoA8a1harMdQVsigC7VwH`
+2. **Local Browser Viewing via `radicle-httpd`:** Developers can launch a local Radicle HTTP gateway daemon (`radicle-httpd` or `rad-web`) on `http://127.0.0.1:8080` to browse local Radicle repositories in any desktop browser completely offline.
 
 ### Universal Formatting Rules for Maximum Portability
 - **Fenced Math:** Avoid obscure LaTeX packages; restrict math to standard TeX macros supported universally by both MathJax and KaTeX ($B \amalg_C W$, $A \times_E B$, $\delta^0 : C^0 \to C^1$, $H^1 = \operatorname{coker} \delta^0$).
@@ -83,7 +99,7 @@ Gargamelle mirrors across five distinct git hosting environments, each with its 
 - [x] **Milestone 1.1: Root `README.md` Forge Polish**
   - **Artifact:** [`README.md`](../README.md)
   - **Content:** Architectural tier map, 11-package register, Rabelaisian naming rationale, plain-English conceptual explanations, and deterministic verification quickstarts.
-  - **Forge Verification:** Confirmed rendering of ASCII diagrams, math notation, and package table across GitHub, GitCode, Disroot, and Framagit.
+  - **Forge Verification:** Confirmed rendering of ASCII diagrams, math notation, and package table across GitHub, GitCode, Disroot, Framagit, and Radicle.
 
 - [ ] **Milestone 1.2: Core Orientation Guides Polish**
   - **Artifacts:**
@@ -99,17 +115,50 @@ Gargamelle mirrors across five distinct git hosting environments, each with its 
 
 ---
 
-### Phase 2: Standardized Package Monographs (11 Packages)
+### Phase 2: Standardized Package Monographs & In-Code Architecture (11 Packages)
 
-**Goal:** Provide an immediate landing document (`README.md`) inside each package directory under `packages/gargamelle-*`, so that navigating into any package on git hosting mirrors displays a self-contained, authoritative monograph.
+**Goal:** Provide an immediate landing document (`README.md`) inside each package directory under `packages/gargamelle-*`, accompanied by deep in-code GHC Notes, `tagref` cross-referencing, and an elevated comment density target.
 
-Each monograph adheres strictly to the **6-Part Anatomical Template** defined in [`FRAMEWORK_RECOMMENDATIONS.md`](FRAMEWORK_RECOMMENDATIONS.md) §4:
-1. Executive Summary & Problem Framing
-2. Mathematical Foundations & Theoretical Invariants
-3. Module Architecture & Repertoire Breadth
-4. Executable Worked Examples (compilable, literate code blocks)
-5. Integration Points & Subsystem Boundaries (Tier DAG)
-6. Diagnostic & Troubleshooting Guide
+#### 1. Uniform 6-Part Anatomical Monograph Template
+Every package in `packages/gargamelle-*` contains a standardized `README.md` adhering to the template from [`FRAMEWORK_RECOMMENDATIONS.md`](FRAMEWORK_RECOMMENDATIONS.md) §4:
+1. **Executive Summary & Problem Framing:** Mathematical/systems problem addressed, domain necessity.
+2. **Mathematical Foundations & Theoretical Invariants:** Categorical diagrams, sheaf restrictions, lattice orders, formal laws.
+3. **Module Architecture & Repertoire Breadth:** Exported modules, primary typeclasses, key data types.
+4. **Executable Worked Examples:** Compilable literate Haskell code snippets with explicit imports.
+5. **Integration Points & Subsystem Boundaries:** Tier DAG position, upstream dependencies, downstream consumers.
+6. **Diagnostic & Troubleshooting Guide:** Type mismatch patterns, SMT timeouts, boundary failures, fix recipes.
+
+#### 2. In-Code GHC Notes Architecture (`tagref`-Validated)
+Adopt the battle-tested GHC Notes pattern formalized in `polytropos`:
+- Major architectural decisions, categorical proofs, and memory physics are preserved in top-level non-Haddock block comments:
+  ```haskell
+  {- Note [Knaster-Tarski Harmonic Consensus Diffusion]
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  [tag:<note-harmonic-consensus>]
+  Iterating cellular diffusion over the Store comonad evaluates local meet
+  semi-lattice operations...
+  -}
+  ```
+- Any function, data constructor, or test asserting this invariant includes a directional tagref pointer:
+  ```haskell
+  -- See Note [Knaster-Tarski Harmonic Consensus Diffusion] [ref:<note-harmonic-consensus>]
+  ```
+- **Bidirectional Linking with `mdBook`:** Notes defined in code can be referenced directly within package monographs and `docs/textbook/` chapters via `[ref:<note-slug>]`, and code comments cite specific treatise chapters.
+
+#### 3. Comment Density Target (50%+)
+- The sheer density of higher categories, proarrow equipments, algebraic sheaves, and container isolation requires deep explanatory prose to prevent code from becoming opaque.
+- We establish an explicit guideline of **50%+ comment density** across `packages/*/src/` (measured via `cloc packages/`).
+- Comment density expands organically through:
+  - Theoretical GHC Notes and rationale blocks.
+  - Formal typeclass law statements (e.g. Galois connection bounds, functoriality of sentences, coboundary linearity).
+  - Module header roadmaps and ASCII commutative diagrams.
+  - Bidirectional cross-references linking code back to the `mdBook`.
+
+#### 4. Polytropos Haddock Conventions
+- Full explanatory paragraphs with zero filler: invariants, failure conditions, time/space complexity, worked snippets.
+- Inline Unicode math ($\amalg, \times, \delta^0, \models, \ker, \operatorname{coker}, \trianglelefteq$).
+- Module introductions required for all exposed modules.
+- Haddock flags: `--hyperlinked-source --quickjump` enabled everywhere.
 
 #### Authorship Batches (Sequenced by Architectural Tier)
 
@@ -134,82 +183,94 @@ Each monograph adheres strictly to the **6-Part Anatomical Template** defined in
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-- [ ] **Milestone 2.1: Batch 2A Monographs (Substrates & Semantics)**
-  - `packages/gargamelle-logic/README.md`: Order-theoretic contracts (`Algebra.Lattice.Op`), contravariant Galois connections, and syntax ASTs.
-  - `packages/gargamelle-effect/README.md`: Kernmantle Arrow Rope pipelines, $O(1)$ variant jump-table routing, profunctor optics, and Coyoneda fusion.
-  - `packages/gargamelle-model/README.md`: 100% observable morphisms (`ObsMor`), Free `VerifierAST`, `Divisible`/`Decidable` trees, and inspection.
-  - `packages/gargamelle-evidence/README.md`: Concrete syntax trees via `hs-tree-sitter`, semantic diffing via `tree-diff`, and similarity metrics.
+- [ ] **Milestone 2.1: Batch 2A Monographs & Notes (Substrates & Semantics)**
+  - `packages/gargamelle-logic`: Order-theoretic contracts (`Algebra.Lattice.Op`), contravariant Galois connections, and syntax ASTs. Initial GHC Notes for lattice inversions.
+  - `packages/gargamelle-effect`: Kernmantle Arrow Rope pipelines, $O(1)$ variant jump-table routing, profunctor optics, and Coyoneda fusion. GHC Notes for jump-table routing physics.
+  - `packages/gargamelle-model`: 100% observable morphisms (`ObsMor`), Free `VerifierAST`, `Divisible`/`Decidable` trees, and inspection. GHC Notes for closure elimination.
+  - `packages/gargamelle-evidence`: Concrete syntax trees via `hs-tree-sitter`, semantic diffing via `tree-diff`, and similarity metrics.
 
-- [ ] **Milestone 2.2: Batch 2B Monographs (Logics & Host Infrastructure)**
-  - `packages/gargamelle-core/README.md`: Goguen-Burstall Institutions, pushout feature weaving ($B \amalg_C W$), pullback protocol discovery ($A \times_E B$), and colimits.
-  - `packages/gargamelle-fol/README.md`: First-order logic, hyperdoctrines, refinement calculi, and streaming Z3 SMT-LIB2 pipe.
-  - `packages/gargamelle-equational/README.md`: Equational logic institution and presheaf Double-Pushout (DPO) algebraic rewriting.
-  - `packages/gargamelle-sandbox/README.md`: Linux container namespace isolation via Bubblewrap (`/usr/bin/bwrap`), resource limits, and filesystem scoping.
-  - `packages/gargamelle-persistence/README.md`: Beam SQLite persistence (`EvidenceRecordT`, `CounterexampleRecordT`, `RunRecordT`), transactional locking, and indexing.
+- [ ] **Milestone 2.2: Batch 2B Monographs & Notes (Logics & Host Infrastructure)**
+  - `packages/gargamelle-core`: Goguen-Burstall Institutions, pushout feature weaving ($B \amalg_C W$), pullback protocol discovery ($A \times_E B$), and colimits. GHC Notes for satisfaction invariance.
+  - `packages/gargamelle-fol`: First-order logic, hyperdoctrines, refinement calculi, and streaming Z3 SMT-LIB2 pipe. GHC Notes for SMT piping and model extraction.
+  - `packages/gargamelle-equational`: Equational logic institution and presheaf Double-Pushout (DPO) algebraic rewriting. GHC Notes for DPO gluing conditions.
+  - `packages/gargamelle-sandbox`: Linux container namespace isolation via Bubblewrap (`/usr/bin/bwrap`), resource limits, and filesystem scoping. GHC Notes for namespace isolation boundaries.
+  - `packages/gargamelle-persistence`: Beam SQLite persistence (`EvidenceRecordT`, `CounterexampleRecordT`, `RunRecordT`), transactional locking, and indexing.
 
-- [ ] **Milestone 2.3: Batch 2C Monographs (Topology & Autonomous Workflow)**
-  - `packages/gargamelle-sheaf/README.md`: 1D Cell complexes, cellular sheaves, Store comonad cellular diffusion, Knaster-Tarski consensus, and $H^1$ homological fault localization.
-  - `packages/gargamelle-workflow/README.md`: Crem Mealy state machines (`singletons-base`), sheaf-gated CEGIS loop (`runSheafGatedCEGIS`), and automated repair guidance.
+- [ ] **Milestone 2.3: Batch 2C Monographs & Notes (Topology & Autonomous Workflow)**
+  - `packages/gargamelle-sheaf`: 1D Cell complexes, cellular sheaves, Store comonad cellular diffusion, Knaster-Tarski consensus, and $H^1$ homological fault localization. GHC Notes for sheaf coboundary $\delta^0$ and $H^1$ localization.
+  - `packages/gargamelle-workflow`: Crem Mealy state machines (`singletons-base`), sheaf-gated CEGIS loop (`runSheafGatedCEGIS`), and automated repair guidance. GHC Notes for Mealy state machine transitions.
 
 ---
 
-### Phase 3: Programmatic Verification Harness & Tooling Automation
+### Phase 3: Programmatic Verification Harness & Multi-GHC Tooling Automation
 
-**Goal:** Mechanically eliminate documentation drift by integrating automated test suites that typecheck all markdown code snippets and validate links on CI.
+**Goal:** Mechanically eliminate documentation drift and cross-reference rot by integrating automated test suites into CI and `./bin/gargamelle-verify`.
 
-- [ ] **Milestone 3.1: Literate Markdown Doc-Testing (`cabal-docspec` / `markdown-unlit`)**
-  - Configure a dedicated Cabal test target or script (`./bin/gargamelle-doccheck`) that extracts all Haskell code blocks from package READMEs, tutorials, and textbook chapters.
-  - Enforce that code blocks compile cleanly under GHC 9.14 with `-Wall -Werror`.
-  - Enforces `DOC_STRATEGY.md` §4: *Code wins at runtime; notes corrected regardless.* Stale documentation becomes a hard compilation failure.
+- [ ] **Milestone 3.1: Multi-GHC Literate Markdown Verification (`cabal-docspec` / `markdown-unlit`)**
+  - Configure `./bin/gargamelle-doccheck` to extract and typecheck all Haskell code blocks in package READMEs, tutorials, and textbook chapters.
+  - Enforce compatibility across the entire supported GHC matrix (GHC 9.6, 9.8, 9.10, 9.12, 9.14) under `-Wall -Werror`, ensuring code examples do not rely on version-brittle language features.
+  - Enforces `DOC_STRATEGY.md` §4: *Code wins at runtime; notes corrected regardless.* Stale documentation fails the build.
 
-- [ ] **Milestone 3.2: Deterministic Intra-Corpus Link & Anchor Verification**
-  - Implement a lightweight link verification check validating that every markdown hyperlink (`[text](path.md#anchor)`) resolves to a physical file and header.
+- [ ] **Milestone 3.2: Mechanical `tagref` Integrity Check**
+  - Integrate `tagref` into `./bin/gargamelle-verify` and CI.
+  - Validate that all `[tag:<slug>]` definitions and `[ref:<slug>]` references across Haskell code, package monographs, and textbook chapters resolve with **0 dangling references** and **0 duplicate tags**.
 
-- [ ] **Milestone 3.3: `mdBook` Local Site Scaffold**
+- [ ] **Milestone 3.3: `cloc` Comment Density Audit**
+  - Add an automated check in `./bin/gargamelle-verify` evaluating comment density via `cloc packages/`.
+  - Track progress toward and maintain the **50%+ comment density target** across all 11 packages.
+
+- [ ] **Milestone 3.4: Deterministic Intra-Corpus Link & Anchor Verification**
+  - Validate that every relative markdown hyperlink (`[text](path.md#anchor)`) resolves to a physical file and header.
+
+- [ ] **Milestone 3.5: `mdBook` Local Site Scaffold**
   - Initialize `docs/textbook/book.toml` with `mdbook-mermaid` and MathJax support for offline reading and local HTML book rendering.
 
-- [ ] **Milestone 3.4: Automated Haddock Hyperlinking & Cross-Linking**
-  - Maintain `./bin/gargamelle-haddock` generating hyperlinked source Haddock trees (`--hyperlinked-source --quickjump`) across all 11 packages.
+- [ ] **Milestone 3.6: Automated Haddock Hyperlinking & Cross-Linking**
+  - Maintain `./bin/gargamelle-haddock` generating hyperlinked source Haddock trees (`--hyperlinked-source --quickjump`) cross-linking all 11 packages.
 
 ---
 
-### Phase 4: The 5-Volume Foundational Treatise (Concurrent with `sarutahiko`)
+### Phase 4: The 5-Volume Foundational Treatise (Package Clusters & Consumer Perspectives)
 
 **Goal:** Author the comprehensive 24-chapter textbook curriculum (`docs/textbook/`) providing the rigorous mathematical, philosophical, and architectural background required to understand and extend Gargamelle.
 
-#### Why Co-Development with `sarutahiko` Is Mandatory
-Writing textbook-level exposition on higher categories, cellular sheaves, and autonomous CEGIS requires grounded, real-world case studies. [`sarutahiko`](~/src/sarutahiko) serves as the primary real-world consumer of `gargamelle`, utilizing its institutions, verifiers, and sandboxed execution to synthesize patches for production systems. 
-
-Authoring the textbook concurrently with `sarutahiko` ensures that:
-- Every theorem has an empirical benchmark in `sarutahiko`.
-- Every SMT example reflects real automated bug-repair queries.
-- Every sheaf coboundary diagram reflects real multi-service architectural boundaries.
-- The prose remains vital, concrete, and battle-tested.
+#### Architecture: Gargamelle Package Clusters + Consumer Perspectives
+The 5 volumes correspond directly to functional clusters of Gargamelle packages and their governing mathematical disciplines. Each volume thoroughly develops its subsystem in its own right, while presenting [`sarutahiko`](~/src/sarutahiko) as the **primary reference consumer and motivating exemplar**—demonstrating how an autonomous programming orchestrator concretely instantiates these modules—while maintaining clean modular uncoupling so that **other current and future consumers** (e.g. theorem provers, compiler frontends, distributed contract engines, multi-agent systems) find clear integration boundaries.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │ VOLUME I: Abstract Model Theory & Categorical Institutions             │
-│   • Grounded in: sarutahiko's multi-language AST translation & syntax  │
+│   • Component: gargamelle-core                                         │
+│   • Consumer View: sarutahiko's multi-language syntax & aspect weaving │
+│   • General Consumers: Heterogeneous verification engines, translators │
 │   • Chapters: Heterogeneous Logics, Signatures/Sentences/Models,       │
 │               Satisfaction Invariance, Comorphisms, Pushout Weaving    │
 ├────────────────────────────────────────────────────────────────────────┤
 │ VOLUME II: Reified Observability & Proof Synthesis                     │
-│   • Grounded in: sarutahiko's verifier synthesis & Z3 SMT pipes        │
+│   • Components: gargamelle-model, gargamelle-logic, gargamelle-fol     │
+│   • Consumer View: sarutahiko's verifier synthesis & Z3 SMT pipes      │
+│   • General Consumers: Symbolic verifiers, SMT translation pipelines   │
 │   • Chapters: Tyranny of Closures, ObsMor Category, Free VerifierAST,  │
 │               Dual AG Contracts (Op Lattice), Host Z3 SMT Pipe         │
 ├────────────────────────────────────────────────────────────────────────┤
 │ VOLUME III: Applied Algebraic Topology & Cellular Sheaves              │
-│   • Grounded in: sarutahiko's multi-module architectures & boundaries  │
+│   • Component: gargamelle-sheaf                                        │
+│   • Consumer View: sarutahiko's multi-module architectures & boundaries│
+│   • General Consumers: Distributed consensus, network fault analyzers │
 │   • Chapters: Cell Complexes, Sheaves & Stalks, Store Comonad,         │
 │               Knaster-Tarski Diffusion, Coboundary δ⁰ & H¹ Obstructions│
 ├────────────────────────────────────────────────────────────────────────┤
 │ VOLUME IV: Effectful Pipeline Architecture & Substrate Invariants      │
-│   • Grounded in: sarutahiko's pipeline engine & high-throughput loops  │
+│   • Components: gargamelle-effect, polytropos, kernmantle              │
+│   • Consumer View: sarutahiko's high-throughput orchestration engine   │
+│   • General Consumers: High-performance data pipelines, extensible ADTs│
 │   • Chapters: Kernmantle Arrow Rope, Polytropos Flat Rep, O(1) Router, │
 │               Profunctor Optics, Coyoneda Pipeline Fusion              │
 ├────────────────────────────────────────────────────────────────────────┤
 │ VOLUME V: Grounded Verification & Autonomous CEGIS                     │
-│   • Grounded in: sarutahiko's autonomous programming campaigns         │
+│   • Components: gargamelle-sandbox, gargamelle-persistence, workflow   │
+│   • Consumer View: sarutahiko's autonomous patch synthesis campaigns   │
+│   • General Consumers: Automated repair bots, sandboxed code executors │
 │   • Chapters: Bubblewrap Sandboxing, Beam SQLite Evidence Persistence, │
 │               Crem Mealy Automata, The End-to-End Sheaf CEGIS Loop     │
 └────────────────────────────────────────────────────────────────────────┘
@@ -219,23 +280,33 @@ Authoring the textbook concurrently with `sarutahiko` ensures that:
 
 - [ ] **Milestone 4.1: Volume I — Foundations of Abstract Model Theory & Categorical Institutions**  
   *Path: `docs/textbook/vol1-institutions/`*  
-  Co-developed with `sarutahiko`'s cross-language interface specifications. Explains why hard-coded syntax fails, formalizes the Goguen-Burstall satisfaction condition, and proves pushout feature amalgamation ($B \amalg_C W$).
+  *Core Package:* `gargamelle-core`.  
+  *Exemplar Perspective:* How `sarutahiko` weaves cross-language module contracts.  
+  *Content:* Explains why hard-coded syntax fails, formalizes the Goguen-Burstall satisfaction condition, and proves pushout feature amalgamation ($B \amalg_C W$) and colimit delta factorization.
 
 - [ ] **Milestone 4.2: Volume II — Reified Observability & Proof Synthesis**  
   *Path: `docs/textbook/vol2-observability/`*  
-  Co-developed with `sarutahiko`'s verifier generation engine. Eliminates black-box functions, constructs `ObsMor` and `VerifierAST`, develops dual assume-guarantee contracts via `Algebra.Lattice.Op`, and streams typed SMT-LIB2 to Z3.
+  *Core Packages:* `gargamelle-model`, `gargamelle-logic`, `gargamelle-fol`.  
+  *Exemplar Perspective:* How `sarutahiko` synthesizes verifiable specifications and queries host Z3.  
+  *Content:* Eliminates black-box functions, constructs `ObsMor` and `VerifierAST`, develops dual assume-guarantee contracts via `Algebra.Lattice.Op`, and streams typed SMT-LIB2 over Linux pipes.
 
 - [ ] **Milestone 4.3: Volume III — Applied Algebraic Topology & Cellular Sheaves**  
   *Path: `docs/textbook/vol3-sheaves/`*  
-  Co-developed with `sarutahiko`'s architectural boundary analysis. Introduces 1D cell complexes, restriction maps, the Store comonad on graph complexes, Knaster-Tarski diffusion, and $H^1$ homological obstruction localization.
+  *Core Package:* `gargamelle-sheaf`.  
+  *Exemplar Perspective:* How `sarutahiko` analyzes cross-module architectural boundaries and localizes faults.  
+  *Content:* Introduces 1D cell complexes, restriction maps, the Store comonad on graph complexes, Knaster-Tarski diffusion, and $H^1$ homological obstruction localization (`locateObstructions`).
 
 - [ ] **Milestone 4.4: Volume IV — Effectful Pipeline Architecture & Substrate Invariants**  
   *Path: `docs/textbook/vol4-effects/`*  
-  Co-developed with `sarutahiko`'s runtime execution pipeline. Demonstrates Kernmantle arrow composition, Polytropos flat `Rep` memory layouts, $O(1)$ variant jump-table routing, and copy-on-write profunctor optics.
+  *Core Packages:* `gargamelle-effect`, with `polytropos` and `kernmantle`.  
+  *Exemplar Perspective:* How `sarutahiko` executes high-throughput effectful Arrow Rope pipelines.  
+  *Content:* Demonstrates Kernmantle arrow composition, Polytropos flat `Rep` memory layouts, $O(1)$ variant jump-table routing, copy-on-write profunctor optics, and Coyoneda pipeline fusion.
 
 - [ ] **Milestone 4.5: Volume V — Grounded Verification & Autonomous CEGIS**  
   *Path: `docs/textbook/vol5-cegis/`*  
-  Co-developed with `sarutahiko`'s full autonomous patch-synthesis campaigns. Covers Linux container isolation via Bubblewrap, Beam SQLite run tracking, verified Mealy state machines, and the complete sheaf-gated CEGIS synthesis loop.
+  *Core Packages:* `gargamelle-sandbox`, `gargamelle-persistence`, `gargamelle-workflow`.  
+  *Exemplar Perspective:* How `sarutahiko` runs full autonomous repair campaigns.  
+  *Content:* Covers Linux container isolation via Bubblewrap, Beam SQLite run tracking, verified Mealy state machines, and the complete sheaf-gated CEGIS synthesis loop (`runSheafGatedCEGIS`).
 
 ---
 
@@ -243,7 +314,7 @@ Authoring the textbook concurrently with `sarutahiko` ensures that:
 
 This living register tracks the status of every planned documentation artifact across all roll-out phases:
 
-| Artifact Path | Phase | Status | Primary Mirror Focus | Co-Development Anchor |
+| Artifact Path | Phase | Status | Primary Mirror Focus | Subsystem / Consumer Anchor |
 | :--- | :---: | :---: | :--- | :--- |
 | `README.md` | Phase 1 | **implemented** | All Mirrors (`github`, `gitcode`, `disroot`, `framagit`, `rad`) | Gargamelle Suite Architecture |
 | `docs/INDEX.md` | Phase 1 | **live** | GitHub & Forgejo navigation | Corpus Inventory |
@@ -262,13 +333,16 @@ This living register tracks the status of every planned documentation artifact a
 | `packages/gargamelle-persistence/README.md`| Phase 2 | **draft** | In-directory monograph rendering | `gargamelle-persistence`, Beam SQLite |
 | `packages/gargamelle-sheaf/README.md` | Phase 2 | **draft** | In-directory monograph rendering | `gargamelle-sheaf` |
 | `packages/gargamelle-workflow/README.md`| Phase 2 | **draft** | In-directory monograph rendering | `gargamelle-workflow`, Crem |
-| `./bin/gargamelle-doccheck` | Phase 3 | **planned** | Deterministic CI Gate | Literate code verification |
+| In-Code GHC Notes (`tagref`-validated) | Phase 2 | **draft** | Codebase navigation & IDEs | In-code invariants across all 11 packages |
+| Comment Density Target (50%+) | Phase 2 | **draft** | `cloc packages/` audit | Mathematical & architectural explanatory depth |
+| `./bin/gargamelle-doccheck` | Phase 3 | **planned** | Deterministic CI Gate | Multi-GHC literate code verification (9.6–9.14) |
+| Mechanical `tagref` Verification | Phase 3 | **planned** | Deterministic CI Gate | Zero dangling references / duplicate tags |
 | `docs/textbook/book.toml` | Phase 3 | **planned** | mdBook offline site | Local HTML rendering |
-| `docs/textbook/vol1-institutions/` | Phase 4 | **planned** | Academic / Scholarly readers | `sarutahiko` Interface Synthesis |
-| `docs/textbook/vol2-observability/` | Phase 4 | **planned** | Academic / Scholarly readers | `sarutahiko` Verifier Synthesis |
-| `docs/textbook/vol3-sheaves/` | Phase 4 | **planned** | Academic / Scholarly readers | `sarutahiko` Architecture Synthesis |
-| `docs/textbook/vol4-effects/` | Phase 4 | **planned** | Academic / Scholarly readers | `sarutahiko` Engine Infrastructure |
-| `docs/textbook/vol5-cegis/` | Phase 4 | **planned** | Academic / Scholarly readers | `sarutahiko` CEGIS Campaigns |
+| `docs/textbook/vol1-institutions/` | Phase 4 | **planned** | Academic / Scholarly readers | `gargamelle-core` / `sarutahiko` Interface Synthesis |
+| `docs/textbook/vol2-observability/` | Phase 4 | **planned** | Academic / Scholarly readers | `model`+`fol` / `sarutahiko` Verifier Synthesis |
+| `docs/textbook/vol3-sheaves/` | Phase 4 | **planned** | Academic / Scholarly readers | `gargamelle-sheaf` / `sarutahiko` Arch Synthesis |
+| `docs/textbook/vol4-effects/` | Phase 4 | **planned** | Academic / Scholarly readers | `effect`+`polytropos` / `sarutahiko` Engine Infrastructure |
+| `docs/textbook/vol5-cegis/` | Phase 4 | **planned** | Academic / Scholarly readers | `workflow`+`sandbox` / `sarutahiko` CEGIS Campaigns |
 
 ---
 
@@ -276,9 +350,11 @@ This living register tracks the status of every planned documentation artifact a
 
 To ensure rapid human feedback and maintain zero-defect standards across all git mirrors:
 
-1. **Local Authoring & Deterministic Gate:**
+1. **Local Authoring & Deterministic Gates:**
    - Draft document artifacts in small, cohesive batches.
    - Run `./bin/gargamelle-verify` to ensure zero compiler warnings, zero HLint hints, and 100% test pass.
+   - Run `tagref` to ensure no broken cross-references.
+   - Monitor comment density via `cloc packages/`.
    - Ensure all relative links resolve within the local tree.
 
 2. **Commit Conventions & Attribution:**
@@ -292,9 +368,9 @@ To ensure rapid human feedback and maintain zero-defect standards across all git
      git push gitcode master
      git push framagit master
      git push disroot master
-     rad sync
+     git push rad master && rad sync
      ```
 
 4. **Visual Web Inspection & Human Feedback:**
-   - Human maintainer inspects the rendered Markdown on GitHub, GitCode, Disroot, and Framagit web interfaces.
+   - Human maintainer inspects the rendered Markdown on GitHub, GitCode, Disroot, Framagit, and Radicle web explorer interfaces.
    - Any typography, MathJax, or styling anomalies are flagged and addressed before advancing to the next batch.

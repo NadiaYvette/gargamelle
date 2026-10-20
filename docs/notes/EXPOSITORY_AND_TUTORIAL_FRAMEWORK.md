@@ -124,14 +124,20 @@ Every package in `packages/gargamelle-*` must contain a standardized `README.md`
 
 To ensure that the textbook and package monographs never suffer from bit rot or documentation drift, we recommend adopting:
 
-1. **Literate Haskell / Markdown Verification (`cabal-docspec` or `markdown-unlit`):**
-   - Configure a dedicated Cabal test arm `test-suite docs` that runs all code blocks in `docs/textbook/` and package `README.md` files against GHC 9.14.
-   - Any broken import or type mismatch in a tutorial immediately fails the CI/verification gate.
-2. **`mdBook` with MathJax Rendering:**
+1. **Multi-GHC Literate Markdown Verification (`cabal-docspec` or `markdown-unlit`):**
+   - Configure a dedicated test arm (`./bin/gargamelle-doccheck` or Cabal test-suite) that runs all code blocks across the full supported GHC matrix (GHC 9.6, 9.8, 9.10, 9.12, 9.14) under `-Wall -Werror`.
+   - Any broken import or type mismatch in a tutorial immediately fails the CI/verification gate across all supported compilers.
+2. **GHC Notes Architecture & Mechanical `tagref` Validation:**
+   - Formalize major architectural invariants, proofs, and memory physics in in-code GHC Notes (`{- Note [Title] ~~~~ [tag:<slug>] -}`).
+   - Verify zero dangling references and zero duplicate tags mechanically via `tagref`.
+   - Support bidirectional reference linking between in-code Notes and `mdBook` textbook chapters.
+3. **Elevated In-Code Comment Density Target (50%+):**
+   - Counter the high conceptual difficulty of higher categories, cellular sheaves, and container namespaces by maintaining **50%+ comment density** across `packages/*/src/` (audited via `cloc packages/`).
+4. **`mdBook` with MathJax Rendering:**
    - Host the textbook under `docs/textbook/` formatted for `mdBook` (`book.toml`).
    - Automatically render LaTeX math ($\delta^0, \amalg, H^1, \cong, \le$) and Mermaid diagrams into a fast, searchable offline HTML book.
-3. **Automated Haddock Cross-Linking:**
+5. **Automated Haddock Cross-Linking:**
    - Compile all 11 packages with `haddock --hyperlinked-source --quickjump`.
    - Embed direct hyperlinks from textbook terms to Hackage/Haddock identifiers.
-4. **Deterministic Precedence Enforcement:**
+6. **Deterministic Precedence Enforcement:**
    - Grounded in `DOC_STRATEGY.md` §4: Code wins at runtime; when code changes invalidate a textbook proof or code snippet, the change set must update the textbook simultaneously.

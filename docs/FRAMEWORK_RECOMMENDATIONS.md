@@ -158,11 +158,21 @@ Every package in `packages/gargamelle-*` must contain a standardized `README.md`
 
 To prevent documentation drift and ensure that tutorials and textbook chapters remain 100% verified against code changes:
 
-### 1. Literate Haskell / Markdown Verification (`cabal-docspec` or `markdown-unlit`)
-- **CI Enforcement:** Configure a dedicated Cabal test arm (`test-suite docs`) or CI check that extracts and typechecks all code blocks in `docs/textbook/` and package `README.md` files against GHC 9.14.
+### 1. Multi-GHC Literate Markdown Verification (`cabal-docspec` or `markdown-unlit`)
+- **Multi-Compiler Matrix:** Configure a dedicated check (`./bin/gargamelle-doccheck` or Cabal test-suite) that extracts and typechecks all code blocks across the full supported GHC matrix (GHC 9.6, 9.8, 9.10, 9.12, 9.14) under `-Wall -Werror`.
 - **Zero Drift:** Any breaking API change, renamed identifier, or altered type signature immediately fails the build, preventing stale code snippets from entering master.
 
-### 2. `mdBook` with MathJax & Mermaid Rendering
+### 2. GHC Notes Architecture & Mechanical `tagref` Validation
+- **In-Code Invariants:** Large architectural invariants, categorical diagrams, and memory physics are preserved in top-level block comments formatted as GHC Notes (`{- Note [Title] ~~~~ [tag:<slug>] -}`).
+- **Call-Site Cross-References:** Internal code locations reference notes via `-- See Note [Title] [ref:<slug>]`.
+- **Mechanical Integrity:** Integrate `tagref` into `./bin/gargamelle-verify` to validate that tags are unique and references are never dangling across code, monographs, and treatise volumes.
+- **Bidirectional mdBook Interlinking:** In-code GHC Notes cite `docs/textbook/` chapters, and textbook chapters link directly back to `[ref:<slug>]` code definitions.
+
+### 3. Elevated Comment Density Target (50%+)
+- **Mathematical Opacity Prevention:** The intrinsic conceptual depth of categorical institutions, cellular sheaves, coboundary operators, and namespace isolation demands extensive explanatory prose.
+- **Density Target:** Maintain an in-code comment density of **50%+** across `packages/*/src/` (measured via `cloc packages/`), grown constructively through formal GHC Notes, law specifications, ASCII commutative diagrams, and mdBook interlinking.
+
+### 4. `mdBook` with MathJax & Mermaid Rendering
 - **Tooling:** Host the textbook under `docs/textbook/` configured via `book.toml`.
 - **Mathematical Typesetting:** MathJax rendering for rich mathematical notation:
   $$\delta^0 : C^0(G; \mathcal{F}) \to C^1(G; \mathcal{F})$$
@@ -171,11 +181,11 @@ To prevent documentation drift and ensure that tutorials and textbook chapters r
 - **Diagrams:** Native Mermaid flowcharts and state diagrams for state machines and categorical pushouts.
 - **Output:** Searchable, zero-dependency offline HTML book suitable for local reference and documentation hosting.
 
-### 3. Automated Haddock Cross-Linking
+### 5. Automated Haddock Cross-Linking
 - **Build Flag:** Compile all 11 packages with `cabal haddock --haddock-options="--hyperlinked-source --quickjump"`.
 - **Deep Linking:** Embed direct hyperlinks from textbook terms and monograph sections to exact source code definitions and Haddock entities.
 
-### 4. Deterministic Precedence Enforcement
+### 6. Deterministic Precedence Enforcement
 - Grounded in `docs/notes/DOC_STRATEGY.md` §4:
   > **Code wins at runtime; notes corrected regardless.**  
   > When a code refactor invalidates a claim, proof, or code example in the treatise or package monograph, the authoring change set must update the documentation simultaneously. Stale documentation is treated as a build failure.
