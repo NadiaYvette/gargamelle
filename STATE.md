@@ -46,7 +46,24 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - `bin/gargamelle-verify`: CLI supporting `--all`, `--sandbox`, `--beam`, `--hlint`, `--tests`.
   - `scripts/tasks/verify-milestones.sh`: Deterministic verification gate script.
 
-## Next Actions (Milestone M4)
-- **Integration & Validation**: Compose the complete synthesis workflow as a unified Kernmantle `Rope` connecting the Crem state machine, Beam database, and Bubblewrap sandbox.
-- **Property-Based Testing**: Add `hedgehog` and `tasty` generators for randomized state machine traces.
-- **Formal Verification (Liquid Haskell)**: Annotate core data structures in `Evidence.hs` and `RefinementCalculus.hs` with refinement types verified via Z3.
+### Phase 1: Substrate & Observable Verifier Core [COMPLETED]
+- **Packages**: `packages/gargamelle-logic`, `packages/gargamelle-model`
+- **Observable Morphisms (`ObsMor a b`)**: Reified AST replacing opaque `(->)` closures, with `Category`, `Profunctor`, `Strong`, and `Choice` instances. Fully introspectable via `inspectObsMor` without execution.
+- **Free Verifier AST (`Verifier model`)**: First-order `Divisible` and `Decidable` tree (`AtomCheck`, `DivideV`, `ChooseV`, `ConquerV`, `LoseV`, `ContramapV`). Evaluates against models returning `Evidence` (`VerifiedSection` or accumulated `Counterexample`). Introspectable via `inspectVerifierPlan`.
+- **Dual Assume-Guarantee Contracts (`AGContract a g`)**: Powered by `Algebra.Lattice.Op`. Refinement meet (`/\`) weakens assumptions (joins in base lattice) while strengthening guarantees (meets in base lattice). Bound laws verified, circular soundness checked via `verifyCircularAG`.
+- **Galois Connections (`Galois arr v e`)**: Parameterized over arrow category `arr` (`ObsMor`), supporting serial composition via `composeGalois`.
+- **First-Order Logic AST (`LogicAST sig`)**: Kind-indexed deep formula AST with atomic predicates, standard connectives, and flat conjunction/disjunction nodes.
+- **GHC-Style Unit Test Suite**: 17 new tests (8 in `gargamelle-logic:test:tests`, 9 in `gargamelle-model:test:tests`), 100% green.
+- **Toolchain & Quality Gates**: 0 compiler warnings under GHC 9.14.1 (`-Wall`), 0 HLint hints across both new packages. Total test suite passes: 37 examples, 0 failures.
+
+## Next Actions (v2.0 Architectural Redesign: Phase 2)
+- **Phase 2: Category Core & Institutions**:
+  - Add `proarrow` and `proarrow-equipment` to `cabal.project`.
+  - Refactor `gargamelle-core:Institution` into kind-indexed signatures (`type Sig i :: Type`, `type (~>) :: CAT (Sig i)`).
+  - Implement `Institution.Weaving` for pushout feature weaving ($B \amalg_C W$) and model amalgamation.
+  - Implement pullback protocol discovery ($A \times_E B$) and colimit change propagation factorizers.
+- **Phase 3: SMT Z3 Pipe & Presheaf DPO Rewriting**: Retire `external/Folly` and `external/Jukebox`, connect Z3 4.16.0 pipe, and use `Proarrow.Tools.DPO`.
+- **Phase 4: Cellular Sheaves & Homological Fault Localization**: Implement `gargamelle-sheaf` Store cellular automaton and $H^1$ obstruction feedback.
+- **Phase 5: Polytropos-Kernmantle Rope & Optics**: Port `gargamelle-effect` to Polytropos $O(1)$ variant jump tables (`deriveRouter`) and Coyoneda array fusion.
+- **Phase 6: End-to-End Sheaf-Gated CEGIS Workflow**: Bind $H^1$ coboundaries into Crem Mealy state machines and Kernmantle `Rope` arrows, preserving the 20 existing passing integration tests.
+

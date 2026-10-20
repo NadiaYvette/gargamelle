@@ -1,7 +1,12 @@
-with-compiler: ghc-9.10.3
+with-compiler: ghc-9.14.1
+allow-newer: *
+write-ghc-environment-files: always
+constraints: some < 1.1
 
 packages:
   packages/gargamelle-core
+  packages/gargamelle-logic
+  packages/gargamelle-model
   packages/gargamelle-fol
   packages/gargamelle-equational
   packages/gargamelle-evidence
@@ -19,4 +24,5 @@ packages:
   /home/nyc/src/beam/beam-sqlite
   /home/nyc/src/polytropos/packages/polytropos-core
   /home/nyc/src/polytropos/packages/polytropos-plugin
+  /home/nyc/src/polytropos/packages/polytropos-reader-soup
   /home/nyc/src/kernmantle/kernmantle
