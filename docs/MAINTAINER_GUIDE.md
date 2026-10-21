@@ -113,4 +113,4 @@ Follow the staged strategy defined in [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](DOC
 - **Phase 1 (Immediate):** Polish root README, orientation guides, and multi-compiler matrices for multi-forge rendering.
 - **Phase 2 (Monographs):** Author standardized 6-part `README.md` monographs for all 11 packages in `packages/gargamelle-*/`, paired with in-code GHC Notes, `tagref` labels, and the 50%+ comment density target.
 - **Phase 3 (Verification Tooling):** Implement `./bin/gargamelle-doccheck` (multi-GHC literate testing across GHC 9.6–9.14), deterministic Markdown link checks, and hyperlinked Haddock cross-reference verification.
-- **Phase 4 (Foundational Treatise):** Author the 5-volume textbook curriculum in `docs/textbook/` concurrently with real consumer libraries (particularly [`sarutahiko`](~/src/sarutahiko)).
+- **Phase 4 (Foundational Treatise):** Author the 5-volume textbook curriculum in `docs/textbook/` concurrently with real consumer libraries (particularly `sarutahiko`).

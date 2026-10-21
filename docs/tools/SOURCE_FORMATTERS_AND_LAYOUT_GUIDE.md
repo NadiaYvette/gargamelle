@@ -48,7 +48,7 @@ In traditional Haskell codebases, source formatters are designed primarily aroun
 └──────────────┴──────────────┴──────────────────┴───────────────────────┘
 ```
 
-### 2.1 Fourmolu Configuration ([`fourmolu.yaml`](../../fourmolu.yaml))
+### 2.1 Fourmolu Configuration (`fourmolu.yaml`)
 Fourmolu provides rich configuration for alignment and leading commas. The project profile specifies:
 ```yaml
 indentation: 2
@@ -110,7 +110,7 @@ Key features:
 - `lconfig_indentListSpecial: true`: Aligns promoted type-level list brackets and items.
 - `conf_forward.options_ghc`: Forwards `DataKinds`, `TypeOperators`, and `OverloadedRecordDot` directly to the Brittany GHC frontend.
 
-### 2.4 Floskell Configuration ([`floskell.json`](../../floskell.json))
+### 2.4 Floskell Configuration (`floskell.json`)
 Floskell provides fine-grained AST alignment and penalty-based line breaking. The project configuration specifies:
 ```json
 {
@@ -152,7 +152,7 @@ Floskell provides fine-grained AST alignment and penalty-based line breaking. Th
 
 ## 3. Formatter CLI Runner (`bin/programming-in-the-large-format`)
 
-The project provides an executable runner script under [`bin/programming-in-the-large-format`](../../bin/programming-in-the-large-format):
+The project provides an executable runner script under `bin/programming-in-the-large-format`:
 
 ```bash
 # Check formatting of source files against Fourmolu (non-destructive)
@@ -172,7 +172,7 @@ bin/programming-in-the-large-format --verify-configs
 
 ## 4. Test Fixtures & AST Preservation
 
-The test fixture module [`formatters/test/FormatFixtures.hs`](../../formatters/test/FormatFixtures.hs) exercises:
+The test fixture module `formatters/test/FormatFixtures.hs` exercises:
 - Multi-line type-level row lists (`type UserRow = '[ "id" := Int, ... ]`).
 - Open variant coproduct rows (`type StatusVariant = Variant '[ "pending" ':= ... ]`).
 - Record dot accessor calls (`u.name ++ " <" ++ u.email ++ ">"`).

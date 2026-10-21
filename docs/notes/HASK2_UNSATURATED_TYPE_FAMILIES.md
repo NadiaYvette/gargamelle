@@ -123,7 +123,7 @@ This is a trap for autonomous agents and verification engines:
 - You cannot inspect their structure or evaluate their complexity.
 - You cannot emit SMT-LIB2 assertions to Z3 or serialize them to SQLite.
 
-In `gargamelle`, 2-cells and arrows are reified ASTs ([`ObsMor`](file:///home/nyc/src/gargamelle/packages/gargamelle-model/src/Gargamelle/Model/Observable.hs)):
+In `gargamelle`, 2-cells and arrows are reified ASTs ([`ObsMor`](../../packages/gargamelle-logic/src/Gargamelle/Logic/Defunctionalize.hs)):
 ```haskell
 data ObsMor a b where
   ObsId      :: ObsMor a a
@@ -131,7 +131,7 @@ data ObsMor a b where
   ObsTagProj :: Int -> ObsMor a b
   ObsNamed   :: Text -> (a -> b) -> ObsMor a b
 ```
-And satisfaction verifiers are Free Verifier trees ([`Verifier`](file:///home/nyc/src/gargamelle/packages/gargamelle-model/src/Gargamelle/Model/Satisfaction.hs)) with `Divisible` and `Decidable` structures. Every 2-cell is 100% inspectable, serializable, and verifiable.
+And satisfaction verifiers are Free Verifier trees ([`Verifier`](../../packages/gargamelle-model/src/Gargamelle/Model/Satisfaction.hs)) with `Divisible` and `Decidable` structures. Every 2-cell is 100% inspectable, serializable, and verifiable.
 
 ---
 
@@ -163,11 +163,11 @@ GHC never needs to solve higher-order coherence equations, keeping compilation i
 ## 5. References & Grounded Implementations
 
 - **Proarrow Bicategories & Equipments**:
-  - [`Proarrow.Bicategory`](file:///home/nyc/src/proarrow/proarrow-equipment/src/Proarrow/Bicategory.hs#L70-L120): The kind-indexed `Bicategory` class.
-  - [`Proarrow.Bicategory.Prof`](file:///home/nyc/src/proarrow/proarrow-equipment/src/Proarrow/Bicategory/Prof.hs#L76-L105): `instance Bicategory PROFK` and `type FUNK = SUBCAT Tight PROFK`.
+  - `Proarrow.Bicategory` (`proarrow-equipment`): The kind-indexed `Bicategory` class.
+  - `Proarrow.Bicategory.Prof` (`proarrow-equipment`): `instance Bicategory PROFK` and `type FUNK = SUBCAT Tight PROFK`.
 - **Gargamelle Categorical Core**:
-  - [`Gargamelle.Core.Institution`](file:///home/nyc/src/gargamelle/packages/gargamelle-core/src/Gargamelle/Core/Institution.hs): Kind-indexed institutions and defunctionalized signature comorphisms.
-  - [`Gargamelle.Model.Satisfaction`](file:///home/nyc/src/gargamelle/packages/gargamelle-model/src/Gargamelle/Model/Satisfaction.hs): Free Verifier AST eliminating opaque closures.
+  - [`Gargamelle.Core.Institution`](../../packages/gargamelle-core/src/Gargamelle/Core/Institution.hs): Kind-indexed institutions and defunctionalized signature comorphisms.
+  - [`Gargamelle.Model.Satisfaction`](../../packages/gargamelle-model/src/Gargamelle/Model/Satisfaction.hs): Free Verifier AST eliminating opaque closures.
 - **Foundational Literature**:
   - Wood, R. J. (1982). *Abstract proarrows I*. Cahiers de Topologie et Géométrie Différentielle Catégoriques, 23(3), 279-290.
   - Street, R. (1980). *Fibrations in bicategories*. Cahiers de Topologie et Géométrie Différentielle Catégoriques, 21(2), 111-160.

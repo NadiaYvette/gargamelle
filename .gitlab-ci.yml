@@ -13,3 +13,4 @@ tagref-check:
     - PREFIX=/usr/local/bin curl https://raw.githubusercontent.com/stepchowfun/tagref/main/install.sh -LSfs | sh
   script:
     - ./bin/gargamelle-tagref
+    - ./bin/gargamelle-linkcheck

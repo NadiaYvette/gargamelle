@@ -21,4 +21,13 @@ if [ -x "${REPO_ROOT}/bin/gargamelle-tagref" ]; then
   fi
 fi
 
+if [ -x "${REPO_ROOT}/bin/gargamelle-linkcheck" ]; then
+  if ! "${REPO_ROOT}/bin/gargamelle-linkcheck" --quiet; then
+    printf '\npre-commit: Markdown link & anchor check failed.\n' >&2
+    printf 'pre-commit: Fix broken relative links or invalid anchors before committing.\n' >&2
+    printf 'pre-commit: (Use `git commit --no-verify` only if explicitly bypassing hooks).\n' >&2
+    exit 1
+  fi
+fi
+
 exit 0

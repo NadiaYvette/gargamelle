@@ -162,7 +162,13 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - Established `.githooks/pre-commit` hook to automatically reject any commit that introduces duplicate tags or dangling references.
   - Created continuous integration workflows for GitHub/GitCode (`.github/workflows/ci.yml`) and GitLab/Framagit/Disroot (`.gitlab-ci.yml`).
   - Verified 100% consistency across 27 canonical GHC Notes tags, 111 directional references, 0 dangling references, 0 duplicate tags, and 0 unused tags in 222 files.
-  - Active next frontier: Milestone 3.3 (Deterministic Intra-Corpus Markdown Link & Anchor Verification).
+- **Roll-Out Phase 3, Milestone 3.3 (Deterministic Intra-Corpus Markdown Link & Anchor Verification) [COMPLETED]**:
+  - Implemented `./bin/gargamelle-linkcheck` verifying relative Markdown hyperlinks (`[text](path.md#anchor)`), image links (`![alt](image.png)`), and line number anchors against physical files on disk.
+  - Repaired all 29 broken relative paths, non-portable hardcoded `file://` URIs, and phantom legacy links across `docs/`, `packages/`, and `.agents/`.
+  - Added `./bin/generate-tags` providing fast symbol indexing for code navigation rules.
+  - Integrated into `.githooks/pre-commit`, `.github/workflows/ci.yml`, `.gitlab-ci.yml`, and elevated `./bin/gargamelle-verify` to an **8-gate physical suite** (100% green).
+  - Verified 100% link resolution across all 68 repository Markdown files (306 internal links checked, 0 broken, 0 invalid anchors).
+  - Active next frontier: Milestone 3.4 (Automated Hyperlinked Haddock Cross-Reference Verification).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:

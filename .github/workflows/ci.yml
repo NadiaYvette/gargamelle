@@ -23,6 +23,9 @@ jobs:
       - name: Verify Tagref Cross-References (Gate 6)
         run: ./bin/gargamelle-tagref
 
+      - name: Verify Markdown Links & Anchors (Gate 7)
+        run: ./bin/gargamelle-linkcheck
+
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
         with:

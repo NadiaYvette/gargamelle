@@ -6,7 +6,7 @@ SPDX-License-Identifier: BSD-3-Clause
 **Status:** ACTIVE RULE · Bounded Context Extension  
 **Canonical Specification:** [`docs/notes/DOC_STRATEGY.md`](../../docs/notes/DOC_STRATEGY.md)  
 **Corpus Inventory:** [`docs/INDEX.md`](../../docs/INDEX.md)  
-**Session Loop:** [`PLAN.md`](../../PLAN.md) · [`STATE.md`](../../STATE.md)
+**Session Loop:** [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](../../docs/DOCUMENTATION_ROLLOUT_PLAN.md) · [`STATE.md`](../../STATE.md)
 
 ---
 
@@ -27,8 +27,8 @@ SPDX-License-Identifier: BSD-3-Clause
 1. **`AGENTS.md` ~4 KB Budget:**
    - `AGENTS.md` is an orientation projection file, not a repository of rules or specs.
    - Never inflate `AGENTS.md` with inlined rule text or tutorial material. Add links, not content.
-2. **The Two-File Loop (`PLAN.md` & `STATE.md`):**
-   - Fresh sessions initialize operational context from `PLAN.md` and `STATE.md`.
+2. **The Two-File Loop (`DOCUMENTATION_ROLLOUT_PLAN.md` & `STATE.md`):**
+   - Fresh sessions initialize operational context from `docs/DOCUMENTATION_ROLLOUT_PLAN.md` and `STATE.md`.
    - Update `STATE.md` before ending or resetting any session to preserve the operational frontier.
 
 ---

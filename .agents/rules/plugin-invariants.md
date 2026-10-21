@@ -5,8 +5,8 @@ SPDX-License-Identifier: BSD-3-Clause
 
 **Status:** ACTIVE RULE · Bounded Context Extension  
 **Canonical Specification:** [`docs/MAINTAINER_GUIDE.md`](../../docs/MAINTAINER_GUIDE.md) §2  
-**Implementation:** [`packages/polytropos-plugin/src/Polytropos/Plugin.hs`](../../packages/polytropos-plugin/src/Polytropos/Plugin.hs)  
-**Specification Tests:** [`packages/polytropos-core/test/Main.hs`](../../packages/polytropos-core/test/Main.hs)
+**Implementation:** [`packages/gargamelle-core/src/Gargamelle/Core/Institution.hs`](../../packages/gargamelle-core/src/Gargamelle/Core/Institution.hs)  
+**Specification Tests:** [`packages/gargamelle-core/test/Main.hs`](../../packages/gargamelle-core/test/Main.hs)
 
 ---
 
@@ -16,7 +16,7 @@ SPDX-License-Identifier: BSD-3-Clause
    - The TcPlugin solves `FieldIndex` and `ConstructorIndex` by directly computing the literal `Int` or `Word` offset.
    - Never emit recursive type-level search evidence or inductive dictionary trees.
 2. **The handwritten tests are the specification:**
-   - The instances in `packages/polytropos-core/test/Main.hs` specify what the plugin must synthesize. A test or plugin implementation that performs type-level search breaks the core design invariant (D3 / compile-time scalability).
+   - The instances in [`packages/gargamelle-core/test/Main.hs`](../../packages/gargamelle-core/test/Main.hs) specify the required categorical invariants. A test or implementation that performs unverified search breaks the core design invariant (D3 / compile-time scalability).
 
 ---
 

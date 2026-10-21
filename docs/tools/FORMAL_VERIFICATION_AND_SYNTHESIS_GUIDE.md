@@ -32,9 +32,9 @@ All tooling adheres to the **Zero-Contamination Doctrine** (`.agents/rules/compi
 
 ### 2.1 Specification Files & Artifacts
 The formal verification suite is located under `verification/liquid/`:
-- **[`RowPredicates.spec`](../../verification/liquid/Polytropos/Liquid/RowPredicates.spec):** LiquidHaskell refinement specifications over `SmallArray` bounds, `Rep` tags and payloads, safe slot indexing, subrow extraction, and domain field predicates.
-- **[`Proofs.hs`](../../verification/liquid/Polytropos/Liquid/Proofs.hs):** Fully typechecked Haskell module with LiquidHaskell refinement contracts in `{-@ ... @-}` pragmas, compiling cleanly under GHC with `-Wall -Werror`.
-- **[`RowBounds.fq`](../../verification/liquid/Polytropos/Liquid/RowBounds.fq):** First-order Horn clause constraint problem solved by the Liquid-Fixpoint solver and the Z3 SMT solver.
+- **`RowPredicates.spec`:** LiquidHaskell refinement specifications over `SmallArray` bounds, `Rep` tags and payloads, safe slot indexing, subrow extraction, and domain field predicates.
+- **`Proofs.hs`:** Fully typechecked Haskell module with LiquidHaskell refinement contracts in `{-@ ... @-}` pragmas, compiling cleanly under GHC with `-Wall -Werror`.
+- **`RowBounds.fq`:** First-order Horn clause constraint problem solved by the Liquid-Fixpoint solver and the Z3 SMT solver.
 
 ### 2.2 Verified Invariants
 
@@ -68,15 +68,15 @@ bin/programming-in-the-large-verify --liquid
 ### 3.1 Overview & Specifications
 Synquid synthesizes functional programs from refinement type specifications using round-trip type-directed deductive search. In `programming-in-the-large`, Synquid automates the synthesis of row adapters and variant eliminator bodies under `synthesis/synquid/`:
 
-1. **[`RecordAdapter-SubRow.sq`](../../synthesis/synquid/RecordAdapter-SubRow.sq):**
+1. **`RecordAdapter-SubRow.sq`:**
    Synthesizes width subtyping projections from wider source records (`SuperRec`) to narrower target records (`SubRec`).
-2. **[`RecordAdapter-Permute.sq`](../../synthesis/synquid/RecordAdapter-Permute.sq):**
+2. **`RecordAdapter-Permute.sq`:**
    Synthesizes field permutation adapters (e.g. `RecXYZ` to `RecZYX`) preserving structural values.
-3. **[`RecordAdapter-Defaults.sq`](../../synthesis/synquid/RecordAdapter-Defaults.sq):**
+3. **`RecordAdapter-Defaults.sq`:**
    Synthesizes record extension adapters with defaulted optional configuration parameters.
-4. **[`VariantEliminator.sq`](../../synthesis/synquid/VariantEliminator.sq):**
+4. **`VariantEliminator.sq`:**
    Synthesizes total, exhaustive variant eliminator dispatch logic given variant branches and handler functions.
-5. **[`VariantSubsumption.sq`](../../synthesis/synquid/VariantSubsumption.sq):**
+5. **`VariantSubsumption.sq`:**
    Synthesizes variant widening and constructor tag injection functions.
 
 ### 3.2 Synthesis Specification Structure

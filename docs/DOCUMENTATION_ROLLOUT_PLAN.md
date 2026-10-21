@@ -63,7 +63,7 @@ The core thesis of this roll-out plan is **progressive disclosure, immediate for
    Literate code snippets in documentation and package monographs are validated across our complete compiler matrix (GHC 9.6, 9.8, 9.10, 9.12, and 9.14). Cross-references are protected by a two-layer net: mechanical `tagref` validation for code/monograph tags, and deterministic link checks for Markdown paths. Hyperlinked Haddock cross-references are mechanically verified.
 
 4. **Treatise Grounded in Package Clusters and Consumer Perspectives (Phase 4):**  
-   The 5-volume foundational textbook in `docs/textbook/` is organized directly around Gargamelle's package clusters and theoretical pillars. It is developed concurrently with real consumer integrations—principally [`sarutahiko`](~/src/sarutahiko)—which provides concrete, empirical case studies of an autonomous coding orchestrator invoking Gargamelle, while preserving uncoupled generality for other current and future consumers.
+   The 5-volume foundational textbook in `docs/textbook/` is organized directly around Gargamelle's package clusters and theoretical pillars. It is developed concurrently with real consumer integrations—principally `sarutahiko`—which provides concrete, empirical case studies of an autonomous coding orchestrator invoking Gargamelle, while preserving uncoupled generality for other current and future consumers.
 
 ---
 
@@ -88,7 +88,7 @@ While Radicle is fundamentally a peer-to-peer git gossip protocol over Heartwood
 
 ### Universal Formatting Rules for Maximum Portability
 - **Fenced Math:** Avoid obscure LaTeX packages; restrict math to standard TeX macros supported universally by both MathJax and KaTeX ($B \amalg_C W$, $A \times_E B$, $\delta^0 : C^0 \to C^1$, $H^1 = \operatorname{coker} \delta^0$).
-- **Relative Hyperlinks:** Always use relative links within the repository (e.g. `[DOC_STRATEGY](docs/notes/DOC_STRATEGY.md)` or `[gargamelle-sheaf](packages/gargamelle-sheaf/README.md)`), avoiding absolute paths or forge-specific URL prefixes.
+- **Relative Hyperlinks:** Always use relative links within the repository (e.g. `[DOC_STRATEGY](notes/DOC_STRATEGY.md)` or `[gargamelle-sheaf](../packages/gargamelle-sheaf/README.md)`), avoiding absolute paths or forge-specific URL prefixes.
 - **Table Cell Padding:** Avoid embedded multiline code blocks inside table cells; use inline code backticks or bulleted sub-lists.
 
 ---
@@ -175,7 +175,7 @@ Adopt the battle-tested GHC Notes pattern formalized in `polytropos`:
 #### 4. Dual Reference Linking: Source Code ↔ Hackage/Haddock ↔ mdBook
 To provide seamless navigation without UI clutter, documentation and textbook chapters adopt a side-by-side **dual-link convention**:
 - **Dual Links (Source + Hackage):** For exposed types, primary typeclasses, and exported combinators, provide both a link to the exact source definition in the repository and a side-by-side link to published Hackage/Haddock documentation:
-  - Example: ``[`ObsMor`](packages/gargamelle-model/src/Gargamelle/Model/ObsMor.hs) ([Hackage](https://hackage.haskell.org/package/gargamelle-model/docs/Gargamelle-Model-ObsMor.html#t:ObsMor))``
+  - Example: ``[`ObsMor`](../packages/gargamelle-logic/src/Gargamelle/Logic/Defunctionalize.hs) ([Hackage](https://hackage.haskell.org/package/gargamelle-logic/docs/Gargamelle-Logic-Defunctionalize.html#t:ObsMor))``
   - Format: ``[`<Identifier>`](<relative-source-path>) ([Hackage](<hackage-url>))``
 - **Single Link (Source Only):** For unexposed internal algorithms, private helpers, transient hardware layouts, and implementation details not exported to Hackage, link directly to the source file line.
 - **Single Link (Hackage / External Only):** For external dependencies or base types, link directly to Hackage or external papers.
@@ -235,9 +235,11 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - Added `.githooks/pre-commit` hook enforcing zero duplicate tags and zero dangling references on every commit.
   - Validated all 27 canonical GHC Notes tags and 111 references across 222 files with 0 dangling references, 0 duplicate tags, and 0 unused tags.
 
-- [ ] **Milestone 3.3: Deterministic Intra-Corpus Markdown Link & Anchor Verification**
-  - Implement an automated check validating that every relative markdown hyperlink (`[text](path.md#anchor)`) resolves to a physical file and exact header anchor in the repository.
-  - Protects against file renames, moved sections, and dead cross-references across `docs/` and `packages/`.
+- [x] **Milestone 3.3: Deterministic Intra-Corpus Markdown Link & Anchor Verification**
+  - Implemented `./bin/gargamelle-linkcheck` verifying that every relative Markdown hyperlink (`[text](path.md#anchor)`) and image link (`![alt](image.png)`) resolves to a physical file and exact heading anchor.
+  - Eliminated all broken links, non-portable hardcoded `file://` URIs, and phantom legacy links across `docs/`, `packages/`, and `.agents/`.
+  - Integrated into Gate 7 of `./bin/gargamelle-verify` (elevating the verification harness to an 8-gate suite), `.githooks/pre-commit`, `.github/workflows/ci.yml`, and `.gitlab-ci.yml`.
+  - Verified 100% link resolution across all 68 repository Markdown files (306 internal links checked, 0 broken, 0 invalid anchors).
 
 - [ ] **Milestone 3.4: Automated Hyperlinked Haddock Cross-Reference Verification**
   - Maintain `./bin/gargamelle-haddock` generating hyperlinked source Haddock trees (`--hyperlinked-source --quickjump`) cross-linking all 11 packages.
@@ -258,7 +260,7 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
 **Goal:** Author the comprehensive 24-chapter textbook curriculum (`docs/textbook/`) providing the rigorous mathematical, philosophical, and architectural background required to understand and extend Gargamelle.
 
 #### Why Co-Development with `sarutahiko` Is Mandatory
-Writing textbook-level exposition on higher categories, cellular sheaves, and autonomous CEGIS requires grounded, real-world case studies rather than toy examples. [`sarutahiko`](~/src/sarutahiko) serves as the primary real-world consumer of `gargamelle`, utilizing its institutions, verifiers, and sandboxed execution to synthesize patches for production systems. 
+Writing textbook-level exposition on higher categories, cellular sheaves, and autonomous CEGIS requires grounded, real-world case studies rather than toy examples. `sarutahiko` serves as the primary real-world consumer of `gargamelle`, utilizing its institutions, verifiers, and sandboxed execution to synthesize patches for production systems. 
 
 Authoring the textbook concurrently with `sarutahiko` ensures that:
 - Every theorem has an empirical benchmark in `sarutahiko`.
@@ -268,7 +270,7 @@ Authoring the textbook concurrently with `sarutahiko` ensures that:
 - The prose remains vital, concrete, and battle-tested.
 
 #### Architecture: Gargamelle Package Clusters + Consumer Perspectives
-The 5 volumes correspond directly to functional clusters of Gargamelle packages and their governing mathematical disciplines. Each volume thoroughly develops its subsystem in its own right, while presenting [`sarutahiko`](~/src/sarutahiko) as the **primary reference consumer and motivating exemplar**—demonstrating how an autonomous programming orchestrator concretely instantiates these modules—while maintaining clean modular uncoupling so that **other current and future consumers** (e.g. theorem provers, compiler frontends, distributed contract engines, multi-agent systems) find clear integration boundaries.
+The 5 volumes correspond directly to functional clusters of Gargamelle packages and their governing mathematical disciplines. Each volume thoroughly develops its subsystem in its own right, while presenting `sarutahiko` as the **primary reference consumer and motivating exemplar**—demonstrating how an autonomous programming orchestrator concretely instantiates these modules—while maintaining clean modular uncoupling so that **other current and future consumers** (e.g. theorem provers, compiler frontends, distributed contract engines, multi-agent systems) find clear integration boundaries.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 verify_sandbox() {
-  echo "=== [1/7] Bubblewrap Container Sandboxing ==="
+  echo "=== [1/8] Bubblewrap Container Sandboxing ==="
   if [[ -x "/usr/bin/bwrap" ]]; then
     local test_dir
     test_dir="$(mktemp -d /tmp/gargamelle-sandbox-gate-XXXXXX)"
@@ -19,7 +19,7 @@ verify_sandbox() {
 }
 
 verify_beam() {
-  echo "=== [2/7] On-Disk Beam Persistence ==="
+  echo "=== [2/8] On-Disk Beam Persistence ==="
   local tmp_db
   tmp_db="$(mktemp /tmp/gargamelle-beam-check-XXXXXX.db)"
   sqlite3 "${tmp_db}" "CREATE TABLE test_check (id INTEGER PRIMARY KEY);" >/dev/null
@@ -28,7 +28,7 @@ verify_beam() {
 }
 
 verify_hlint() {
-  echo "=== [3/7] HLint Static Analysis Gate ==="
+  echo "=== [3/8] HLint Static Analysis Gate ==="
   local hlint_bin="${HOME}/.ghcup/bin/hlint"
   if [[ -x "${hlint_bin}" ]]; then
     "${hlint_bin}" "${REPO_ROOT}"/packages/gargamelle-*/src >/dev/null
@@ -39,7 +39,7 @@ verify_hlint() {
 }
 
 verify_tests() {
-  echo "=== [4/7] Full Cabal Test Suite ==="
+  echo "=== [4/8] Full Cabal Test Suite ==="
   (cd "${REPO_ROOT}" && cabal test \
     gargamelle-workflow:test:tests \
     gargamelle-evidence:test:tests \
@@ -52,7 +52,7 @@ verify_tests() {
 }
 
 verify_doccheck() {
-  echo "=== [5/7] Literate Markdown Doccheck Gate ==="
+  echo "=== [5/8] Literate Markdown Doccheck Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-doccheck" ]]; then
     "${REPO_ROOT}/bin/gargamelle-doccheck" --quiet
     echo "  [+] All 28 literate Markdown snippets compiled with 0 errors (-Wall -Werror)."
@@ -62,7 +62,7 @@ verify_doccheck() {
 }
 
 verify_tagref() {
-  echo "=== [6/7] Tagref Cross-Reference Gate ==="
+  echo "=== [6/8] Tagref Cross-Reference Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-tagref" ]]; then
     local tagref_out
     tagref_out="$("${REPO_ROOT}/bin/gargamelle-tagref")"
@@ -75,8 +75,19 @@ verify_tagref() {
   fi
 }
 
+verify_linkcheck() {
+  echo "=== [7/8] Markdown Link & Anchor Integrity Gate ==="
+  if [[ -x "${REPO_ROOT}/bin/gargamelle-linkcheck" ]]; then
+    local linkcheck_out
+    linkcheck_out="$("${REPO_ROOT}/bin/gargamelle-linkcheck" --quiet)"
+    echo "  [+] Markdown links verified: ${linkcheck_out}"
+  else
+    echo "  [SKIP] bin/gargamelle-linkcheck not found or not executable."
+  fi
+}
+
 verify_cloc() {
-  echo "=== [7/7] CLOC Comment Density Gate ==="
+  echo "=== [8/8] CLOC Comment Density Gate ==="
   if command -v cloc >/dev/null 2>&1; then
     local stats comments code total pct
     stats="$(cd "${REPO_ROOT}" && cloc --json packages/ 2>/dev/null)"
@@ -98,5 +109,6 @@ verify_hlint
 verify_tests
 verify_doccheck
 verify_tagref
+verify_linkcheck
 verify_cloc
-echo "=== All 7 Physical Verification Checks PASSED ==="
+echo "=== All 8 Physical Verification Checks PASSED ==="
