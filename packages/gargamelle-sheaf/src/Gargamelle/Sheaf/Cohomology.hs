@@ -31,10 +31,46 @@ import Gargamelle.Core.Weaving (PushoutWeaving(..))
 import Gargamelle.Sheaf.Complex (CellComplex(..))
 import Gargamelle.Sheaf.Diffusion (CellularSheaf(..), Cochain0(..), Cochain1(..))
 
+{- Note [Sheaf Coboundary Operator and Cohomological Obstructions]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-sheaf-coboundary-obstructions]
+In applied algebraic topology (Curry 2014, Ghrist 2014), the Sheaf Coboundary
+operator \delta^0 maps assignments of vertex stalks (0-cochains C^0) to interface
+discrepancies across boundary edges (1-cochains C^1):
+  \delta^0 : C^0(G; F) -> C^1(G; F)
+  \delta^0(x)_e = (ρ_{u ⊴ e}(x_u), ρ_{v ⊴ e}(x_v))
+
+Mathematical Invariants & Verification Semantics:
+  1. Harmonic Global Sections (0-th Cohomology H^0):
+       H^0(G; F) = ker \delta^0 = { x ∈ C^0 | \forall e=(u,v): ρ_{u ⊴ e}(x_u) == ρ_{v ⊴ e}(x_v) }
+     A 0-cochain is harmonic (isHarmonicCochain == True) if and only if all boundary
+     projections coincide across every 1-cell. This formally certifies that the local
+     specifications glue into a globally coherent system.
+
+  2. The Model Amalgamation Theorem:
+       H^0(G; Mod) ≅ Mod(colim D)
+     When vertex stalks represent institution models, global sections H^0 are naturally
+     isomorphic to models over the colimit apex of the diagram D ('verifyModelAmalgamation').
+     Global consistency is verified locally at interfaces rather than globally on giant ASTs.
+
+  3. Cohomological Obstructions (1-st Cohomology H^1):
+       H^1(G; F) = coker \delta^0
+     When \delta^0(x) fails to vanish, the non-zero cochains represent cohomological
+     obstructions to global consistency. 'locateObstructions' extracts the exact failing
+     edges e and mismatched values (sourceRestriction, targetRestriction).
+
+  4. Inductive Repair Guidance:
+     Rather than treating verification failures as opaque rejections, CEGIS synthesis loops
+     inspect H^1 obstructions to identify which subsystem interface breached its contract,
+     transforming verification from binary testing into directed homological program repair.
+-}
+
 -- | Sheaf Coboundary Operator \delta^0 : C^0(G; F) -> C^1(G; F).
 -- Computes the boundary discrepancy pair (\rho_{u \trianglelefteq e}(x_u), \rho_{v \trianglelefteq e}(x_v))
 -- for every 1-cell e = (u, v) in the complex.
 -- Returns the 1-cochain of discrepancies and a boolean indicating whether the cochain is harmonic (no discrepancies).
+--
+-- See Note [Sheaf Coboundary Operator and Cohomological Obstructions] [ref:note-sheaf-coboundary-obstructions].
 coboundary
   :: forall vId eId stalk edgeStalk.
      (Ord vId, Eq edgeStalk)
@@ -109,6 +145,8 @@ data InterfaceObstruction eId edgeStalk = InterfaceObstruction
 
 -- | Locate all failing interface boundaries where H^1 cohomological obstructions prevent composition.
 -- Directly informs the CEGIS counterexample-guided repair loop.
+--
+-- See Note [Sheaf Coboundary Operator and Cohomological Obstructions] [ref:note-sheaf-coboundary-obstructions].
 locateObstructions
   :: (Ord vId, Eq edgeStalk)
   => CellComplex vId eId
@@ -130,6 +168,8 @@ locateObstructions complex sheaf c0 =
 -- H^0(G; Mod) \cong Mod(colim D).
 -- When base model mB and aspect model mW restrict to identical interface models on c,
 -- the sheaf coboundary vanishes and 'amalgamateModels' produces a verified amalgamated model.
+--
+-- See Note [Sheaf Coboundary Operator and Cohomological Obstructions] [ref:note-sheaf-coboundary-obstructions].
 verifyModelAmalgamation
   :: forall inst (c :: Sig inst) (b :: Sig inst) (w :: Sig inst) (p :: Sig inst).
      (PushoutWeaving inst, Eq (Mod inst c))

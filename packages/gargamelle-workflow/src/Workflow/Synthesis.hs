@@ -138,7 +138,36 @@ data SynthesisEvent
   | EvtResetDone
   deriving (Show, Eq)
 
--- | The core Mealy machine enforcing the synthesis loop topology
+{- Note [Formally Verified Mealy Automata State Topology]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-crem-mealy-topology]
+In autonomous program synthesis, state transitions between stages of generation,
+sandboxed evaluation, failure analysis, and repair must be strictly controlled.
+Allowing a synthesis loop to arbitrarily skip sandboxed compilation or bypass
+evidence collection leads to invalid certification.
+
+Gargamelle enforces its synthesis state graph at compile time via Tweag's 'crem'
+library and 'singletons-base':
+  1. Vertex Type: 'SynthesisVertex' defines the 6 discrete states:
+       - StatePropose: Initial candidate generation and patch proposal.
+       - StateSandboxRun: Execution inside isolated Bubblewrap container.
+       - StateCollectEvidence: Evidence extraction and SMT counterexample gathering.
+       - StateSimilarityCheck: Structural diff comparison with known failures.
+       - StateSheafCheck: Topological evaluation of sheaf coboundaries.
+       - StateComplete: Termination upon verified proof or failure limit.
+
+  2. Type-Level Topology: 'synthesisTopology' lists the strictly permitted directed
+     edges between vertices. Any transition not explicitly listed in the topology
+     fails to compile with a type error during 'BaseMachineT' construction.
+
+  3. Mealy Machine Semantics: 'synthesisMachine' maps (State, Command) pairs to
+     (Event, NextState). Illegal commands in any state transition soundly to
+     'EvtSynthesisRetry' or 'EvtResetDone' without undefined behavior or state corruption.
+-}
+
+-- | The core Mealy machine enforcing the synthesis loop topology.
+--
+-- See Note [Formally Verified Mealy Automata State Topology] [ref:note-crem-mealy-topology].
 synthesisMachine
   :: SSynthesisVertex a
   -> BaseMachine SynthesisTopology SynthesisCommand SynthesisEvent
@@ -226,7 +255,33 @@ runSynthesisBatch m (c:cs) =
       (es, m'') = runSynthesisBatch m' cs
   in (e : es, m'')
 
--- | Compute AST similarity between two TreeDiff Exprs in range [0.0, 1.0]
+{- Note [AST Tree-Diff Structural Similarity Heuristics]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-ast-structural-similarity]
+In Counterexample-Guided Inductive Synthesis (CEGIS), generative models or symbolic
+enumerators frequently propose superficial variants of previously refuted candidates
+(such as renaming variables, reordering commutative operations, or swapping redundant blocks).
+Submitting these trivial variations to expensive SMT solvers or isolated container test
+suites wastes compute and causes synthesis stagnation.
+
+Gargamelle prevents redundant exploration using structural tree diffing ('tree-diff'):
+  1. Generic Tree Representation: Any AST implementing 'ToExpr' (from 'tree-diff')
+     is normalized into an algebraic 'Expr' tree.
+  2. Edit Distance Calculation: 'exprDiff ea eb' calculates the minimal edit script
+     between the two expression trees, classifying nodes into:
+       - Cpy: Identical preserved subterms.
+       - Swp / Ins / Del: Replaced, inserted, or deleted subterms.
+  3. Normalized Structural Metric: 'computeExprSimilarity' computes the copy ratio:
+       similarity = copies / (copies + changes) ∈ [0.0, 1.0]
+  4. Pruning Threshold: If 'isAstStructurallySimilar threshold a b' exceeds the threshold
+     (e.g. 0.8), the proposal is recognized as structurally equivalent to a known failure,
+     immediately triggering 'CmdCheckSimilarity True' to guide the generator away from
+     futile search regions.
+-}
+
+-- | Compute AST similarity between two TreeDiff Exprs in range [0.0, 1.0].
+--
+-- See Note [AST Tree-Diff Structural Similarity Heuristics] [ref:note-ast-structural-similarity].
 computeExprSimilarity :: Expr -> Expr -> Double
 computeExprSimilarity ea eb =
   let editTree = exprDiff ea eb
@@ -292,7 +347,36 @@ data SheafCEGISOutcome vId eId stalk edgeStalk
   | SheafCEGISPriorFailureFound Text
   deriving (Eq, Show)
 
+{- Note [End-to-End Sheaf-Gated CEGIS Synthesis Loop]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-sheaf-gated-cegis-loop]
+The 'runSheafGatedCEGIS' pipeline unifies all core subsystems of Gargamelle into
+a closed-loop, verifiable autonomous synthesis engine:
+
+Pipeline Execution Stages:
+  1. Initial Propose: 'startRunRecord' logs the run in SQLite ('Persistence.Beam');
+     'CmdProposeCandidate' enters the synthesis loop.
+  2. Cache Check: 'findEvidenceByRep' queries past evidence records to reject
+     candidates whose structural representations have already been disproved.
+  3. Sandboxed Execution: 'executeSandboxed' runs candidate tests inside unprivileged
+     Bubblewrap Linux containers ('Sandbox.Handler'), enforcing timeout and memory bounds.
+  4. Evidence Recording: Sandboxed results are evaluated; if failure occurs,
+     'insertEvidenceRecord' persists the witness to prevent future regression.
+  5. Sheaf Cohomology Gate: 'coboundary' computes boundary discrepancies across the
+     cell complex G = (V, E):
+       - If H^1 = 0: All boundary restrictions match; 'GlobalSection' certifies the
+         system, emitting 'SheafCEGISSuccess' and updating the run status to 'SUCCESS'.
+       - If H^1 /= 0: 'locateObstructions' pinpoints exact failing interface edges,
+         emitting 'SheafCEGISObstruction' and recording counterexamples into SQLite
+         to directly guide targeted repair.
+  6. Consensus Diffusion: With 'runSheafGatedCEGISWithDiffusion', Knaster-Tarski
+     diffusion ('diffuseUntilHarmonic') reconciles flexible interface contracts
+     before testing for hard cohomological obstructions.
+-}
+
 -- | Run end-to-end Sheaf-Gated CEGIS with production Bubblewrap sandbox runner.
+--
+-- See Note [End-to-End Sheaf-Gated CEGIS Synthesis Loop] [ref:note-sheaf-gated-cegis-loop].
 runSheafGatedCEGIS
   :: (Ord vId, Ord eId, Show vId, Show eId, Show edgeStalk, Eq edgeStalk)
   => SheafCEGISConfig vId eId stalk edgeStalk

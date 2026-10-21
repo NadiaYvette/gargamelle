@@ -57,6 +57,8 @@ main = hspec do
       let tree = fromEdges [("e1", "v1", "v2"), ("e2", "v2", "v3")]
       eulerCharacteristic tree `shouldBe` 1
 
+  -- Tested against Note [Cellular Sheaf Restriction Maps and Stalk Functors] [ref:note-cellular-sheaf-stalks]
+  -- and Note [Store Comonad Cellular Diffusion and Harmonic Consensus] [ref:note-store-comonad-diffusion]
   describe "Gargamelle.Sheaf.Diffusion (Store Comonad & Knaster-Tarski)" do
     it "diffuses specifications comonadically across cell boundaries" do
       let complex = fromEdges [("e1", "A", "B"), ("e2", "B", "C")]
@@ -92,6 +94,7 @@ main = hspec do
       lookupCochain0 "B" fixedPoint `shouldBe` Just HighIntegrity
       lookupCochain0 "C" fixedPoint `shouldBe` Just HighIntegrity
 
+  -- Tested against Note [Sheaf Coboundary Operator and Cohomological Obstructions] [ref:note-sheaf-coboundary-obstructions]
   describe "Gargamelle.Sheaf.Cohomology (Coboundaries, H0 & H1 Localization)" do
     it "identifies harmonic global sections (H0) when boundary restrictions agree" do
       let complex = fromEdges [("e1", "A", "B")]

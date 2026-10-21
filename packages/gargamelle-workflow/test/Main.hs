@@ -190,6 +190,7 @@ main = hspec $ do
           existsAfter `shouldBe` False
         Left err -> expectationFailure (T.unpack err)
 
+    -- Tested against Note [Formally Verified Mealy Automata State Topology] [ref:note-crem-mealy-topology]
     it "initializes Crem synthesis state machine in StatePropose" $ do
       let machine = createSynthesisMachine
       let (evt, machine') = stepSynthesis machine (CmdProposeCandidate "let x = 1 in x")
@@ -246,6 +247,7 @@ main = hspec $ do
         Right () -> pure ()
         Left err -> expectationFailure (T.unpack err)
 
+    -- Tested against Note [AST Tree-Diff Structural Similarity Heuristics] [ref:note-ast-structural-similarity]
     it "computes AST structural similarity using TreeDiff expressions" $ do
       let astA = App "Module" [App "Func" [App "Var" []]]
       let astB = App "Module" [App "Func" [App "Var" []]]
@@ -255,6 +257,7 @@ main = hspec $ do
       isAstStructurallySimilar 0.8 astA astB `shouldBe` True
       isAstStructurallySimilar 0.8 astA astDifferent `shouldBe` False
 
+  -- Tested against Note [End-to-End Sheaf-Gated CEGIS Synthesis Loop] [ref:note-sheaf-gated-cegis-loop]
   describe "Phase 6: End-to-End Sheaf-Gated CEGIS Workflow" $ do
     it "transitions Crem Mealy state machine into StateSheafCheck and completes on harmonic section" $ do
       let machine = createSynthesisMachine

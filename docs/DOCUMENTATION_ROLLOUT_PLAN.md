@@ -212,9 +212,9 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - `packages/gargamelle-sandbox/README.md`: Linux container namespace isolation via Bubblewrap (`/usr/bin/bwrap`), resource limits, and filesystem scoping. GHC Notes for namespace isolation boundaries. Dedicated test suite added.
   - `packages/gargamelle-persistence/README.md`: Beam SQLite persistence (`EvidenceRecordT`, `CounterexampleRecordT`, `RunRecordT`), transactional locking, and indexing. Dedicated test suite added.
 
-- [ ] **Milestone 2.3: Batch 2C Monographs & In-Code Architecture (Topology & Autonomous Workflow)**
-  - `packages/gargamelle-sheaf/README.md`: 1D Cell complexes, cellular sheaves, Store comonad cellular diffusion, Knaster-Tarski consensus, and $H^1$ homological fault localization. GHC Notes for sheaf coboundary $\delta^0$ and $H^1$ localization.
-  - `packages/gargamelle-workflow/README.md`: Crem Mealy state machines (`singletons-base`), sheaf-gated CEGIS loop (`runSheafGatedCEGIS`), and automated repair guidance. GHC Notes for Mealy state machine transitions.
+- [x] **Milestone 2.3: Batch 2C Monographs & In-Code Architecture (Topology & Autonomous Workflow)**
+  - `packages/gargamelle-sheaf/README.md`: 1D Cell complexes, cellular sheaves, Store comonad cellular diffusion, Knaster-Tarski consensus, and $H^1$ homological fault localization. GHC Notes for cellular sheaves, Store comonad diffusion, and sheaf coboundaries / $H^1$ obstructions.
+  - `packages/gargamelle-workflow/README.md`: Crem Mealy state machines (`singletons-base`), sheaf-gated CEGIS loop (`runSheafGatedCEGIS`), and automated repair guidance. GHC Notes for Crem Mealy topology, AST tree-diff structural similarity heuristics, and end-to-end Sheaf-Gated CEGIS synthesis loops.
 
 ---
 

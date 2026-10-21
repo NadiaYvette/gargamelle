@@ -40,9 +40,40 @@ meet = (/\)
 join :: Lattice a => a -> a -> a
 join = (\/)
 
+{- Note [Cellular Sheaf Restriction Maps and Stalk Functors]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-cellular-sheaf-stalks]
+In applied algebraic topology and distributed systems verification, a software
+architecture is formalized as a 1-dimensional cell complex (graph complex) G = (V, E):
+  - 0-cells (vertices v ∈ V) represent local component scopes, module stalks, or actor states.
+  - 1-cells (edges e ∈ E) represent shared communication interfaces, network channels, or contracts.
+
+A Cellular Sheaf F over G consists of:
+  1. Stalk Assignments:
+     - For each vertex v, a stalk F(v) containing local contract or model data.
+     - For each edge e = (u, v), an edge stalk F(e) representing the shared interface contract.
+  2. Restriction Maps:
+     Along face inclusions u ⊴ e and v ⊴ e, directional restriction morphisms:
+       ρ_{u ⊴ e} : F(u) -> F(e)
+       ρ_{v ⊴ e} : F(v) -> F(e)
+     project vertex-level internal invariants into the shared interface language.
+  3. Adjoint Lifting Maps:
+     Adjoint or Galois dual maps lift edge-level interface contracts back into vertex stalks:
+       liftSrc : F(e) -> F(u)
+       liftTgt : F(e) -> F(v)
+
+Operational Role:
+  - Symmetric Sheaves ('symmetricSheaf'): Useful when communication channels are non-directional
+    and contracts are symmetric across client and server.
+  - Directional Sheaves ('directionalSheaf'): Essential when interfaces distinguish caller
+    assumptions from callee guarantees.
+-}
+
 -- | A cellular sheaf F over a cell complex G = (V, E).
 -- Assigns stalks to 0-cells and 1-cells, restriction maps along cell face inclusions,
 -- and comonadic diffusion lifting maps back to the vertex stalks.
+--
+-- See Note [Cellular Sheaf Restriction Maps and Stalk Functors] [ref:note-cellular-sheaf-stalks].
 data CellularSheaf vId eId stalk edgeStalk = CellularSheaf
   { restrictSrc :: eId -> stalk -> edgeStalk  -- ^ \rho_{u \trianglelefteq e} (source restriction)
   , restrictTgt :: eId -> stalk -> edgeStalk  -- ^ \rho_{v \trianglelefteq e} (target restriction)
@@ -111,9 +142,42 @@ cochainToStore :: (Ord vId) => stalk -> Cochain0 vId stalk -> vId -> Store vId s
 cochainToStore defaultStalk (Cochain0 m) =
   store (\v -> Map.findWithDefault defaultStalk v m)
 
+{- Note [Store Comonad Cellular Diffusion and Harmonic Consensus]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-store-comonad-diffusion]
+Traditional graph algorithms process networks via imperative mutation or iterative loops.
+Gargamelle models cellular space comonadically using 'Control.Comonad.Store':
+  data Store s a = Store (s -> a) s
+
+In cellular diffusion:
+  - Focus 's = vId': The focused vertex currently under evaluation ('pos w').
+  - Local Value: The current stalk contract at that vertex ('extract w').
+  - Neighborhood Access: Neighboring contract stalks across incident cell boundaries
+    are queried via 'peek other w'.
+
+Parallel Global Diffusion via Comonadic 'extend':
+  The local rule 'diffuseLocalRule' inspects the focused vertex and takes the meet (/\)
+  of its current contract with all incoming restricted and lifted neighbor contracts.
+  By invoking:
+    diffusedStore = extend (diffuseLocalRule complex sheaf) baseStore
+  the comonad simultaneously computes updated stalks across all vertices in the cell
+  complex in a single pure, parallel evaluation step.
+
+Knaster-Tarski Fixed-Point Convergence:
+  Because the meet operation (/\) in a meet-semi-lattice is monotonic and contracting:
+    c_{t+1} ⩽ c_t
+  the sequence of 0-cochains produced by 'diffuseUntilHarmonic':
+    c_0 ⩾ c_1 ⩾ c_2 ⩾ ...
+  is guaranteed by the Knaster-Tarski fixed-point theorem to converge to the greatest
+  lower bound (the most permissive common contract refinement that satisfies all interface
+  boundary constraints simultaneously).
+-}
+
 -- | Local cellular diffusion step evaluated comonadically at the current focused vertex.
 -- Uses 'pos' to determine the active vertex, 'extract' for its current stalk value,
 -- and 'peek' to inspect neighboring stalks across incident cell boundaries.
+--
+-- See Note [Store Comonad Cellular Diffusion and Harmonic Consensus] [ref:note-store-comonad-diffusion].
 diffuseLocalRule
   :: forall vId eId stalk edgeStalk.
      (Ord vId, BoundedMeetSemiLattice stalk)
@@ -159,6 +223,8 @@ stepDiffusion complex sheaf c0@(Cochain0 m) = case vertices complex of
 -- | Knaster-Tarski fixed-point iteration via Store comonad diffusion.
 -- Iterates until a fixed point is reached (new state == current state)
 -- or the step limit is reached.
+--
+-- See Note [Store Comonad Cellular Diffusion and Harmonic Consensus] [ref:note-store-comonad-diffusion].
 diffuseUntilHarmonic
   :: (Ord vId, BoundedMeetSemiLattice stalk, Eq stalk)
   => Int  -- ^ Maximum iterations
