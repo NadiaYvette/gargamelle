@@ -184,6 +184,10 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
     1. CI runner configuration (`.github/workflows/ci.yml`): disabled AppArmor unprivileged userns restriction via `sysctl -w kernel.apparmor_restrict_unprivileged_userns=0` and provisioned unconfined `/etc/apparmor.d/bwrap` profile.
     2. Verification script resilience (`bin/gargamelle-verify`): updated Gate 1 (`verify_sandbox`) to test strict `--unshare-all`, transparently falling back to `--unshare-all --share-net`, and issuing a warning rather than aborting under `set -e` if host kernel completely restricts namespaces.
     3. Haskell runtime sandbox resilience (`packages/gargamelle-sandbox/src/Sandbox/Handler.hs`): enriched Note [Bubblewrap Namespace Isolation and Resource Limiting Boundaries] `[ref:note-sandbox-bwrap-isolation]`, added `isBwrapSetupError` detection, transparent retry with `--share-net` to retain loopback without sacrificing filesystem/PID/mount isolation, and graceful fallback to direct execution with `/usr/bin/timeout` and directory scoping if Bubblewrap setup fails entirely.
+  - Resolved CI runner toolchain gaps and SMT test blocker:
+    1. Installed `z3` in CI runner (`.github/workflows/ci.yml`) to enable `gargamelle-fol:test:tests` streaming SMT-LIB2 pipeline, and wrapped `solveZ3Raw` in `packages/gargamelle-fol/src/Gargamelle/FOL/Z3.hs` in bracketed `try` exception handling to gracefully report missing solver binaries.
+    2. Automated `hlint` installation in CI runner via `ghcup install hlint recommended --set` and updated `verify_hlint` in `bin/gargamelle-verify` to automatically discover HLint from either `~/.ghcup/bin/hlint` or system `$PATH`.
+    3. Documented benign GHC 9.14 / Cabal 3.18 library linking warnings (`Warning: ignoring unrecognised input ...dyn_o`) occurring when Cabal passes object directory files to static archive linkers under `-dynamic-too` and `Polytropos.Plugin`.
   - Active next frontier: Milestone 3.6 (`mdBook` Local Site Scaffold & Dual-Link Integration).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED

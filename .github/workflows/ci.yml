@@ -29,7 +29,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y bubblewrap sqlite3
+          sudo apt-get install -y bubblewrap sqlite3 z3
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 2>/dev/null || true
           if [ -d /etc/apparmor.d ]; then
             printf 'abi <abi/4.0>,\ninclude <tunables/global>\nprofile bwrap /usr/bin/bwrap flags=(unconfined) {\n    userns,\n    include if exists <local/bwrap>\n}\n' | sudo tee /etc/apparmor.d/bwrap >/dev/null || true
@@ -44,6 +44,9 @@ jobs:
         with:
           ghc-version: '9.14.1'
           cabal-version: '3.18.1.0'
+
+      - name: Install HLint
+        run: ghcup install hlint recommended --set || true
 
       - name: Cache Cabal artifacts
         uses: actions/cache@v4

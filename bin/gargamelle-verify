@@ -36,12 +36,18 @@ verify_beam() {
 
 verify_hlint() {
   echo "=== [3/9] HLint Static Analysis Gate ==="
-  local hlint_bin="${HOME}/.ghcup/bin/hlint"
-  if [[ -x "${hlint_bin}" ]]; then
-    "${hlint_bin}" "${REPO_ROOT}"/packages/gargamelle-*/src >/dev/null
+  local hlint_cmd=""
+  if [[ -x "${HOME}/.ghcup/bin/hlint" ]]; then
+    hlint_cmd="${HOME}/.ghcup/bin/hlint"
+  elif command -v hlint >/dev/null 2>&1; then
+    hlint_cmd="$(command -v hlint)"
+  fi
+
+  if [[ -n "${hlint_cmd}" ]]; then
+    "${hlint_cmd}" "${REPO_ROOT}"/packages/gargamelle-*/src >/dev/null
     echo "  [+] Clean HLint run: 0 hints."
   else
-    echo "  [SKIP] hlint binary not found at ${hlint_bin}"
+    echo "  [SKIP] hlint binary not found."
   fi
 }
 

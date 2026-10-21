@@ -12,8 +12,10 @@ module Gargamelle.FOL.Z3
   , parseZ3Model
   ) where
 
+import Control.Exception (SomeException, try)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import System.Exit (ExitCode)
 import System.Process (readProcessWithExitCode)
 import GHC.TypeLits (symbolVal)
 
@@ -120,13 +122,17 @@ Gargamelle intentionally chooses the streaming SMT-LIB2 pipe architecture for fo
 -- See Note [Streaming Z3 SMT-LIB2 Piping and Model Extraction] [ref:note-z3-smt-pipe-extraction].
 solveZ3Raw :: String -> IO SMTResult
 solveZ3Raw script = do
-  (_code, stdoutStr, stderrStr) <- readProcessWithExitCode "z3" ["-in", "-smt2"] script
-  let cleanOut = filter (not . null) (lines stdoutStr)
-  case cleanOut of
-    ("sat" : _)     -> pure $ Sat (parseZ3Model stdoutStr)
-    ("unsat" : _)   -> pure Unsat
-    ("unknown" : _) -> pure $ Unknown "Z3 returned unknown"
-    _               -> pure $ Unknown ("Z3 error: " ++ stderrStr ++ " | out: " ++ stdoutStr)
+  res <- (try (readProcessWithExitCode "z3" ["-in", "-smt2"] script) :: IO (Either SomeException (ExitCode, String, String)))
+  case res of
+    Left err ->
+      pure $ Unknown ("Z3 process invocation failed (is z3 installed?): " ++ show err)
+    Right (_code, stdoutStr, stderrStr) ->
+      let cleanOut = filter (not . null) (lines stdoutStr)
+      in case cleanOut of
+        ("sat" : _)     -> pure $ Sat (parseZ3Model stdoutStr)
+        ("unsat" : _)   -> pure Unsat
+        ("unknown" : _) -> pure $ Unknown "Z3 returned unknown"
+        _               -> pure $ Unknown ("Z3 error: " ++ stderrStr ++ " | out: " ++ stdoutStr)
 
 -- | Check satisfiability of a First-Order formula using host Z3.
 --
