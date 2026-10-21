@@ -12,9 +12,40 @@ import qualified FirstOrder as FO
 -- We keep it phantom for now.
 newtype HDCSig (syms :: [Symbol]) = HDCSig (Proxy syms)
 
+{- Note [Categorical Hyperdoctrine Quantifier Adjunctions]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-hyperdoctrine-adjunctions]
+In categorical logic (F.W. Lawvere, 1969), a Hyperdoctrine formalizes the semantics of
+first-order predicate logic by functorially indexing logical propositions over a cartesian
+category of contexts (sorts, variables, and terms) C:
+  P : C^op -> HeytAlg
+
+For any term substitution or projection morphism π : X × Y -> X:
+  1. Pullback (Substitution) Functor:
+     The contravariant action π* : P(X) -> P(X × Y) re-indexes propositions under context
+     extension (weakening / variable introduction).
+  2. Existential Quantifier as Left Adjoint:
+     The existential quantifier ∃_π is the LEFT adjoint to substitution π*:
+       ∃_π ⊣ π*   <===>   (∃_π(φ) ⩽ ψ  ⟺  φ ⩽ π*(ψ))
+     This states that ∃_π(φ) is the strongest proposition on X entailed by φ on X × Y.
+  3. Universal Quantifier as Right Adjoint:
+     The universal quantifier ∀_π is the RIGHT adjoint to substitution π*:
+       π* ⊣ ∀_π   <===>   (π*(ψ) ⩽ φ  ⟺  ψ ⩽ ∀_π(φ))
+     This states that ∀_π(φ) is the weakest proposition on X that entails φ on X × Y.
+  4. Beck-Chevalley Condition:
+     For every pullback square in the base category C, the canonical comparison morphisms
+     between quantification and substitution commute, guaranteeing that quantification
+     behaves invariantly under substitution of terms.
+
+In Gargamelle, 'HDCSig' and 'HDModel' reify this fibered context structure into an
+executable 'Institution' where context extensions are indexed by type-level symbol lists.
+-}
+
 -- | In a hyperdoctrine, we have a base category of contexts.
 -- For simplicity, we represent contexts as lists of symbols (variables).
 -- We don't actually build the category; we use it to index the fiber.
+--
+-- See Note [Categorical Hyperdoctrine Quantifier Adjunctions] [ref:note-hyperdoctrine-adjunctions].
 data Context (syms :: [Symbol]) where
   Nil  :: Context '[]   -- empty context
   Cons :: KnownSymbol sym => Proxy sym -> Context syms -> Context (sym ': syms)

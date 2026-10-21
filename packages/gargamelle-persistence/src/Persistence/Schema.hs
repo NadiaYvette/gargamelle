@@ -34,9 +34,34 @@ module Persistence.Schema
 import Data.Int (Int64)
 import Data.Text (Text)
 import Database.Beam
-import Database.Beam.Schema.Tables
+import Database.Beam.Schema.Tables ()
+
+{- Note [Beam SQLite Relational Persistence and Concurrency Locking]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-beam-sqlite-persistence]
+In autonomous multi-agent synthesis loops and counterexample-guided inductive synthesis
+(CEGIS), maintaining a durable, relational record of past verification trials is essential:
+  1. Preventing Regression Loops: Without persistent storage, an iterative synthesizer
+     has no memory across restarts or parallel runs, leading to the repeated generation of
+     previously refuted hypotheses.
+  2. Structured Relational Foreign Keys: Counterexamples are not arbitrary log strings;
+     they are concrete mathematical witnesses linked via foreign keys ('counterexampleEvidenceRef')
+     to the specific structural change ('evidenceChangeRep') and signature ('evidenceSig')
+     that triggered the failure.
+  3. Compile-Time Type-Safe Beam Schemas:
+     By leveraging Beam's higher-kinded data (HKD) table encoding:
+       data EvidenceRecordT f = EvidenceRecord { evidenceId :: Columnar f Int64, ... }
+     queries and joins are validated at compile time by GHC. Column names, primary keys,
+     and foreign key references cannot drift out of sync with Haskell types.
+  4. Concurrency & File-Locking Invariants:
+     SQLite provides zero-configuration, serverless transactional persistence. In multi-agent
+     and parallel synthesis workflows, WAL (Write-Ahead Logging) and atomic transaction
+     boundaries guarantee ACID durability without database corruption.
+-}
 
 -- | Record representing a failed structural proposal or verified evidence item.
+--
+-- See Note [Beam SQLite Relational Persistence and Concurrency Locking] [ref:note-beam-sqlite-persistence].
 data EvidenceRecordT f = EvidenceRecord
   { evidenceId        :: Columnar f Int64
   , evidenceSig       :: Columnar f Text

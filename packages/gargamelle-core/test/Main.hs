@@ -66,6 +66,7 @@ instance CategoricalInstitution TestInst where
 
 main :: IO ()
 main = hspec $ do
+  -- Tested against Note [Categorical Pushout Feature Weaving] [ref:note-pushout-feature-weaving]
   describe "Pushout Feature Weaving (B ⨿_C W)" $ do
     it "weaves aspect into base signature over a shared interface in Unit category" $ do
       let inclBase   = Unit
@@ -85,6 +86,7 @@ main = hspec $ do
           (F2T, Tru) -> True `shouldBe` True
           _          -> expectationFailure "Unexpected pushout injection arrows"
 
+    -- Tested against Note [Colimit Mediating Morphisms and Semantic Delta Propagation] [ref:note-colimit-semantic-delta]
     it "computes mediating factorizer for semantic delta propagation" $ do
       -- Pushout of (Unit <- Unit -> Unit) is Unit
       let pBase = Unit
@@ -95,6 +97,7 @@ main = hspec $ do
       case factorizer of
         Unit -> True `shouldBe` True
 
+  -- Tested against Note [Pullback Interface Discovery] [ref:note-pullback-interface-discovery]
   describe "Pullback Interface Discovery (A ×_E B)" $ do
     it "discovers minimal interface in Unit category" $ do
       let f = Unit
@@ -111,6 +114,7 @@ main = hspec $ do
       case factorInterface p1 p2 q1 q2 of
         Unit -> True `shouldBe` True
 
+  -- Tested against Note [Goguen-Burstall Categorical Institution Satisfaction Invariance] [ref:note-institution-satisfaction-invariance]
   describe "Goguen-Burstall Categorical Institution Satisfaction Invariance" $ do
     it "verifies satisfaction condition invariance across signature morphisms" $ do
       let phi = FlsSen "x_non_negative"

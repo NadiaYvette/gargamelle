@@ -24,7 +24,46 @@ data AmalgamatedModel mb mw = AmalgamatedModel
   , aspectModel :: mw
   } deriving (Eq, Show)
 
+{- Note [Categorical Pushout Feature Weaving]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-pushout-feature-weaving]
+In aspect-oriented software engineering and formal program synthesis, modifying a base
+specification B directly to inject an aspect or concern W (e.g. logging, audit trails,
+persistent storage, transactional locking) creates three major hazards:
+  1. Destructive Mutation: Modifying the base AST invalidates prior proofs and regression
+     test guarantees established for B.
+  2. Syntactic Collision: Injected variable names, sorts, and operations can unintentionally
+     clash with base identifiers.
+  3. Ad-Hoc Weaving Rules: Custom text-based or AST-grafting rules fail to preserve logical
+     satisfaction conditions.
+
+Gargamelle formulates non-invasive feature weaving algebraically as a categorical Pushout:
+  Given base signature B, aspect extension W, and their shared common interface C:
+    inclB :: c ~> b
+    inclW :: c ~> w
+
+  The woven system signature P is the categorical pushout apex:
+          C ──────────────► W
+          │                 │
+          │ inclB           │ injAspect
+          ▼                 ▼
+          B ──────────────► P = B ⨿_C W
+                injBase
+
+Universal Property & Soundness:
+  1. Canonical Injections: 'weaveAspect' yields injection arrows (injBase, injAspect) such that
+     the square commutes: injBase . inclB == injAspect . inclW.
+  2. Model Amalgamation: Because the model functor Mod is contravariant, it maps the pushout
+     in Sig to a pullback in Cat. When models M_B and M_W agree on interface C, 'amalgamate'
+     constructs a unique, canonical amalgamated model M_P.
+  3. Preservation of Invariants: All theorems proven about B in isolation translate
+     functorially along injBase into P with zero re-verification cost.
+-}
+
 -- | Pushout Feature Weaving:
+--
+-- See Note [Categorical Pushout Feature Weaving] [ref:note-pushout-feature-weaving].
+--
 -- Combines base logic B with aspect extension W over common interface C.
 class (CategoricalInstitution i, HasPushouts (Sig i)) => PushoutWeaving (i :: Type) where
   -- | Amalgamate models M_B and M_W that agree on common interface C.
@@ -40,6 +79,8 @@ class (CategoricalInstitution i, HasPushouts (Sig i)) => PushoutWeaving (i :: Ty
 
 -- | Non-invasively weave an aspect extension into a base signature over a shared interface C.
 -- Returns the pushout signature P and canonical injection morphisms (inclB, inclW).
+--
+-- See Note [Categorical Pushout Feature Weaving] [ref:note-pushout-feature-weaving].
 weaveAspect
   :: forall k (c :: k) (b :: k) (w :: k) r. HasPushouts k
   => (c ~> b)  -- ^ Interface inclusion into Base

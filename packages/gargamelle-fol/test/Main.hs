@@ -42,6 +42,7 @@ main = hspec do
             }
       Legacy.satisfies (Proxy @(FO.FOLSig '["P"])) model formula `shouldBe` True
 
+  -- Tested against Note [Streaming Z3 SMT-LIB2 Piping and Model Extraction] [ref:note-z3-smt-pipe-extraction]
   describe "Gargamelle.FOL.Z3 SMT-LIB2 Pipe" do
     it "solves satisfiable formula and extracts model assignments" do
       let pVar = FO.Pred (Proxy @"p") []
@@ -77,6 +78,7 @@ main = hspec do
         Counterexample sym _ -> sym `shouldBe` "Z3-Countermodel"
         VerifiedSection      -> expectationFailure "Expected counterexample for non-valid formula"
 
+  -- Tested against Note [Categorical Hyperdoctrine Quantifier Adjunctions] [ref:note-hyperdoctrine-adjunctions]
   describe "Hyperdoctrine & Refinement Calculus" do
     it "evaluates hyperdoctrine context satisfaction" do
       let pVar = FO.Pred (Proxy @"p") []

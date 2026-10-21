@@ -40,6 +40,7 @@ main = hspec do
             }
       Legacy.satisfies (Proxy @(Eq.EGSym '["f", "c", "d"])) model eqnInvalid `shouldBe` False
 
+  -- Tested against Note [Presheaf Double-Pushout Gluing Conditions] [ref:note-dpo-gluing-conditions]
   describe "Double-Pushout (DPO) Rewriting (Proarrow.Tools.DPO)" do
     it "successfully applies a DPO rule under an injective match" do
       -- Span: Fin 2 <- Fin 1 -> Fin 2

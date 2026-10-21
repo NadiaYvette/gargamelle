@@ -205,12 +205,12 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - `packages/gargamelle-model/README.md`: 100% observable morphisms (`ObsMor`), Free `VerifierAST`, `Divisible`/`Decidable` trees, and inspection. GHC Notes for closure elimination.
   - `packages/gargamelle-evidence/README.md`: Concrete syntax trees via `hs-tree-sitter`, semantic diffing via `tree-diff`, and similarity metrics.
 
-- [ ] **Milestone 2.2: Batch 2B Monographs & In-Code Architecture (Logics & Host Infrastructure)**
-  - `packages/gargamelle-core/README.md`: Goguen-Burstall Institutions, pushout feature weaving ($B \amalg_C W$), pullback protocol discovery ($A \times_E B$), and colimits. GHC Notes for satisfaction invariance.
-  - `packages/gargamelle-fol/README.md`: First-order logic, hyperdoctrines, refinement calculi, and streaming Z3 SMT-LIB2 pipe. GHC Notes for SMT piping and model extraction.
+- [x] **Milestone 2.2: Batch 2B Monographs & In-Code Architecture (Logics & Host Infrastructure)**
+  - `packages/gargamelle-core/README.md`: Goguen-Burstall Institutions, pushout feature weaving ($B \amalg_C W$), pullback protocol discovery ($A \times_E B$), and colimits. GHC Notes for satisfaction invariance, pushout weaving, pullback discovery, and colimit semantic deltas.
+  - `packages/gargamelle-fol/README.md`: First-order logic, hyperdoctrines, refinement calculi, and streaming Z3 SMT-LIB2 pipe. GHC Notes for SMT piping and hyperdoctrine quantifier adjunctions.
   - `packages/gargamelle-equational/README.md`: Equational logic institution and presheaf Double-Pushout (DPO) algebraic rewriting. GHC Notes for DPO gluing conditions.
-  - `packages/gargamelle-sandbox/README.md`: Linux container namespace isolation via Bubblewrap (`/usr/bin/bwrap`), resource limits, and filesystem scoping. GHC Notes for namespace isolation boundaries.
-  - `packages/gargamelle-persistence/README.md`: Beam SQLite persistence (`EvidenceRecordT`, `CounterexampleRecordT`, `RunRecordT`), transactional locking, and indexing.
+  - `packages/gargamelle-sandbox/README.md`: Linux container namespace isolation via Bubblewrap (`/usr/bin/bwrap`), resource limits, and filesystem scoping. GHC Notes for namespace isolation boundaries. Dedicated test suite added.
+  - `packages/gargamelle-persistence/README.md`: Beam SQLite persistence (`EvidenceRecordT`, `CounterexampleRecordT`, `RunRecordT`), transactional locking, and indexing. Dedicated test suite added.
 
 - [ ] **Milestone 2.3: Batch 2C Monographs & In-Code Architecture (Topology & Autonomous Workflow)**
   - `packages/gargamelle-sheaf/README.md`: 1D Cell complexes, cellular sheaves, Store comonad cellular diffusion, Knaster-Tarski consensus, and $H^1$ homological fault localization. GHC Notes for sheaf coboundary $\delta^0$ and $H^1$ localization.

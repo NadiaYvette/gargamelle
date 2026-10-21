@@ -123,7 +123,23 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - Implemented in-code GHC Notes architecture with 12 canonical tags (`tagref`-validated, 0 dangling references, 0 duplicate tags across 211 files).
   - Raised in-code comment density from 13% to 19% (+300 comment lines of GHC Notes and Haddock) toward the 50%+ target.
   - Added dedicated test suite to `packages/gargamelle-evidence` (4 tests), bringing Gate 4 assertions in `./bin/gargamelle-verify` to 30 passed assertions.
-  - Ready for Batch 2B: Core Engine & Host Infrastructure (`gargamelle-core`, `gargamelle-fol`, `gargamelle-equational`, `gargamelle-sandbox`, `gargamelle-persistence`).
+- **Roll-Out Phase 2, Milestone 2.2 (Batch 2B: Logics & Host Infrastructure) [COMPLETED]**:
+  - Authored comprehensive 6-part standardized `README.md` monographs for `gargamelle-core`, `gargamelle-fol`, `gargamelle-equational`, `gargamelle-sandbox`, and `gargamelle-persistence` with tripartite dual-linking to source and Hackage.
+  - Established in-code GHC Notes architecture across logic and host infrastructure:
+    - Note [Goguen-Burstall Categorical Institution Satisfaction Invariance] `[ref:note-institution-satisfaction-invariance]`
+    - Note [Categorical Pushout Feature Weaving] `[ref:note-pushout-feature-weaving]`
+    - Note [Pullback Interface Discovery] `[ref:note-pullback-interface-discovery]`
+    - Note [Colimit Mediating Morphisms and Semantic Delta Propagation] `[ref:note-colimit-semantic-delta]`
+    - Note [Streaming Z3 SMT-LIB2 Piping and Model Extraction] `[ref:note-z3-smt-pipe-extraction]`
+    - Note [Categorical Hyperdoctrine Quantifier Adjunctions] `[ref:note-hyperdoctrine-adjunctions]`
+    - Note [Presheaf Double-Pushout Gluing Conditions] `[ref:note-dpo-gluing-conditions]`
+    - Note [Bubblewrap Namespace Isolation and Resource Limiting Boundaries] `[ref:note-sandbox-bwrap-isolation]`
+    - Note [Beam SQLite Relational Persistence and Concurrency Locking] `[ref:note-beam-sqlite-persistence]`
+  - Added dedicated unit test suites to `packages/gargamelle-sandbox` (5 tests) and `packages/gargamelle-persistence` (4 tests), expanding Gate 4 in `./bin/gargamelle-verify` to 59 passed assertions across 7 test suites.
+  - In-code comment density raised from 19% to 23% (1125 comments / 3592 code lines, +400 comment lines).
+  - Validated via `tagref` (21 tags, 75 references across 218 files, 0 dangling references, 0 duplicate tags).
+  - All 6 physical verification gates in `./bin/gargamelle-verify` PASSED cleanly.
+  - Ready for Batch 2C: Topological Sheaves & Autonomous Orchestration (`gargamelle-sheaf`, `gargamelle-workflow`).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:
