@@ -16,6 +16,7 @@ import sys
 import os
 import glob
 import re
+import shutil
 import argparse
 import tempfile
 import subprocess
@@ -132,6 +133,20 @@ def main():
     if not targets:
         print("[!] No markdown target files found.")
         sys.exit(1)
+
+    # Ensure GHC environment file is present so that ghc finds all packages and dependencies
+    env_files = glob.glob(os.path.join(repo_root, ".ghc.environment.*"))
+    if not env_files:
+        if shutil.which("cabal"):
+            if not args.quiet:
+                print("  [*] No GHC environment file found (.ghc.environment.*).")
+                print("      Running 'cabal build all' to compile packages and generate environment...")
+            res = subprocess.run(["cabal", "build", "all"], cwd=repo_root)
+            if res.returncode != 0:
+                print("[!] Error: 'cabal build all' failed to generate GHC environment.", file=sys.stderr)
+                sys.exit(1)
+        else:
+            print("[!] Warning: No GHC environment file found and 'cabal' binary not found.", file=sys.stderr)
 
     if not args.quiet:
         print(f"=== Gargamelle Literate Markdown Verification ({args.ghc}) ===")
