@@ -123,8 +123,8 @@ cabal test gargamelle-logic gargamelle-model gargamelle-core gargamelle-fol \
            gargamelle-equational gargamelle-sheaf gargamelle-effect gargamelle-workflow
 ```
 
-### 2. Deterministic Physical Verification Gate (7 Gates)
-Execute the deterministic physical verification harness exercising Bubblewrap container isolation, Beam SQLite file locking, HLint cleanliness, full test suite assertions, literate Markdown doccheck verification, mechanical Tagref cross-referencing, and CLOC comment density tracking:
+### 2. Deterministic Physical Verification Harness (10 Gates)
+Execute the deterministic physical verification harness exercising Bubblewrap container isolation, Beam SQLite file locking, HLint cleanliness, full test suite assertions, literate Markdown doccheck verification, mechanical Tagref cross-referencing, Markdown link integrity, Hyperlinked Haddock resolution, CLOC comment density audit, and mdBook treatise compilation:
 
 ```bash
 ./bin/gargamelle-verify
@@ -138,6 +138,7 @@ Gargamelle supports Cabal, Stack, and Nix across GHC 9.6, 9.8, 9.10, 9.12, and 9
 ## Documentation Index
 
 - [`docs/INDEX.md`](docs/INDEX.md) — Corpus inventory and reading maps.
+- [`docs/textbook/src/introduction.md`](docs/textbook/src/introduction.md) — The 5-Volume Comprehensive Treatise on Categorical Institutions, Cellular Sheaves, and Sheaf-Gated CEGIS.
 - [`docs/DOCUMENTATION_ROLLOUT_PLAN.md`](docs/DOCUMENTATION_ROLLOUT_PLAN.md) — Staged roll-out plan: easiest parts first for forge review, deferring treatise to co-development with sarutahiko.
 - [`docs/FRAMEWORK_RECOMMENDATIONS.md`](docs/FRAMEWORK_RECOMMENDATIONS.md) — Framework recommendations: 5-volume treatise curriculum, package monographs, and literate tooling.
 - [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — Interactive worked tutorial from Institutions to Sheaf CEGIS.

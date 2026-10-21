@@ -67,8 +67,16 @@ jobs:
       - name: Verify Hyperlinked Haddock Documentation (Gate 8)
         run: ./bin/gargamelle-haddock --check
 
-      - name: Verify Comment Density Audit (Gate 9)
-        run: ./bin/gargamelle-cloc --check
+      - name: Install mdBook & Plugins
+        run: |
+          mkdir -p "${HOME}/.local/bin"
+          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C "${HOME}/.local/bin"
+          curl -sSL https://github.com/badboy/mdbook-mermaid/releases/download/v0.17.1/mdbook-mermaid-v0.17.1-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C "${HOME}/.local/bin"
+          chmod +x "${HOME}/.local/bin/mdbook" "${HOME}/.local/bin/mdbook-mermaid"
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
 
-      - name: Run Full Physical Verification Gates
+      - name: Verify mdBook Treatise Site (Gate 10)
+        run: ./bin/gargamelle-mdbook --check
+
+      - name: Run Full Physical Verification Gates (10 Gates)
         run: ./bin/gargamelle-verify

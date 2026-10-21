@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# bin/gargamelle-mdbook — Build & verify the Gargamelle mdBook 5-volume textbook
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+TEXTBOOK_DIR="${REPO_ROOT}/docs/textbook"
+
+MDBOOK_CMD=""
+if command -v mdbook >/dev/null 2>&1; then
+  MDBOOK_CMD="$(command -v mdbook)"
+elif [[ -x "${HOME}/.local/bin/mdbook" ]]; then
+  MDBOOK_CMD="${HOME}/.local/bin/mdbook"
+elif [[ -x "${HOME}/.cargo/bin/mdbook" ]]; then
+  MDBOOK_CMD="${HOME}/.cargo/bin/mdbook"
+fi
+
+usage() {
+  echo "Usage: $0 [OPTIONS]"
+  echo ""
+  echo "Commands & Options:"
+  echo "  --build         Build HTML textbook into docs/textbook/book/ (default)"
+  echo "  --check         Verify book.toml, SUMMARY.md, and run a test build"
+  echo "  --clean         Remove generated docs/textbook/book/ output"
+  echo "  --serve [port]  Run live preview development server (default port: 3000)"
+  echo "  -q, --quiet     Suppress informational output"
+  echo "  -h, --help      Display this help message"
+  exit 0
+}
+
+ACTION="build"
+QUIET=0
+PORT=3000
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --build)
+      ACTION="build"
+      shift
+      ;;
+    --check)
+      ACTION="check"
+      shift
+      ;;
+    --clean)
+      ACTION="clean"
+      shift
+      ;;
+    --serve)
+      ACTION="serve"
+      shift
+      if [[ $# -gt 0 && ! "$1" =~ ^- ]]; then
+        PORT="$1"
+        shift
+      fi
+      ;;
+    -q|--quiet)
+      QUIET=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      usage
+      ;;
+  esac
+done
+
+if [[ ! -d "${TEXTBOOK_DIR}" ]]; then
+  echo "Error: Textbook directory not found at ${TEXTBOOK_DIR}" >&2
+  exit 1
+fi
+
+do_clean() {
+  if [[ -d "${TEXTBOOK_DIR}/book" ]]; then
+    rm -rf "${TEXTBOOK_DIR}/book"
+    if [[ ${QUIET} -eq 0 ]]; then
+      echo "Cleaned ${TEXTBOOK_DIR}/book"
+    fi
+  fi
+}
+
+do_check_fallback() {
+  # Python validation of book.toml and SUMMARY.md
+  python3 - "${TEXTBOOK_DIR}" << 'EOF'
+import sys, os, re
+
+tb_dir = sys.argv[1]
+book_toml = os.path.join(tb_dir, "book.toml")
+summary_md = os.path.join(tb_dir, "src", "SUMMARY.md")
+
+if not os.path.isfile(book_toml):
+    sys.exit(f"Missing {book_toml}")
+if not os.path.isfile(summary_md):
+    sys.exit(f"Missing {summary_md}")
+
+with open(summary_md, "r", encoding="utf-8") as f:
+    content = f.read()
+
+links = re.findall(r"\[([^\]]+)\]\(([^)]+)\)", content)
+if not links:
+    sys.exit("No chapter links found in SUMMARY.md")
+
+missing = []
+for title, rel_path in links:
+    if rel_path.startswith("http://") or rel_path.startswith("https://"):
+        continue
+    clean_path = rel_path.split("#")[0]
+    target_abs = os.path.join(tb_dir, "src", clean_path)
+    if not os.path.isfile(target_abs):
+        missing.append((title, clean_path))
+
+if missing:
+    print(f"Error: {len(missing)} missing chapter file(s) in SUMMARY.md:", file=sys.stderr)
+    for title, path in missing:
+        print(f"  - [{title}]({path})", file=sys.stderr)
+    sys.exit(1)
+
+print(f"Valid structure: {len(links)} chapter links verified.")
+EOF
+}
+
+case "${ACTION}" in
+  clean)
+    do_clean
+    ;;
+  check)
+    if [[ -n "${MDBOOK_CMD}" ]]; then
+      if [[ ${QUIET} -eq 0 ]]; then
+        echo "Validating mdBook site via ${MDBOOK_CMD}..."
+      fi
+      local_tmp="$(mktemp -d /tmp/gargamelle-mdbook-check-XXXXXX)"
+      export MDBOOK_BUILD__BUILD_DIR="${local_tmp}"
+      if [[ ${QUIET} -eq 1 ]]; then
+        (cd "${TEXTBOOK_DIR}" && "${MDBOOK_CMD}" build >/dev/null 2>&1)
+      else
+        (cd "${TEXTBOOK_DIR}" && "${MDBOOK_CMD}" build)
+      fi
+      rm -rf "${local_tmp}"
+      echo "mdBook verification PASSED (all chapters compiled cleanly)."
+    else
+      if [[ ${QUIET} -eq 0 ]]; then
+        echo "mdbook binary not found; running structural fallback validation..."
+      fi
+      do_check_fallback
+    fi
+    ;;
+  build)
+    if [[ -n "${MDBOOK_CMD}" ]]; then
+      if [[ ${QUIET} -eq 0 ]]; then
+        echo "Building mdBook site via ${MDBOOK_CMD}..."
+      fi
+      if [[ ${QUIET} -eq 1 ]]; then
+        (cd "${TEXTBOOK_DIR}" && "${MDBOOK_CMD}" build >/dev/null 2>&1)
+      else
+        (cd "${TEXTBOOK_DIR}" && "${MDBOOK_CMD}" build)
+      fi
+      if [[ ${QUIET} -eq 0 ]]; then
+        echo "HTML textbook written to ${TEXTBOOK_DIR}/book/"
+      fi
+    else
+      echo "Error: mdbook command not found in PATH or ~/.local/bin/mdbook." >&2
+      echo "Install mdbook via: curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.5.4/mdbook-v0.5.4-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C ~/.local/bin" >&2
+      exit 1
+    fi
+    ;;
+  serve)
+    if [[ -n "${MDBOOK_CMD}" ]]; then
+      echo "Starting mdBook dev server on port ${PORT}..."
+      (cd "${TEXTBOOK_DIR}" && "${MDBOOK_CMD}" serve --port "${PORT}")
+    else
+      echo "Error: mdbook command not found. Cannot start dev server." >&2
+      exit 1
+    fi
+    ;;
+esac

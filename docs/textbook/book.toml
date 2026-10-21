@@ -1,0 +1,22 @@
+[book]
+authors = ["Nadia Yvette Chambers <nadia.yvette.chambers@ik.me>"]
+description = "The 5-Volume Comprehensive Treatise on Categorical Institutions, Cellular Sheaves, and Sheaf-Gated CEGIS"
+language = "en"
+src = "src"
+title = "Gargamelle: Mathematical Foundations & Autonomous Synthesis"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+default-theme = "rust"
+edit-url-template = "https://github.com/nadia-chambers/gargamelle/edit/master/docs/textbook/{path}"
+git-repository-url = "https://github.com/nadia-chambers/gargamelle"
+mathjax-support = true
+preferred-dark-theme = "coal"
+smart-punctuation = true

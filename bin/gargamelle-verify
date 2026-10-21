@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 verify_sandbox() {
-  echo "=== [1/9] Bubblewrap Container Sandboxing ==="
+  echo "=== [1/10] Bubblewrap Container Sandboxing ==="
   if [[ -x "/usr/bin/bwrap" ]]; then
     local test_dir
     test_dir="$(mktemp -d /tmp/gargamelle-sandbox-gate-XXXXXX)"
@@ -26,7 +26,7 @@ verify_sandbox() {
 }
 
 verify_beam() {
-  echo "=== [2/9] On-Disk Beam Persistence ==="
+  echo "=== [2/10] On-Disk Beam Persistence ==="
   local tmp_db
   tmp_db="$(mktemp /tmp/gargamelle-beam-check-XXXXXX.db)"
   sqlite3 "${tmp_db}" "CREATE TABLE test_check (id INTEGER PRIMARY KEY);" >/dev/null
@@ -35,7 +35,7 @@ verify_beam() {
 }
 
 verify_hlint() {
-  echo "=== [3/9] HLint Static Analysis Gate ==="
+  echo "=== [3/10] HLint Static Analysis Gate ==="
   local hlint_cmd=""
   if [[ -x "${HOME}/.ghcup/bin/hlint" ]]; then
     hlint_cmd="${HOME}/.ghcup/bin/hlint"
@@ -52,7 +52,7 @@ verify_hlint() {
 }
 
 verify_tests() {
-  echo "=== [4/9] Full Cabal Test Suite ==="
+  echo "=== [4/10] Full Cabal Test Suite ==="
   (cd "${REPO_ROOT}" && cabal test \
     gargamelle-workflow:test:tests \
     gargamelle-evidence:test:tests \
@@ -65,7 +65,7 @@ verify_tests() {
 }
 
 verify_doccheck() {
-  echo "=== [5/9] Literate Markdown Doccheck Gate ==="
+  echo "=== [5/10] Literate Markdown Doccheck Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-doccheck" ]]; then
     "${REPO_ROOT}/bin/gargamelle-doccheck" --quiet
     echo "  [+] All 28 literate Markdown snippets compiled with 0 errors (-Wall -Werror)."
@@ -75,7 +75,7 @@ verify_doccheck() {
 }
 
 verify_tagref() {
-  echo "=== [6/9] Tagref Cross-Reference Gate ==="
+  echo "=== [6/10] Tagref Cross-Reference Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-tagref" ]]; then
     local tagref_out
     tagref_out="$("${REPO_ROOT}/bin/gargamelle-tagref")"
@@ -89,7 +89,7 @@ verify_tagref() {
 }
 
 verify_linkcheck() {
-  echo "=== [7/9] Markdown Link & Anchor Integrity Gate ==="
+  echo "=== [7/10] Markdown Link & Anchor Integrity Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-linkcheck" ]]; then
     local linkcheck_out
     linkcheck_out="$("${REPO_ROOT}/bin/gargamelle-linkcheck" --quiet)"
@@ -100,7 +100,7 @@ verify_linkcheck() {
 }
 
 verify_haddock() {
-  echo "=== [8/9] Hyperlinked Haddock Cross-Reference Gate ==="
+  echo "=== [8/10] Hyperlinked Haddock Cross-Reference Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-haddock" ]]; then
     local haddock_out
     haddock_out="$("${REPO_ROOT}/bin/gargamelle-haddock" --quiet)"
@@ -111,7 +111,7 @@ verify_haddock() {
 }
 
 verify_cloc() {
-  echo "=== [9/9] CLOC Comment Density Gate ==="
+  echo "=== [9/10] CLOC Comment Density Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gargamelle-cloc" ]]; then
     local cloc_out
     cloc_out="$("${REPO_ROOT}/bin/gargamelle-cloc" --quiet --check)"
@@ -131,6 +131,17 @@ verify_cloc() {
   fi
 }
 
+verify_mdbook() {
+  echo "=== [10/10] mdBook Local Site Scaffold & Dual-Link Gate ==="
+  if [[ -x "${REPO_ROOT}/bin/gargamelle-mdbook" ]]; then
+    local mdbook_out
+    mdbook_out="$("${REPO_ROOT}/bin/gargamelle-mdbook" --check --quiet)"
+    echo "  [+] ${mdbook_out}"
+  else
+    echo "  [SKIP] bin/gargamelle-mdbook not found or not executable."
+  fi
+}
+
 verify_sandbox
 verify_beam
 verify_hlint
@@ -140,4 +151,5 @@ verify_tagref
 verify_linkcheck
 verify_haddock
 verify_cloc
-echo "=== All 9 Physical Verification Checks PASSED ==="
+verify_mdbook
+echo "=== All 10 Physical Verification Checks PASSED ==="

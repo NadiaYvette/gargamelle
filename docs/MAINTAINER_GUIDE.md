@@ -34,9 +34,9 @@ SPDX-License-Identifier: EUPL-1.2
 
 ## 2. Verification Gates & Quality Control
 
-Before any change is committed to master, it must pass all seven physical verification gates:
+Before any change is committed to master, it must pass all ten physical verification gates:
 
-### Gate 1: The Deterministic Physical Verification Harness (7 Gates)
+### Gate 1: The Deterministic Physical Verification Harness (10 Gates)
 ```bash
 ./bin/gargamelle-verify
 ```
@@ -47,7 +47,10 @@ Checks executed in sequence:
 4. **Full Test Suite Assertions:** All 59 unit, integration, and milestone assertions pass with 0 failures across 7 test suites.
 5. **Literate Markdown Doccheck:** All 28 literate code blocks across monographs and tutorials compile under `-Wall -Werror`.
 6. **Tagref Cross-Reference Gate:** Zero dangling references and zero duplicate tags across code, monographs, and docs.
-7. **CLOC Comment Density Gate:** Tracks progress toward and maintains the **50%+ comment density target** across packages.
+7. **Markdown Link & Anchor Integrity Gate:** Verifies all intra-corpus relative markdown hyperlinks and anchors across repository documents.
+8. **Hyperlinked Haddock Cross-Reference Gate:** Generates unified hyperlinked source trees and cross-package API documentation without dangling identifiers.
+9. **CLOC Comment Density Gate:** Tracks progress toward and maintains the **50%+ comment density target** across packages.
+10. **mdBook Local Site Scaffold & Dual-Link Gate:** Verifies `book.toml`, `SUMMARY.md`, MathJax, Mermaid preprocessors, and dual-link conventions across the 5-volume treatise.
 
 ### Gate 2: Full Multi-Package Test Suite
 ```bash

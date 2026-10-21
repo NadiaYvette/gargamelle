@@ -15,3 +15,4 @@ tagref-check:
     - ./bin/gargamelle-tagref
     - ./bin/gargamelle-linkcheck
     - ./bin/gargamelle-cloc --check
+    - ./bin/gargamelle-mdbook --check

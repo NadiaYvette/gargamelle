@@ -188,7 +188,14 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
     1. Installed `z3` in CI runner (`.github/workflows/ci.yml`) to enable `gargamelle-fol:test:tests` streaming SMT-LIB2 pipeline, and wrapped `solveZ3Raw` in `packages/gargamelle-fol/src/Gargamelle/FOL/Z3.hs` in bracketed `try` exception handling to gracefully report missing solver binaries.
     2. Automated `hlint` installation in CI runner via `ghcup install hlint recommended --set` and updated `verify_hlint` in `bin/gargamelle-verify` to automatically discover HLint from either `~/.ghcup/bin/hlint` or system `$PATH`.
     3. Documented benign GHC 9.14 / Cabal 3.18 library linking warnings (`Warning: ignoring unrecognised input ...dyn_o`) occurring when Cabal passes object directory files to static archive linkers under `-dynamic-too` and `Polytropos.Plugin`.
-  - Active next frontier: Milestone 3.6 (`mdBook` Local Site Scaffold & Dual-Link Integration).
+  - **Roll-Out Phase 3, Milestone 3.6 (`mdBook` Local Site Scaffold & Dual-Link Integration) [COMPLETED]**:
+    - Initialized `docs/textbook/book.toml` with `mdbook-mermaid`, MathJax support, and responsive themes.
+    - Scaffolded the complete 5-volume curriculum (28 chapters/monographs) under `docs/textbook/src/` mapped to Gargamelle package clusters, framing `sarutahiko` as the primary reference consumer alongside general consumers.
+    - Implemented the standardized dual-link convention linking textbook terms side-by-side to exact repository source files and Hackage API documentation.
+    - Built `./bin/gargamelle-mdbook` supporting `--build`, `--check`, `--clean`, `--serve`, and hermetic fallback validation.
+    - Elevated `./bin/gargamelle-verify` to a **10-gate physical verification suite** (Gate 10: mdBook Local Site Scaffold & Dual-Link Gate), verifying clean compilation of all 28 treatise modules and 100% intra-corpus link integrity.
+    - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
+  - Active next frontier: Phase 4, Milestone 4.1 (Volume I: Foundations of Abstract Model Theory & Categorical Institutions).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:

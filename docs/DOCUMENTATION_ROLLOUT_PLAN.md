@@ -253,9 +253,13 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - Enriched Haddock documentation and formal invariants across `packages/gargamelle-workflow`, `packages/gargamelle-persistence`, and `packages/gargamelle-sandbox`, raising in-code comment density to 28.6% repository-wide (1,435 comments / 3,591 code lines; 35.2% across production `src/` modules).
   - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
 
-- [ ] **Milestone 3.6: `mdBook` Local Site Scaffold & Dual-Link Integration**
-  - Initialize `docs/textbook/book.toml` with `mdbook-mermaid` and MathJax support for offline reading and local HTML book rendering.
-  - Support the dual-link convention linking textbook terms to both source definitions and Hackage documentation.
+- [x] **Milestone 3.6: `mdBook` Local Site Scaffold & Dual-Link Integration**
+  - Initialized `docs/textbook/book.toml` configured with `mdbook-mermaid`, MathJax mathematical typesetting, and responsive theme palettes for offline reading and local HTML book rendering.
+  - Scaffolded the complete 5-volume curriculum (28 chapters/monographs) under `docs/textbook/src/` mapped directly to Gargamelle package clusters, with `sarutahiko` framed as the primary reference consumer alongside general consumers.
+  - Implemented the standardized dual-link convention (``[`<Identifier>`](<source-path>) ([Hackage](<hackage-url>))``) linking textbook terms side-by-side to exact repository source files and Hackage API documentation.
+  - Built `./bin/gargamelle-mdbook` supporting `--build`, `--check`, `--clean`, `--serve`, and hermetic fallback validation.
+  - Elevated `./bin/gargamelle-verify` to a **10-gate physical verification suite** (Gate 10: mdBook Local Site Scaffold & Dual-Link Gate), verifying clean compilation of all 28 treatise modules and 100% intra-corpus link integrity.
+  - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
 
 ---
 

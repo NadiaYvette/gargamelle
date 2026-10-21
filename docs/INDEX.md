@@ -13,6 +13,7 @@
 | `NEWBIE_GUIDE.md` | guide | live | cross-cutting | Progressive disclosure funnel, package navigation, and token conservation |
 | `TUTORIAL.md` | tutorial | live | cross-cutting | 5-lesson hands-on walkthrough: ObsMor, Institutions, Z3, Sheaves, and Crem CEGIS |
 | `MAINTAINER_GUIDE.md` | guide | live | cross-cutting | Governance, observability doctrine, 4 physical verification gates, and commit trailers |
+| `textbook/src/introduction.md` | treatise | live | cross-cutting | 5-Volume Comprehensive Treatise: Institutions, Observability, Cellular Sheaves, Substrates, and CEGIS |
 | `developer/BUILD_SYSTEMS_MATRIX.md`| guide | live | cross-cutting | Multi-compiler matrix (GHC 9.6–9.14) across Cabal, Stack, and Nix |
 | `DOCUMENTATION_ROLLOUT_PLAN.md`| plan | live | cross-cutting | Staged roll-out: easiest parts first for forge review, deferring treatise to co-development with sarutahiko |
 | `FRAMEWORK_RECOMMENDATIONS.md`| specification | live | cross-cutting | Recommendations for 5-volume textbook curriculum, package monographs, and literate tooling |
