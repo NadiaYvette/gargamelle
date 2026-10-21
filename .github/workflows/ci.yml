@@ -30,6 +30,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bubblewrap sqlite3
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 2>/dev/null || true
+          if [ -d /etc/apparmor.d ]; then
+            printf 'abi <abi/4.0>,\ninclude <tunables/global>\nprofile bwrap /usr/bin/bwrap flags=(unconfined) {\n    userns,\n    include if exists <local/bwrap>\n}\n' | sudo tee /etc/apparmor.d/bwrap >/dev/null || true
+            sudo apparmor_parser -r /etc/apparmor.d/bwrap 2>/dev/null || true
+          fi
 
       - name: Configure Git for HTTPS submodules
         run: git config --global url."https://github.com/".insteadOf "git@github.com:"

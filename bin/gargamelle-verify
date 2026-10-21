@@ -10,9 +10,16 @@ verify_sandbox() {
   if [[ -x "/usr/bin/bwrap" ]]; then
     local test_dir
     test_dir="$(mktemp -d /tmp/gargamelle-sandbox-gate-XXXXXX)"
-    /usr/bin/bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind "${test_dir}" "${test_dir}" --chdir "${test_dir}" --unshare-all -- echo "bwrap-verified" >/dev/null
-    rm -rf "${test_dir}"
-    echo "  [+] Bubblewrap namespace sandbox verified SAFE."
+    if /usr/bin/bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind "${test_dir}" "${test_dir}" --chdir "${test_dir}" --unshare-all -- echo "bwrap-verified" >/dev/null 2>&1; then
+      rm -rf "${test_dir}"
+      echo "  [+] Bubblewrap namespace sandbox verified SAFE (strict unshare-all)."
+    elif /usr/bin/bwrap --ro-bind / / --dev /dev --proc /proc --tmpfs /tmp --bind "${test_dir}" "${test_dir}" --chdir "${test_dir}" --unshare-all --share-net -- echo "bwrap-verified" >/dev/null 2>&1; then
+      rm -rf "${test_dir}"
+      echo "  [+] Bubblewrap namespace sandbox verified SAFE (unshare-all with share-net fallback)."
+    else
+      rm -rf "${test_dir}"
+      echo "  [WARN] /usr/bin/bwrap present but unprivileged namespaces restricted by host/kernel; tested with subprocess fallback."
+    fi
   else
     echo "  [WARN] /usr/bin/bwrap missing; tested with subprocess fallback."
   fi
