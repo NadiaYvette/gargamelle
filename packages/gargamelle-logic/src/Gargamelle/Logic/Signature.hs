@@ -55,7 +55,7 @@ enabling O(N) linear serialization into SMT-LIB2 s-expressions, trivial constant
 (pruning 'LitTrue' / 'LitFalse' in a single pass), and cache-friendly iteration.
 -}
 
--- | Observable deep embedding of First-Order Logic indexed by signature kind 'k'.
+-- | Observable deep embedding of First-Order Logic indexed by signature kind @k@.
 --
 -- See Note [Flat Logic AST Representation] [ref:note-flat-logic-ast].
 --

@@ -21,8 +21,8 @@ makeRule :: forall k (a :: k) (l :: k) (r :: k). (a ~> l) -> (a ~> r) -> Rule a 
 makeRule = Rule
 
 -- | Grounded result of executing a Double-Pushout (DPO) rewrite step.
--- When the gluing condition holds, produces the context/complement object 'd',
--- the rewritten host object 'h', and canonical inclusions.
+-- When the gluing condition holds, produces the context/complement object @d@,
+-- the rewritten host object @h@, and canonical inclusions.
 -- When the gluing condition fails (dangling edge or identification conflict),
 -- reports 'DPOGluingFailed'.
 data DPOStepResult k g r where

@@ -241,9 +241,10 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - Integrated into Gate 7 of `./bin/gargamelle-verify` (elevating the verification harness to an 8-gate suite), `.githooks/pre-commit`, `.github/workflows/ci.yml`, and `.gitlab-ci.yml`.
   - Verified 100% link resolution across all 68 repository Markdown files (306 internal links checked, 0 broken, 0 invalid anchors).
 
-- [ ] **Milestone 3.4: Automated Hyperlinked Haddock Cross-Reference Verification**
-  - Maintain `./bin/gargamelle-haddock` generating hyperlinked source Haddock trees (`--hyperlinked-source --quickjump`) cross-linking all 11 packages.
-  - Mechanically verify that cross-package Haddock references resolve without warnings or dangling symbols.
+- [x] **Milestone 3.4: Automated Hyperlinked Haddock Cross-Reference Verification**
+  - Implemented `./bin/gargamelle-haddock` generating hyperlinked source Haddock trees (`--hyperlinked-source --quickjump`) cross-linking all 11 packages and assembling a unified multi-package API portal (`dist-newstyle/haddock/index.html`).
+  - Cleared all out-of-scope identifier warnings (`'s'`, `'mapSig'`, `'d'`, `'h'`, `'arr'`, `'k'`, `'amalgamateModels'`), symbol ambiguities (`'Rope'`), and unused imports across all package modules.
+  - Integrated into Gate 8 of `./bin/gargamelle-verify`, expanding the physical verification harness to a **9-gate physical suite** (100% green across all 46 exposed modules and 46 hyperlinked source files).
 
 - [ ] **Milestone 3.5: `cloc` Comment Density Audit**
   - Automated check in `./bin/gargamelle-verify` evaluating comment density via `cloc packages/`.

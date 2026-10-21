@@ -11,7 +11,7 @@ License     : EUPL-1.2
 Maintainer  : nadia.yvette.chambers@ik.me
 
 Re-exports 'Control.Kernmantle.Rope.Fusion' upstreamed into @kernmantle@,
-adapting pipeline fusion to Gargamelle's domain-specific 'Rope'.
+adapting pipeline fusion to Gargamelle's domain-specific 'Effect.Rope.Rope'.
 -}
 module Gargamelle.Effect.Fusion
   ( -- * Coyoneda Array and Effect Fusion
@@ -44,7 +44,7 @@ newtype FusedPipeline arr a b = FusedPipeline
   { unFusedPipeline :: Coyoneda (arr a) b
   }
 
--- | Chain a pure post-processing function onto a 'Rope' pipeline using Coyoneda fusion.
+-- | Chain a pure post-processing function onto a 'Effect.Rope.Rope' pipeline using Coyoneda fusion.
 fuseRopeMap :: (b -> c) -> Coyoneda (Rope core mantle a) b -> Coyoneda (Rope core mantle a) c
 fuseRopeMap = fmap
 {-# INLINE fuseRopeMap #-}
@@ -76,7 +76,7 @@ This guarantees zero intermediate arrow nodes, eliminating allocations and maxim
 GHC worker-wrapper inlining.
 -}
 
--- | Fuse and materialize a Coyoneda-wrapped 'Rope' arrow into a standard 'Rope' pipeline
+-- | Fuse and materialize a Coyoneda-wrapped 'Effect.Rope.Rope' arrow into a standard 'Effect.Rope.Rope' pipeline
 -- in a single composition step.
 --
 -- See Note [Coyoneda Pipeline Fusion] [ref:note-coyoneda-pipeline-fusion].

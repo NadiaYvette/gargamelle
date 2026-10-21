@@ -43,7 +43,7 @@ opaque closures.
 -}
 
 -- | Galois connection (restrict ⊣ coRestrict) between a Vertex Stalk and an Edge Stalk,
--- parameterized over the arrow category 'arr'.
+-- parameterized over the arrow category @arr@.
 --
 -- See Note [Adjoint Restrict-CoRestrict Galois Connections] [ref:note-galois-connection-stalks].
 data Galois (arr :: k -> k -> Type) vStalk eStalk = Galois

@@ -45,5 +45,8 @@ jobs:
       - name: Verify Literate Documentation (Gate 5)
         run: ./bin/gargamelle-doccheck
 
+      - name: Verify Hyperlinked Haddock Documentation (Gate 8)
+        run: ./bin/gargamelle-haddock --check
+
       - name: Run Full Physical Verification Gates
         run: ./bin/gargamelle-verify

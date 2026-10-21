@@ -17,7 +17,6 @@ module Persistence.Beam
   , completeRunRecord
   ) where
 
-import Control.Monad (void)
 import Data.Int (Int64)
 import Data.Text (Text)
 import Database.Beam

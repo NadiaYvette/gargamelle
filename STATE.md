@@ -168,7 +168,12 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - Added `./bin/generate-tags` providing fast symbol indexing for code navigation rules.
   - Integrated into `.githooks/pre-commit`, `.github/workflows/ci.yml`, `.gitlab-ci.yml`, and elevated `./bin/gargamelle-verify` to an **8-gate physical suite** (100% green).
   - Verified 100% link resolution across all 68 repository Markdown files (306 internal links checked, 0 broken, 0 invalid anchors).
-  - Active next frontier: Milestone 3.4 (Automated Hyperlinked Haddock Cross-Reference Verification).
+- **Roll-Out Phase 3, Milestone 3.4 (Automated Hyperlinked Haddock Cross-Reference Verification) [COMPLETED]**:
+  - Implemented `./bin/gargamelle-haddock` generating hyperlinked source Haddock trees (`--hyperlinked-source --quickjump`) cross-linking all 11 packages and assembling a unified multi-package API portal (`dist-newstyle/haddock/index.html`).
+  - Cleared all out-of-scope identifier warnings (`'s'`, `'mapSig'`, `'d'`, `'h'`, `'arr'`, `'k'`, `'amalgamateModels'`), symbol ambiguities (`'Rope'`), and unused imports across all package modules.
+  - Upgraded `./bin/gargamelle-verify` to a **9-gate physical suite** (Gate 8: Hyperlinked Haddock Cross-Reference Gate), verifying 46 exposed modules and 46 hyperlinked source files with 0 dangling symbols.
+  - Integrated into `.github/workflows/ci.yml` and repository release harnesses.
+  - Active next frontier: Milestone 3.5 (`cloc` Comment Density Audit).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:

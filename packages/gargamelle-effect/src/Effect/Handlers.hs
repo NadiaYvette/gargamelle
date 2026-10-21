@@ -29,7 +29,7 @@ import Persistence.Schema (evidenceReason)
 import Persistence.Beam (findEvidenceByRep, insertEvidenceRecord)
 import Effect.Strand
 
--- | A record of handlers mapping each strand to a target arrow 'core'.
+-- | A record of handlers mapping each strand to a target arrow @core@.
 data Handlers core = Handlers
   { handleLogMsg    :: forall a b. LogMsg a b -> core a b
   , handleReadFile  :: forall a b. ReadFile a b -> core a b

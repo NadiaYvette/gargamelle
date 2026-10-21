@@ -167,7 +167,7 @@ locateObstructions complex sheaf c0 =
 -- | Theorem: Model Amalgamation via Sheaves.
 -- H^0(G; Mod) \cong Mod(colim D).
 -- When base model mB and aspect model mW restrict to identical interface models on c,
--- the sheaf coboundary vanishes and 'amalgamateModels' produces a verified amalgamated model.
+-- the sheaf coboundary vanishes and 'amalgamate' produces a verified amalgamated model.
 --
 -- See Note [Sheaf Coboundary Operator and Cohomological Obstructions] [ref:note-sheaf-coboundary-obstructions].
 verifyModelAmalgamation

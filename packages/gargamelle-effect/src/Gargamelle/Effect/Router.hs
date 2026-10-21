@@ -12,7 +12,7 @@ License     : EUPL-1.2
 Maintainer  : nadia.yvette.chambers@ik.me
 
 Re-exports 'Control.Kernmantle.Rope.Variant' upstreamed into @kernmantle@,
-adapting variant routing to Gargamelle's domain-specific 'Rope'.
+adapting variant routing to Gargamelle's domain-specific 'Effect.Rope.Rope'.
 -}
 module Gargamelle.Effect.Router
   ( -- * O(1) Variant Router Jump Table
@@ -66,7 +66,7 @@ true hardware-level O(1) jump-table dispatch:
      into the mantle.
 -}
 
--- | Route an open variant effect into a Gargamelle 'Rope' arrow computation.
+-- | Route an open variant effect into a Gargamelle 'Effect.Rope.Rope' arrow computation.
 --
 -- See Note [O(1) Variant Jump-Table Dispatch Physics] [ref:note-variant-jump-table-physics].
 routeVariantRope :: VariantRouter core a b -> Variant s -> Rope core mantle a b

@@ -31,8 +31,8 @@ This ensures that model checking scales compositionally across structural produc
 without monolithic verification functions.
 -}
 
--- | Binds an interpreted symbol sort 's' to its runtime implementation 'interp s'
--- and formal specification 'pred s'.
+-- | Binds an interpreted symbol sort @s@ to its runtime implementation @interp s@
+-- and formal specification @pred s@.
 --
 -- See Note [Universal LogicModel Sorting and Product Splittings] [ref:note-logic-model-sorting].
 class LogicModel interp pred s where

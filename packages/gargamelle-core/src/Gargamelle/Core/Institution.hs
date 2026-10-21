@@ -71,7 +71,7 @@ In Gargamelle, this meta-theoretic axiom is reified as an executable computation
 --
 -- Binds Syntax and Semantics via observable Free Verifier ASTs.
 class (LogicalSyntax i, ModelTheory i) => CategoricalInstitution (i :: Type) where
-  -- | Returns an inspectable Verifier AST for a sentence under signature 's'.
+  -- | Returns an inspectable Verifier AST for a sentence under signature @s@.
   satisfactionVerifier :: forall (s :: Sig i). Sen i s -> Verifier (Mod i s)
 
 -- | Verification of the satisfaction condition for a concrete candidate:
@@ -94,7 +94,7 @@ checkSatisfactionInvariance morph phi mPrime =
   in (evLHS, evRHS, isPreserved)
 
 -- | 4. Institution Comorphisms (Stepwise Refinement & Compiler Translation Passes)
--- Parameterized by a defunctionalized type-level signature translation 'mapSig'.
+-- Parameterized by a defunctionalized type-level signature translation @mapSig@.
 data InstitutionComorphism src tgt (mapSig :: TyFun (Sig src) (Sig tgt) -> Type) = InstitutionComorphism
   { comorphismName :: String
   , transSen       :: forall (s :: Sig src). Sen src s -> Sen tgt (Apply mapSig s)

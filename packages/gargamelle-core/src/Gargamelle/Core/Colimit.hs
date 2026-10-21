@@ -36,11 +36,11 @@ By the universal property of the colimit apex P, there exists a unique mediating
 such that the cocone commutes (u . legA == legA_Q and u . legB == legB_Q).
 
 Architectural Role in Incremental Synthesis:
-  1. Semantic Delta Reification: The mediating morphism 'u' precisely characterizes the
+  1. Semantic Delta Reification: The mediating morphism @u@ precisely characterizes the
      semantic diff or migration required between the original composite system P and the
      updated target Q.
   2. Incremental Proof Translation: Rather than re-verifying the composed system from scratch,
-     theorems and certificates established in P translate functorially across 'u' into Q,
+     theorems and certificates established in P translate functorially across @u@ into Q,
      preserving already-verified properties.
   3. Incremental Re-synthesis: Synthesis engines use 'factorSemanticDelta' to isolate the
      minimal delta morphism that must be checked against host verification invariants.
