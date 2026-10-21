@@ -63,7 +63,11 @@ verify_doccheck() {
 
 verify_tagref() {
   echo "=== [6/7] Tagref Cross-Reference Gate ==="
-  if command -v tagref >/dev/null 2>&1; then
+  if [[ -x "${REPO_ROOT}/bin/gargamelle-tagref" ]]; then
+    local tagref_out
+    tagref_out="$("${REPO_ROOT}/bin/gargamelle-tagref")"
+    echo "  [+] Tagref verified: ${tagref_out}"
+  elif command -v tagref >/dev/null 2>&1; then
     (cd "${REPO_ROOT}" && tagref >/dev/null)
     echo "  [+] Tagref verified: 0 dangling references, 0 duplicate tags."
   else

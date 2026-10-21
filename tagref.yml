@@ -7,3 +7,5 @@ ignore_rules:
   - "docs/DOCUMENTATION_ROLLOUT_PLAN.md"
   - "docs/FRAMEWORK_RECOMMENDATIONS.md"
   - "docs/notes/EXPOSITORY_AND_TUTORIAL_FRAMEWORK.md"
+  - "bin/gargamelle-tagref"
+  - ".githooks"

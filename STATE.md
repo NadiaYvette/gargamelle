@@ -157,7 +157,12 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - Aligned and typechecked all 28 literate Haskell snippets across all 11 package READMEs (`packages/gargamelle-*/README.md`) and `docs/TUTORIAL.md` under GHC `-Wall -Werror` (0 warnings, 0 errors, 100% pass).
   - Enforced `DOC_STRATEGY.md` §4 (*Code wins at runtime; notes corrected regardless*), fixing dead imports, unused matches, fragile GADT matching, and partial functions.
   - Upgraded `./bin/gargamelle-verify` to a **7-gate physical suite** (Bubblewrap, Beam SQLite, HLint 0 hints, 59 test assertions, Literate Doccheck, Tagref 0 dangling/0 duplicates, CLOC comment density).
-  - Active next frontier: Milestone 3.2 (Mechanical `tagref` Integrity Check) & Milestone 3.3 (Deterministic Intra-Corpus Markdown Link & Anchor Verification).
+- **Roll-Out Phase 3, Milestone 3.2 (Mechanical `tagref` Integrity Check) [COMPLETED]**:
+  - Created standalone `./bin/gargamelle-tagref` verification harness with dual native-binary and Python fallback runner.
+  - Established `.githooks/pre-commit` hook to automatically reject any commit that introduces duplicate tags or dangling references.
+  - Created continuous integration workflows for GitHub/GitCode (`.github/workflows/ci.yml`) and GitLab/Framagit/Disroot (`.gitlab-ci.yml`).
+  - Verified 100% consistency across 27 canonical GHC Notes tags, 111 directional references, 0 dangling references, 0 duplicate tags, and 0 unused tags in 222 files.
+  - Active next frontier: Milestone 3.3 (Deterministic Intra-Corpus Markdown Link & Anchor Verification).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:

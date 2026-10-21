@@ -1,0 +1,46 @@
+name: CI Verification Harness
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  verify:
+    name: Tagref & Verification Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Tagref
+        run: |
+          mkdir -p "${HOME}/.local/bin"
+          PREFIX="${HOME}/.local/bin" curl https://raw.githubusercontent.com/stepchowfun/tagref/main/install.sh -LSfs | sh
+          echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
+      - name: Verify Tagref Cross-References (Gate 6)
+        run: ./bin/gargamelle-tagref
+
+      - name: Set up Haskell Toolchain
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.10.3'
+          cabal-version: '3.12.1.0'
+
+      - name: Cache Cabal artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal/store
+            dist-newstyle
+          key: ${{ runner.os }}-cabal-${{ hashFiles('cabal.project', '**/*.cabal') }}
+          restore-keys: |
+            ${{ runner.os }}-cabal-
+
+      - name: Verify Literate Documentation (Gate 5)
+        run: ./bin/gargamelle-doccheck
+
+      - name: Run Full Physical Verification Gates
+        run: ./bin/gargamelle-verify

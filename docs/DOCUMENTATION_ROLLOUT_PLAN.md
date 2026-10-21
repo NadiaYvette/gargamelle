@@ -229,9 +229,11 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - Integrated into `./bin/gargamelle-verify` as Gate 5 of 7.
   - Enforces `DOC_STRATEGY.md` §4: *Code wins at runtime; notes corrected regardless.* Stale documentation fails the build.
 
-- [ ] **Milestone 3.2: Mechanical `tagref` Integrity Check**
-  - Integrate `tagref` into `./bin/gargamelle-verify` and CI.
-  - Validate that all `[tag:<slug>]` definitions and `[ref:<slug>]` references across Haskell code, package monographs, and textbook chapters resolve with **0 dangling references** and **0 duplicate tags**.
+- [x] **Milestone 3.2: Mechanical `tagref` Integrity Check**
+  - Integrated `tagref` into `./bin/gargamelle-verify` (Gate 6 of 7) and CI workflows (`.github/workflows/ci.yml`, `.gitlab-ci.yml`).
+  - Implemented `./bin/gargamelle-tagref` with native binary execution and deterministic Python fallback mode.
+  - Added `.githooks/pre-commit` hook enforcing zero duplicate tags and zero dangling references on every commit.
+  - Validated all 27 canonical GHC Notes tags and 111 references across 222 files with 0 dangling references, 0 duplicate tags, and 0 unused tags.
 
 - [ ] **Milestone 3.3: Deterministic Intra-Corpus Markdown Link & Anchor Verification**
   - Implement an automated check validating that every relative markdown hyperlink (`[text](path.md#anchor)`) resolves to a physical file and exact header anchor in the repository.
