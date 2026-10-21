@@ -230,22 +230,36 @@ def run_cabal_haddock(repo_root):
     out_of_scope_re = re.compile(r"Warning:\s+'([^']+)'\s+is out of scope")
     ambiguous_re = re.compile(r"Warning:\s+'([^']+)'\s+is ambiguous")
     unused_import_re = re.compile(r"warning:.*\[-Wunused-imports\]")
+    pkg_header_re = re.compile(r"Running Haddock on (?:library for )?([a-zA-Z0-9_\-]+?)(?:-\d|\.\.\.|\s)")
 
-    in_gargamelle_section = True
+    target_pkg_names = {pkg["name"] for pkg in PACKAGES}
+    cur_pkg = None
+
     for line in res.stdout.splitlines():
+        m_pkg = pkg_header_re.search(line)
+        if m_pkg:
+            cur_pkg = m_pkg.group(1)
+            continue
+
+        if "Documentation created:" in line:
+            cur_pkg = None
+            continue
+
+        # Only enforce zero-warning policy on in-tree Gargamelle packages
+        if cur_pkg not in target_pkg_names:
+            continue
+
         # Check for out-of-scope identifiers or ambiguities in Gargamelle
         m_scope = out_of_scope_re.search(line)
         if m_scope:
             sym = m_scope.group(1)
-            # Filter out vendor dependencies warnings if any
-            if not any(v in line for v in ("Proarrow", "Polytropos")):
-                warnings.append(f"Identifier '{sym}' is out of scope in docstrings: {line.strip()}")
+            warnings.append(f"[{cur_pkg}] Identifier '{sym}' is out of scope in docstrings: {line.strip()}")
         m_ambig = ambiguous_re.search(line)
         if m_ambig:
             sym = m_ambig.group(1)
-            warnings.append(f"Identifier '{sym}' is ambiguous in docstrings: {line.strip()}")
+            warnings.append(f"[{cur_pkg}] Identifier '{sym}' is ambiguous in docstrings: {line.strip()}")
         if unused_import_re.search(line):
-            warnings.append(f"Unused import in package module: {line.strip()}")
+            warnings.append(f"[{cur_pkg}] Unused import in package module: {line.strip()}")
 
     success = (res.returncode == 0) and (len(warnings) == 0)
     return success, res.stdout, warnings

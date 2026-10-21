@@ -6,7 +6,7 @@
 
 -- | The core Rope arrow of the Kernmantle effect orchestration layer.
 --
--- A 'Rope' decouples effect composition from handler interpretation,
+-- A 't:Rope' decouples effect composition from handler interpretation,
 -- enabling config-time static analysis and pluggable production/test execution.
 module Effect.Rope
   ( Rope(..)

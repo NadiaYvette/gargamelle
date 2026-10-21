@@ -72,7 +72,7 @@ mismatch before deployment.
 --
 -- See Note [Lattice Inversion via Op Dualization] [ref:note-lattice-op-dualization].
 --
--- Because refinement is meet (/\), wrapping assumptions in 'Op' ensures that
+-- Because refinement is meet (/\), wrapping assumptions in 't:Op' ensures that
 -- contract refinement automatically weakens assumptions (as joins \/ in the base lattice)
 -- while strengthening guarantees (as meets /\ in the base lattice).
 data AGContract a g = AGContract
