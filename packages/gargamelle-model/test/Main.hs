@@ -9,6 +9,7 @@ import Gargamelle.Model.Structure
 main :: IO ()
 main = hspec $ do
   describe "Gargamelle.Model.Satisfaction (Evidence Monoid)" $ do
+    -- See Note [Free Verifier AST and Algebraic Counterexample Evidence] [ref:note-free-verifier-ast]
     it "treats VerifiedSection as identity" $ do
       let v = VerifiedSection
       let c = Counterexample "sym" "witness"
@@ -27,6 +28,7 @@ main = hspec $ do
         VerifiedSection -> expectationFailure "Expected Counterexample, got VerifiedSection"
 
   describe "Gargamelle.Model.Satisfaction (Free Verifier AST)" $ do
+    -- See Note [Free Verifier AST and Algebraic Counterexample Evidence] [ref:note-free-verifier-ast]
     it "evaluates conquer as universally verified" $ do
       let v = conquer :: Verifier Int
       evalVerifier v 42 `shouldBe` VerifiedSection
@@ -70,6 +72,7 @@ main = hspec $ do
       inspectVerifierPlan vPair `shouldBe` ["Step:divide", "AtomCheck:pos", "AtomCheck:nonEmpty"]
 
   describe "Gargamelle.Model.Structure" $ do
+    -- See Note [Universal LogicModel Sorting and Product Splittings] [ref:note-logic-model-sorting]
     it "evaluates compilePairVerifier and compileEitherVerifier helpers" $ do
       let vA = verifyPredicate "gtZero" (> (0 :: Int))
       let vB = verifyPredicate "gtTen" (> (10 :: Int))

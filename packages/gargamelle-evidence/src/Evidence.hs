@@ -6,7 +6,6 @@ import Institution
 import Data.Proxy
 import Data.Hashable
 import qualified Data.HashMap.Strict as HM
-import Data.Maybe
 import qualified TreeSitter as TS
 import Data.TreeDiff.Tree (treeDiff, EditTree(..), Edit(..))
 import System.IO.Unsafe (unsafePerformIO)
@@ -36,7 +35,32 @@ data Evidence sig = Evidence
   }
   deriving (Eq, Show)
 
+{- Note [Structural AST Change Tracking via Tree-Diff]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-structural-tree-diff]
+In autonomous program repair, AI-guided synthesis, and Counterexample-Guided Inductive
+Synthesis (CEGIS), recording failed patches as raw text strings or line-based unified diffs
+fails for two fundamental reasons:
+  1. False Negatives: An autonomous model will frequently propose patches with trivial
+     syntactic variations (whitespace differences, identifier renaming, comment alterations)
+     that produce distinct git diff hashes while representing the exact same failing AST.
+  2. Unnecessary Sandboxing Overhead: Spawning container namespaces (/usr/bin/bwrap) and
+     running full compiler toolchains (GHC) to evaluate a patch that is structurally
+     identical to an already known failure wastes enormous amounts of energy and time.
+
+'gargamelle-evidence' solves this by lifting patch tracking into structural AST space:
+  - 'StructuralRep' wraps a 'Data.Tree String' converted from a Tree-Sitter concrete syntax tree.
+  - 'EvidenceStore' maintains an exact hash index of previously failed structural representations,
+    permitting O(1) membership testing via 'proposesKnownFailure'.
+  - 'proposesSimilarFailure' runs 'treeDiff' to compute structural tree edit distance
+    (accounting for insertions, deletions, and node swaps). If a proposed AST is within a
+    configurable edit distance (e.g., <= 2) of a known failure, the proposal is rejected
+    immediately without compiling or executing it.
+-}
+
 -- | A collection of evidence for a given signature, stored as a hash map for quick lookup.
+--
+-- See Note [Structural AST Change Tracking via Tree-Diff] [ref:note-structural-tree-diff].
 newtype EvidenceStore sig = EvidenceStore
   { unEvidenceStore :: HM.HashMap StructuralRep (Evidence sig)
   } deriving (Eq, Show)
@@ -78,7 +102,7 @@ class ToStructuralRep a where
 
 -- | A wrapper for proposing a change in the context of an institution.
 proposeChange :: (Institution sig, ToStructuralRep a) => a -> Proxy sig -> EvidenceStore sig -> Either (Evidence sig) a
-proposeChange change sig store =
+proposeChange change _sig store =
   case checkProposal (toStructuralRep change) store of
     Just ev -> Left ev
     Nothing -> Right change
@@ -100,7 +124,7 @@ levenshtein (x:xs) (y:ys) = minimum [ levenshtein xs ys + if x == y then 0 else 
 editDistance :: Edit (EditTree a) -> Int
 editDistance = go
   where
-    go (Cpy _) = 0
+    go (Cpy sub) = editDistanceTree sub
     go (Ins sub) = 1 + editDistanceTree sub
     go (Del sub) = 1 + editDistanceTree sub
     go (Swp l r) = 2 + editDistanceTree l + editDistanceTree r
@@ -116,7 +140,9 @@ tsTreeToDataTree tree =
     tsNodeToDataTree node = 
       let label' = unsafePerformIO $ TS.showNodeAsString node
           childCount' = unsafePerformIO $ TS.nodeChildCount node
-      in  Node label' [ tsNodeToDataTree (unsafePerformIO $ TS.nodeChild node (fromIntegral i)) | i <- [0..(fromIntegral childCount' - 1)] ]
+          count :: Int
+          count = fromIntegral childCount'
+      in  Node label' [ tsNodeToDataTree (unsafePerformIO $ TS.nodeChild node (fromIntegral i)) | i <- [0 .. count - 1] ]
 
 -- | Extract the root label from a Data.Tree.Tree String.
 getDataTreeRootLabel :: Tree String -> String
@@ -131,7 +157,10 @@ instance ToStructuralRep TS.Tree where
     in StructuralRep lbl dt
 
 -- | Check if a proposed tree is structurally similar to any known failure in the evidence store.
---   Uses tree-diff to compute the edit distance on the Data.Tree representations and returns the evidence if the distance is <= similarityThreshold.
+--
+-- See Note [Structural AST Change Tracking via Tree-Diff] [ref:note-structural-tree-diff].
+--
+-- Uses tree-diff to compute the edit distance on the Data.Tree representations and returns the evidence if the distance is <= similarityThreshold.
 proposesSimilarFailure :: TS.Tree -> EvidenceStore sig -> Maybe (Evidence sig)
 proposesSimilarFailure proposedTree (EvidenceStore store) =
   let threshold = 2 :: Int

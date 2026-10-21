@@ -49,7 +49,34 @@ data SingSymbol (f :: k1 ~> k2) = SingSymbol
 -- 2. TERM-LEVEL OBSERVABLE MORPHISM GADT (Replaces Opaque `->` Closures)
 -- ============================================================================
 
+{- Note [Defunctionalized Observable Morphisms]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-defunctionalized-obsmor]
+In standard Haskell architectures, transformations and signature morphisms are
+represented as native function closures @(a -> b)@. However, Haskell function
+closures are completely opaque:
+  1. A function closure cannot be inspected: an autonomous agent or verifier cannot
+     determine whether @f@ reads a database, modifies a field, or drops information.
+  2. A function closure cannot be serialized or translated: it cannot be mapped to an
+     SMT-LIB2 relation or emitted into an explainable proof certificate.
+  3. A function closure prevents algebraic rewriting: categorical laws like
+     @f . id = f@ or @first (g . h) = first g . first h@ cannot be applied at compile
+     or run time.
+
+To resolve this opacity, 'ObsMor a b' defunctionalizes morphism arrows into a first-class
+GADT. Every pipeline step—whether an identity, a composition, a tagged field projection,
+a tagged variant injection, or a profunctor splitting—is represented as an inspectable term.
+
+Autonomous reasoning engines can:
+  - Statically inspect the transformation plan via 'inspectObsMor' without evaluating code.
+  - Compile the AST to native executable code via 'evalObsMor'.
+  - Verify functorial and profunctorial preservation across institutional boundaries.
+-}
+
 -- | Deeply embedded, inspectable morphism AST replacing native @(->)@.
+--
+-- See Note [Defunctionalized Observable Morphisms] [ref:note-defunctionalized-obsmor].
+--
 -- Autonomous agents can pattern-match on @ObsMor@ to extract symbolic dependencies,
 -- or compile it to a native Haskell function via @evalObsMor@.
 data ObsMor a b where

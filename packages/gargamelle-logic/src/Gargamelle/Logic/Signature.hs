@@ -35,7 +35,30 @@ data UniversalAlgebraSig = UASig
 data LawvereSort sort = LawvereOp [sort] sort
   deriving (Eq, Show)
 
+{- Note [Flat Logic AST Representation]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-flat-logic-ast]
+In formal verification, SMT piping, and sheaf-theoretic restriction solvers, formulas
+frequently contain dozens or hundreds of simultaneous clauses (e.g., global state
+invariants, cell complex boundary matchings, and frame conditions).
+
+Representing large n-ary conjunctions as nested binary trees
+  (And (And (And A B) C) D)
+induces three severe performance penalties:
+  1. O(N^2) recursive traversal cost for deep flattening and SMT-LIB2 syntax generation.
+  2. High heap allocation from intermediate binary constructor nodes.
+  3. GHC call-stack depth exhaustion on deeply nested formulas during pattern matching.
+
+To eliminate this bottleneck, 'LogicAST' incorporates 'FlatConj' and 'FlatDisj' alongside
+binary 'And' and 'Or'. 'FlatConj' stores clauses as a flat contiguous list of subformulas,
+enabling O(N) linear serialization into SMT-LIB2 s-expressions, trivial constant folding
+(pruning 'LitTrue' / 'LitFalse' in a single pass), and cache-friendly iteration.
+-}
+
 -- | Observable deep embedding of First-Order Logic indexed by signature kind 'k'.
+--
+-- See Note [Flat Logic AST Representation] [ref:note-flat-logic-ast].
+--
 -- Avoids native (->) opacity so autonomous agents and SMT pipes can inspect,
 -- serialize, and rewrite formulas.
 data LogicAST (sig :: k) where

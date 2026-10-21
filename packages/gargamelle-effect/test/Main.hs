@@ -26,6 +26,7 @@ import Polytropos.Core (Rep(..), RowRep(..))
 main :: IO ()
 main = hspec do
   describe "Gargamelle.Effect.Router (O(1) Variant Jump Table)" do
+    -- See Note [O(1) Variant Jump-Table Dispatch Physics] [ref:note-variant-jump-table-physics]
     it "dispatches open variants directly through the O(1) jump table" do
       -- Define 3 handlers corresponding to tags 0, 1, 2
       let handler0 rep = Kleisli \_ -> pure ("Tag0: " ++ getSlot 0 rep :: String)
@@ -82,6 +83,7 @@ main = hspec do
       preview (typedVariantPrism 1 :: Prism' (Variant '[]) Int) var0 `shouldBe` Nothing
 
   describe "Gargamelle.Effect.Fusion (Coyoneda Pipeline Fusion)" do
+    -- See Note [Coyoneda Pipeline Fusion] [ref:note-coyoneda-pipeline-fusion]
     it "fuses multiple intermediate mappings into a single pass" do
       let initialVal = Just (10 :: Int)
           fused = fuseMap (+ 5) (fuseMap (* 2) (fuseMap (+ 3) (liftCoyoneda initialVal)))
@@ -96,6 +98,7 @@ main = hspec do
         Left err  -> expectationFailure (T.unpack err)
 
   describe "Kernmantle Rope Backward Compatibility" do
+    -- See Note [Mantle Decoupling and Config-Time Resource Verification] [ref:note-mantle-static-requirements]
     it "executes standard strands under pure mock handlers" do
       let pipeline = getRandomWordRope . logInfoRope "initializing"
       case runKleisli (runRope pipeline pureMockHandlers) () of

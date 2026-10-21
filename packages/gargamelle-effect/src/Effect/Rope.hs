@@ -133,7 +133,33 @@ inspectMantleRequirements _ = Requirements
   , reqTimer    = True
   }
 
+{- Note [Mantle Decoupling and Config-Time Resource Verification]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-mantle-static-requirements]
+In standard monadic effect libraries (e.g. mtl, fused-effects), effect execution is
+intertwined with effect construction: there is no separation between the computation's
+static requirements and its runtime interpretation.
+
+In Kernmantle, the computation arrow 'Rope core mantle a b' is represented as a function
+from a handler mantle to the underlying core arrow:
+  newtype Rope core mantle a b = Rope (Handlers core -> core a b)
+
+This architecture provides a vital operational advantage for autonomous systems:
+  1. Decoupled Interpretation: The arrow structure can be constructed once and interpreted
+     differently in test (pure mock handlers) vs production (real Bubblewrap namespaces and
+     SQLite databases).
+  2. Config-Time Resource Verification: Before executing any arrow step or spawning
+     processes, 'inspectMantleRequirements' extracts the capability profile, and
+     'validateWorkflowResources' mechanically asserts that host binaries (e.g. /usr/bin/bwrap)
+     and database directories exist on the physical machine.
+  3. Fail-Fast Safety: Missing permissions or binaries are caught at configuration time
+     before launching unprivileged container namespaces or database locks.
+-}
+
 -- | Physical environment verification at configuration time.
+--
+-- See Note [Mantle Decoupling and Config-Time Resource Verification] [ref:note-mantle-static-requirements].
+--
 -- Inspects that external physical binaries and filesystem resources actually exist
 -- BEFORE executing any workflow steps.
 validateWorkflowResources :: FilePath -> FilePath -> Requirements -> IO (Either [Text] ())

@@ -29,3 +29,18 @@ library
     gargamelle-core,
     hs-tree-sitter,
     tree-diff
+
+test-suite tests
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs: test
+  default-language: Haskell2010
+  ghc-options: -Wall
+  build-depends:
+    base >= 4.14 && < 5,
+    gargamelle-evidence,
+    gargamelle-core,
+    containers,
+    unordered-containers,
+    tree-diff,
+    hspec >= 2.10

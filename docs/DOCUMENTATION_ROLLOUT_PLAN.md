@@ -199,7 +199,7 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
 
 #### Delivery Milestones for Phase 2
 
-- [ ] **Milestone 2.1: Batch 2A Monographs & In-Code Architecture (Substrates & Semantics)**
+- [x] **Milestone 2.1: Batch 2A Monographs & In-Code Architecture (Substrates & Semantics)**
   - `packages/gargamelle-logic/README.md`: Order-theoretic contracts (`Algebra.Lattice.Op`), contravariant Galois connections, and syntax ASTs. Initial GHC Notes for lattice inversions.
   - `packages/gargamelle-effect/README.md`: Kernmantle Arrow Rope pipelines, $O(1)$ variant jump-table routing, profunctor optics, and Coyoneda fusion. GHC Notes for jump-table routing physics.
   - `packages/gargamelle-model/README.md`: 100% observable morphisms (`ObsMor`), Free `VerifierAST`, `Divisible`/`Decidable` trees, and inspection. GHC Notes for closure elimination.

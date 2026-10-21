@@ -40,8 +40,8 @@ verify_hlint() {
 
 verify_tests() {
   echo "=== [4/6] Full Cabal Test Suite ==="
-  (cd "${REPO_ROOT}" && cabal test gargamelle-workflow:test:tests >/dev/null)
-  echo "  [+] All 26 test suite assertions PASSED."
+  (cd "${REPO_ROOT}" && cabal test gargamelle-workflow:test:tests gargamelle-evidence:test:tests >/dev/null)
+  echo "  [+] All 30 test suite assertions PASSED."
 }
 
 verify_tagref() {

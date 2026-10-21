@@ -16,6 +16,7 @@ import Prelude hiding (id, (.))
 main :: IO ()
 main = hspec $ do
   describe "Gargamelle.Logic.Signature" $ do
+    -- See Note [Flat Logic AST Representation] [ref:note-flat-logic-ast]
     it "constructs first-order LogicAST trees and flat connectives" $ do
       let phi = Implies (AtomPred "P" ["x"]) (Or (AtomPred "Q" ["x"]) LitFalse)
       phi `shouldBe` Implies (AtomPred "P" ["x"]) (Or (AtomPred "Q" ["x"]) LitFalse)
@@ -23,6 +24,7 @@ main = hspec $ do
       flat `shouldBe` FlatConj [LitTrue, AtomPred "R" ["y"]]
 
   describe "Gargamelle.Logic.Defunctionalize (ObsMor)" $ do
+    -- See Note [Defunctionalized Observable Morphisms] [ref:note-defunctionalized-obsmor]
     it "obeys Category identity and composition laws" $ do
       let stepA = SymbolicStep "add1" (+ (1 :: Int))
       let stepB = SymbolicStep "mul2" (* (2 :: Int))
@@ -48,6 +50,7 @@ main = hspec $ do
       inspectObsMor pipe `shouldBe` ["Step:validateInput", "ProjectTag:payload", "InjectTag:envelope"]
 
   describe "Gargamelle.Logic.Contract (Assume-Guarantee via Op)" $ do
+    -- See Note [Lattice Inversion via Op Dualization] [ref:note-lattice-op-dualization]
     it "dualizes refinement: meet weakens assumptions and strengthens guarantees" $ do
       -- In Bool lattice: False <= True (False is bottom, True is top)
       -- A1 = False (demanding assumption), G1 = False (weak guarantee)
@@ -67,6 +70,7 @@ main = hspec $ do
       getAssumption topContract `shouldBe` False
       getGuarantee topContract `shouldBe` True
 
+    -- See Note [Circular Assume-Guarantee Soundness] [ref:note-circular-ag-soundness]
     it "verifies circular assume-guarantee soundness on shared interfaces" $ do
       -- C1 assumes True, guarantees True
       -- C2 assumes True, guarantees True
@@ -78,6 +82,7 @@ main = hspec $ do
       verifyCircularAG cBroken c2 `shouldBe` False
 
   describe "Gargamelle.Logic.Galois" $ do
+    -- See Note [Adjoint Restrict-CoRestrict Galois Connections] [ref:note-galois-connection-stalks]
     it "composes Galois connections in series" $ do
       let g1 = galoisObsMor "g1" (+ (1 :: Int)) (\x -> x - (1 :: Int))
       let g2 = galoisObsMor "g2" (* (2 :: Int)) (`div` (2 :: Int))
