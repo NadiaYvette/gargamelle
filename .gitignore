@@ -3,6 +3,7 @@ dist-newstyle/
 *.hi
 *.o
 cabal.project.freeze
+cabal.project.local*
 .ghc-pkg-env/
 run-smoke.sh
 tags
@@ -11,3 +12,4 @@ TAGS
 .contextful/
 .ok/
 docs/haddock/
+external/Jukebox/

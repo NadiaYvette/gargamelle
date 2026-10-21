@@ -26,6 +26,9 @@ jobs:
       - name: Verify Markdown Links & Anchors (Gate 7)
         run: ./bin/gargamelle-linkcheck
 
+      - name: Configure Git for HTTPS submodules
+        run: git config --global url."https://github.com/".insteadOf "git@github.com:"
+
       - name: Set up Haskell Toolchain
         uses: haskell-actions/setup@v2
         with:

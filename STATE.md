@@ -179,6 +179,7 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - Formalized Gate 9 in `./bin/gargamelle-verify` to audit and enforce repository-wide and per-package in-code comment density.
   - Enriched Haddock documentation and formal invariants across `packages/gargamelle-workflow`, `packages/gargamelle-persistence`, and `packages/gargamelle-sandbox`, raising in-code comment density to 28.6% repository-wide (1,435 comments / 3,591 code lines; 35.2% across production `src/` modules).
   - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
+  - Resolved GitHub Actions CI environment divergence: replaced laptop-specific `/home/nyc/src/...` paths in `cabal.project` with portable `source-repository-package` declarations targeting public git repositories and pinned commits, preserved local development checkouts via git-ignored `cabal.project.local`, added `git config url."https://github.com/".insteadOf "git@github.com:"` rewrite in CI, and pruned phantom legacy `external/Jukebox` submodule gitlink.
   - Active next frontier: Milestone 3.6 (`mdBook` Local Site Scaffold & Dual-Link Integration).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
