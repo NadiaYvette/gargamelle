@@ -117,7 +117,14 @@ executeBubblewrapSandboxed limits workDir cmd args = do
     Left (err :: SomeException) ->
       pure (-1, T.empty, T.pack (show err))
 
--- | Bracketed temporary directory allocation guaranteeing cleanup
+-- | Bracketed temporary directory allocation guaranteeing cleanup.
+--
+-- Safely creates an isolated staging directory under @/tmp/gargamelle-sandbox-<prefix>@,
+-- executes the provided callback, and guarantees recursive cleanup even if exceptions occur.
+--
+-- Parameters:
+--   - 'Text': Prefix slug for the directory name.
+--   - @(FilePath -> IO r)@: Action to execute with the ephemeral directory path.
 withTempSandboxDir :: Text -> (FilePath -> IO r) -> IO (Either Text r)
 withTempSandboxDir prefix action = do
   let baseDir = "/tmp" </> ("gargamelle-sandbox-" ++ T.unpack prefix)
@@ -130,7 +137,10 @@ withTempSandboxDir prefix action = do
           Right val -> pure (Right val)
           Left (err :: SomeException) -> pure (Left (T.pack (show err))))
 
--- | Deterministic pure mock for sandboxed runs in unit tests
+-- | Deterministic pure mock for sandboxed runs in unit tests and mock interpreters.
+--
+-- Returns exit code 0, a synthetic stdout payload indicating the executed command
+-- and argument count, and empty stderr without invoking OS processes or filesystem calls.
 pureMockSandboxRun :: ResourceLimits -> FilePath -> [String] -> (Int, Text, Text)
 pureMockSandboxRun _limits cmd args =
   (0, T.pack ("mock-output-for-" ++ cmd ++ "-with-" ++ show (length args) ++ "-args"), T.empty)

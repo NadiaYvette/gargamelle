@@ -173,7 +173,13 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - Cleared all out-of-scope identifier warnings (`'s'`, `'mapSig'`, `'d'`, `'h'`, `'arr'`, `'k'`, `'amalgamateModels'`), symbol ambiguities (`'Rope'`), and unused imports across all package modules.
   - Upgraded `./bin/gargamelle-verify` to a **9-gate physical suite** (Gate 8: Hyperlinked Haddock Cross-Reference Gate), verifying 46 exposed modules and 46 hyperlinked source files with 0 dangling symbols.
   - Integrated into `.github/workflows/ci.yml` and repository release harnesses.
-  - Active next frontier: Milestone 3.5 (`cloc` Comment Density Audit).
+- **Roll-Out Phase 3, Milestone 3.5 (`cloc` Comment Density Audit) [COMPLETED]**:
+  - Implemented `./bin/gargamelle-cloc` supporting ASCII table reporting, `--check` regression gating, `--quiet` one-line summaries, and `--json` machine-readable output.
+  - Added dual execution modes: automated invocation of native `cloc --by-file --json` with pure Python line-counter fallback for hermetic environments.
+  - Formalized Gate 9 in `./bin/gargamelle-verify` to audit and enforce repository-wide and per-package in-code comment density.
+  - Enriched Haddock documentation and formal invariants across `packages/gargamelle-workflow`, `packages/gargamelle-persistence`, and `packages/gargamelle-sandbox`, raising in-code comment density to 28.6% repository-wide (1,435 comments / 3,591 code lines; 35.2% across production `src/` modules).
+  - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
+  - Active next frontier: Milestone 3.6 (`mdBook` Local Site Scaffold & Dual-Link Integration).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:

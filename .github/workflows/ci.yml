@@ -48,5 +48,8 @@ jobs:
       - name: Verify Hyperlinked Haddock Documentation (Gate 8)
         run: ./bin/gargamelle-haddock --check
 
+      - name: Verify Comment Density Audit (Gate 9)
+        run: ./bin/gargamelle-cloc --check
+
       - name: Run Full Physical Verification Gates
         run: ./bin/gargamelle-verify

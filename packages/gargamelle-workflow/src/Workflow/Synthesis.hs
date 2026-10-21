@@ -112,30 +112,48 @@ $( singletons
 
 deriving via AllVertices SynthesisVertex instance RenderableVertices SynthesisVertex
 
--- | Commands sent to drive the synthesis state machine
+-- | Commands sent to drive the synthesis state machine transitions.
 data SynthesisCommand
   = CmdProposeCandidate Text
+    -- ^ Propose a newly generated patch, expression, or candidate synthesis.
   | CmdRunSandbox (Int, Text, Text)
+    -- ^ Feed the result of sandboxed container execution: (exit code, stdout, stderr).
   | CmdEvaluateEvidence (Maybe Text)
+    -- ^ Evaluate gathered evidence or counterexamples from the execution environment.
   | CmdEvaluateEvidenceWithSheaf (Maybe Text)
+    -- ^ Evaluate evidence and route directly toward the topological sheaf verification stage.
   | CmdCheckSimilarity Bool
+    -- ^ Pass the boolean result of AST structural similarity against known prior failures.
   | CmdCheckSimilarityWithSheaf Bool
+    -- ^ Check structural similarity, transitioning to sheaf evaluation if non-similar.
   | CmdTransitionToSheafCheck
+    -- ^ Unconditionally transition to the 'StateSheafCheck' verification state.
   | CmdEvaluateSheaf Bool [Text]
+    -- ^ Submit the sheaf coboundary outcome: (isHarmonic, list of failing boundary descriptions).
   | CmdReset
+    -- ^ Reset the synthesis state machine back to its initial 'StatePropose' state.
   deriving (Show, Eq)
 
--- | Events emitted by the synthesis state machine
+-- | Events emitted by the synthesis state machine upon state transitions.
 data SynthesisEvent
   = EvtCandidateProposed Text
+    -- ^ A new synthesis candidate was successfully proposed and queued for execution.
   | EvtSandboxCompleted (Int, Text)
+    -- ^ Sandboxed container execution completed with given exit code and diagnostic output.
   | EvtEvidenceRecorded Text
+    -- ^ SMT counterexample or execution evidence was persisted to prevent future regressions.
   | EvtSimilarityChecked Bool
+    -- ^ AST structural similarity check finished with given boolean outcome.
   | EvtSheafHarmonicVerified Text
+    -- ^ Global section verified: coboundary operator yields zero discrepancy ($H^1 = 0$).
   | EvtSheafObstructionsDetected [Text]
+    -- ^ Cohomological boundary obstructions detected ($H^1 \neq 0$), routing failing interfaces back to repair.
   | EvtSynthesisSucceeded Text
+    -- ^ End-to-end synthesis achieved full physical, relational, and topological certification.
   | EvtSynthesisRetry Text
+    -- ^ Proposal rejected due to known failure, container crash, or obstruction; retrying.
   | EvtResetDone
+    -- ^ The state machine was cleanly reset to 'StatePropose'.
   deriving (Show, Eq)
 
 {- Note [Formally Verified Mealy Automata State Topology]
@@ -324,27 +342,42 @@ countEE (EditRec _ omap) = foldr (\e (accC, accCh) -> let (c, ch) = countEdits e
 countEE (EditLst es) = foldr (\e (accC, accCh) -> let (c, ch) = countEdits e in (accC + c, accCh + ch)) (0, 0) es
 countEE (EditExp _) = (1, 0)
 
--- | Configuration for an end-to-end Sheaf-Gated CEGIS run
+-- | Configuration parameters for an end-to-end Sheaf-Gated CEGIS run.
 data SheafCEGISConfig vId eId stalk edgeStalk = SheafCEGISConfig
   { cegisDbConn        :: Connection
+    -- ^ Active SQLite connection handle for relational evidence logging.
   , cegisRunId         :: Int64
+    -- ^ Unique primary key identifier for this synthesis run.
   , cegisCandidateName :: Text
+    -- ^ Human-readable descriptor or module name of the synthesis candidate.
   , cegisChangeRep     :: Text
+    -- ^ Canonical structural representation string for duplicate proposal pruning.
   , cegisSig           :: Text
+    -- ^ Interface signature name under which verification is performed.
   , cegisLimits        :: ResourceLimits
+    -- ^ Hardware execution constraints (timeout seconds, memory MB) for the container.
   , cegisSandboxCmd    :: (FilePath, [String])
+    -- ^ Command binary path and argument list to execute inside the Bubblewrap sandbox.
   , cegisComplex       :: CellComplex vId eId
+    -- ^ Topological cell complex $G = (V, E)$ modeling the software module architecture.
   , cegisSheaf         :: CellularSheaf vId eId stalk edgeStalk
+    -- ^ Sheaf assignment of vertex stalks, edge stalks, and directional restriction maps.
   , cegisCandidateSpec :: Cochain0 vId stalk
+    -- ^ Proposed 0-cochain assigning local contracts or candidate implementations to each vertex cell.
   , cegisTimestamp     :: Int64
+    -- ^ POSIX epoch timestamp in seconds marking the start of synthesis evaluation.
   }
 
--- | Outcome of an end-to-end Sheaf-Gated CEGIS synthesis run
+-- | Outcome of an end-to-end Sheaf-Gated CEGIS synthesis run.
 data SheafCEGISOutcome vId eId stalk edgeStalk
   = SheafCEGISSuccess (GlobalSection vId stalk) Text
+    -- ^ Synthesis fully succeeded: the candidate forms a valid global section ($H^1 = 0$), accompanied by confirmation text.
   | SheafCEGISObstruction [InterfaceObstruction eId edgeStalk]
+    -- ^ Synthesis rejected due to boundary discrepancies ($H^1 \neq 0$): returns list of failing interface edge obstructions.
   | SheafCEGISSandboxFailure Int Text
+    -- ^ Sandboxed container execution failed: returns non-zero exit code and stderr error diagnostics.
   | SheafCEGISPriorFailureFound Text
+    -- ^ Fast-path cache rejection: candidate structural representation matches a known prior refuted hypothesis in Beam SQLite.
   deriving (Eq, Show)
 
 {- Note [End-to-End Sheaf-Gated CEGIS Synthesis Loop]

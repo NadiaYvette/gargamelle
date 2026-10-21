@@ -2,6 +2,25 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 -- | Milestone M2: High-level Beam persistence operations for Evidence, Counterexamples, and Runs.
+--
+-- Provides transactional SQLite persistence using the Beam ORM:
+--
+-- @
+--   ┌───────────────────────┐
+--   │    EvidenceRecordT    │◄──────┐
+--   │ (id, sig, rep, ts)    │       │ FK (evidence_ref__id)
+--   └───────────────────────┘       │
+--                               ┌───┴───────────────────┐
+--   ┌───────────────────────┐   │ CounterexampleRecordT │
+--   │      RunRecordT       │   │ (id, payload, ref)    │
+--   │ (id, status, started) │   └───────────────────────┘
+--   └───────────────────────┘
+-- @
+--
+-- All operations are executed atomically via 'runBeamSqlite' under SQLite transaction
+-- boundaries, preventing race conditions during concurrent CEGIS loops.
+--
+-- See Note [Beam SQLite Relational Persistence and Concurrency Locking] [ref:note-beam-sqlite-persistence].
 module Persistence.Beam
   ( -- * Initialization
     initEvidenceDb
@@ -26,6 +45,8 @@ import Persistence.Schema
 
 -- | Initialize SQLite database tables for Evidence, Counterexamples, and Runs
 -- if they do not already exist.
+--
+-- Idempotent: creates tables with foreign keys and index constraints only if missing.
 initEvidenceDb :: Connection -> IO ()
 initEvidenceDb conn = do
   execute_ conn
@@ -51,7 +72,15 @@ initEvidenceDb conn = do
     \, completed_at INTEGER \
     \);"
 
--- | Insert a failure or verified evidence item into the store.
+-- | Insert a verified or failure evidence item into the store.
+--
+-- Parameters:
+--   - 'Connection': Active SQLite database connection.
+--   - 'Int64': Unique evidence primary key ID.
+--   - 'Text': Module or institution signature name.
+--   - 'Text': Canonical structural representation of the patch or expression.
+--   - 'Text': Diagnostic reason string or SMT failure witness.
+--   - 'Int64': POSIX epoch timestamp in seconds.
 insertEvidenceRecord :: Connection -> Int64 -> Text -> Text -> Text -> Int64 -> IO ()
 insertEvidenceRecord conn eid sig rep reason ts =
   runBeamSqlite conn $ runInsert $
@@ -59,6 +88,9 @@ insertEvidenceRecord conn eid sig rep reason ts =
       insertValues [EvidenceRecord eid sig rep reason ts]
 
 -- | Find an evidence entry by its structural representation string.
+--
+-- Used by the CEGIS engine to quickly reject syntactically different but
+-- structurally identical variants of previously refuted candidates.
 findEvidenceByRep :: Connection -> Text -> IO (Maybe EvidenceRecord)
 findEvidenceByRep conn rep =
   runBeamSqlite conn $ runSelectReturningOne $ select $ do
@@ -66,13 +98,19 @@ findEvidenceByRep conn rep =
     guard_ (evidenceChangeRep ev ==. val_ rep)
     pure ev
 
--- | Retrieve all stored evidence records.
+-- | Retrieve all stored evidence records ordered arbitrarily.
 listAllEvidence :: Connection -> IO [EvidenceRecord]
 listAllEvidence conn =
   runBeamSqlite conn $ runSelectReturningList $ select $
     all_ (dbEvidence evidenceDb)
 
--- | Insert a counterexample associated with a specific evidence item.
+-- | Insert a counterexample witness associated with a specific evidence record.
+--
+-- Parameters:
+--   - 'Connection': Active SQLite database connection.
+--   - 'Int64': Unique counterexample primary key ID.
+--   - 'Int64': Foreign key ID referencing the parent 'EvidenceRecordT'.
+--   - 'Text': Serialized counterexample payload (e.g. SMT model assignment).
 insertCounterexample :: Connection -> Int64 -> Int64 -> Text -> IO ()
 insertCounterexample conn cid eid payload =
   runBeamSqlite conn $ runInsert $
@@ -87,14 +125,26 @@ findCounterexamplesFor conn eid =
     guard_ (counterexampleEvidenceRef cx ==. val_ (EvidenceId eid))
     pure cx
 
--- | Track the beginning of an autonomous execution run.
+-- | Track the beginning of an autonomous synthesis or verification run.
+--
+-- Parameters:
+--   - 'Connection': Active SQLite database connection.
+--   - 'Int64': Unique run primary key ID.
+--   - 'Text': Initial status string (e.g. @"RUNNING"@).
+--   - 'Int64': Start POSIX epoch timestamp in seconds.
 startRunRecord :: Connection -> Int64 -> Text -> Int64 -> IO ()
 startRunRecord conn rid status startedAt =
   runBeamSqlite conn $ runInsert $
     insert (dbRuns evidenceDb) $
       insertValues [RunRecord rid status startedAt Nothing]
 
--- | Mark an autonomous execution run as completed with a timestamp.
+-- | Mark an autonomous execution run as completed with final status and timestamp.
+--
+-- Parameters:
+--   - 'Connection': Active SQLite database connection.
+--   - 'Int64': Run primary key ID.
+--   - 'Text': Final status string (e.g. @"SUCCESS"@, @"FAILED_SANDBOX"@).
+--   - 'Int64': Completion POSIX epoch timestamp in seconds.
 completeRunRecord :: Connection -> Int64 -> Text -> Int64 -> IO ()
 completeRunRecord conn rid status completedAt =
   runBeamSqlite conn $ runUpdate $

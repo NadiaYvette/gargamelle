@@ -99,7 +99,11 @@ verify_haddock() {
 
 verify_cloc() {
   echo "=== [9/9] CLOC Comment Density Gate ==="
-  if command -v cloc >/dev/null 2>&1; then
+  if [[ -x "${REPO_ROOT}/bin/gargamelle-cloc" ]]; then
+    local cloc_out
+    cloc_out="$("${REPO_ROOT}/bin/gargamelle-cloc" --quiet --check)"
+    echo "  [+] Comment density verified: ${cloc_out}"
+  elif command -v cloc >/dev/null 2>&1; then
     local stats comments code total pct
     stats="$(cd "${REPO_ROOT}" && cloc --json packages/ 2>/dev/null)"
     comments="$(echo "${stats}" | python3 -c 'import sys, json; data=json.load(sys.stdin); print(data.get("Haskell", {}).get("comment", 0))')"
@@ -110,7 +114,7 @@ verify_cloc() {
       echo "  [i] In-code comment density: ${pct}% (${comments} comments / ${code} code lines; target: 50%+)."
     fi
   else
-    echo "  [SKIP] cloc binary not found."
+    echo "  [SKIP] cloc binary or bin/gargamelle-cloc not found."
   fi
 }
 

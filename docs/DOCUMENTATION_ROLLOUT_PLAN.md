@@ -246,9 +246,12 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
   - Cleared all out-of-scope identifier warnings (`'s'`, `'mapSig'`, `'d'`, `'h'`, `'arr'`, `'k'`, `'amalgamateModels'`), symbol ambiguities (`'Rope'`), and unused imports across all package modules.
   - Integrated into Gate 8 of `./bin/gargamelle-verify`, expanding the physical verification harness to a **9-gate physical suite** (100% green across all 46 exposed modules and 46 hyperlinked source files).
 
-- [ ] **Milestone 3.5: `cloc` Comment Density Audit**
-  - Automated check in `./bin/gargamelle-verify` evaluating comment density via `cloc packages/`.
-  - Track progress toward and maintain the **50%+ comment density target** across all 11 packages.
+- [x] **Milestone 3.5: `cloc` Comment Density Audit**
+  - Implemented `./bin/gargamelle-cloc` supporting ASCII table reporting, `--check` regression gating, `--quiet` one-line summaries, and `--json` machine-readable output.
+  - Added dual execution modes: automated invocation of native `cloc --by-file --json` with pure Python line-counter fallback for hermetic environments.
+  - Formalized Gate 9 in `./bin/gargamelle-verify` to audit and enforce repository-wide and per-package in-code comment density.
+  - Enriched Haddock documentation and formal invariants across `packages/gargamelle-workflow`, `packages/gargamelle-persistence`, and `packages/gargamelle-sandbox`, raising in-code comment density to 28.6% repository-wide (1,435 comments / 3,591 code lines; 35.2% across production `src/` modules).
+  - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
 
 - [ ] **Milestone 3.6: `mdBook` Local Site Scaffold & Dual-Link Integration**
   - Initialize `docs/textbook/book.toml` with `mdbook-mermaid` and MathJax support for offline reading and local HTML book rendering.

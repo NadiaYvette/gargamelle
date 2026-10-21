@@ -2,6 +2,25 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-- | Workflow & Integration Test Suite for Gargamelle
+--
+-- Validates the unified synthesis loop across four developmental milestones:
+--
+--   1. Milestone M1: Kernmantle Arrow Rope effect orchestration, strand interpretation,
+--      and static config-time analysis without IO side-effects.
+--   2. Milestone M2: Beam SQLite transactional persistence, evidence and counterexample
+--      relational linking, and on-disk durability across connection lifecycles.
+--      (See Note [Beam SQLite Relational Persistence and Concurrency Locking] [ref:note-beam-sqlite-persistence])
+--   3. Milestone M3: Bubblewrap Linux container namespace isolation, Crem Mealy state
+--      machine topology enforcement, and Tree-Diff AST structural similarity heuristics.
+--      (See Note [Bubblewrap Namespace Isolation and Resource Limiting Boundaries] [ref:note-sandbox-bwrap-isolation])
+--      (See Note [Formally Verified Mealy Automata State Topology] [ref:note-crem-mealy-topology])
+--      (See Note [AST Tree-Diff Structural Similarity Heuristics] [ref:note-ast-structural-similarity])
+--   4. Phase 6: End-to-end Sheaf-Gated CEGIS synthesis pipeline, topological $H^1$
+--      cohomological obstruction localization, and Knaster-Tarski lattice diffusion.
+--      (See Note [End-to-End Sheaf-Gated CEGIS Synthesis Loop] [ref:note-sheaf-gated-cegis-loop])
+--      (See Note [Sheaf Coboundary Operator and Cohomological Obstructions] [ref:note-sheaf-coboundary-obstructions])
+--      (See Note [Store Comonad Cellular Diffusion and Harmonic Consensus] [ref:note-store-comonad-diffusion])
 module Main where
 
 import Test.Hspec
