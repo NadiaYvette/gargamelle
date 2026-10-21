@@ -70,6 +70,7 @@ The package exports 2 modules delivering equational institutions and categorical
 ### 4.1 Constructing and Executing a DPO Rewrite Rule
 ```haskell
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE GADTs #-}
 
 module ExampleDPO where
 
@@ -91,7 +92,7 @@ exampleRewrite = do
       match = fromList [(0, 0), (1, 1)]
 
   case applyDPO rule match of
-    DPOSuccess d2g d2h r2h ->
+    DPOSuccess _d2g _d2h _r2h ->
       putStrLn "DPO rewrite succeeded: host transformed cleanly."
     DPOGluingFailed ->
       putStrLn "Rewrite aborted: gluing condition violated."
@@ -100,6 +101,7 @@ exampleRewrite = do
 ### 4.2 Equational Term Evaluation
 ```haskell
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE LambdaCase #-}
 
 module ExampleEquational where
 
@@ -112,10 +114,10 @@ checkIdentityLaw :: Bool
 checkIdentityLaw =
   let c = Const (Proxy @"c")
       fc = FunApp (Proxy @"f") [c]
-      eqn = Equation fc c
+      _eqn = Equation fc c
       model = EqModel
         { carrier = ["c"]
-        , interp  = Map.fromList [("f", head)]
+        , interp  = Map.fromList [("f", \case (x:_) -> x; [] -> "c")]
         }
   in evalTerm model fc == evalTerm model c
 ```

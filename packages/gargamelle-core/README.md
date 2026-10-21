@@ -111,17 +111,24 @@ The package exports 10 modules providing category-theoretic institution infrastr
 ```haskell
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
 
 module ExampleInstitution where
 
+import Proarrow.Core (type (~>))
 import Gargamelle.Core.Institution
-import Proarrow.Category.Instance.Bool (BOOL(..), Booleans(..))
 
--- Given a signature morphism F2T :: FLS ~> TRU,
+-- Given a signature morphism morph :: s1 ~> s2,
 -- a sentence phi, and a target model mPrime:
-verifyPreservation :: CategoricalInstitution i => (Fls ~> Tru) -> Sen i FLS -> Mod i TRU -> Bool
+verifyPreservation
+  :: forall i s1 s2. CategoricalInstitution i
+  => (s1 ~> s2)
+  -> Sen i s1
+  -> Mod i s2
+  -> Bool
 verifyPreservation morph phi mPrime =
-  let (evLHS, evRHS, isPreserved) = checkSatisfactionInvariance morph phi mPrime
+  let (evLHS, evRHS, isPreserved) = checkSatisfactionInvariance @i morph phi mPrime
   in isPreserved && evLHS == evRHS
 ```
 
@@ -129,7 +136,6 @@ verifyPreservation morph phi mPrime =
 ```haskell
 module ExampleWeaving where
 
-import Proarrow.Core (type (~>))
 import Proarrow.Category.Instance.Unit (Unit(..))
 import Gargamelle.Core.Weaving
 
@@ -138,7 +144,7 @@ weaveSystem :: IO ()
 weaveSystem = do
   let inclBase   = Unit
       inclAspect = Unit
-  weaveAspect inclBase inclAspect $ \injBase injAspect -> do
+  weaveAspect inclBase inclAspect $ \_injBase _injAspect -> do
     putStrLn "Weaving completed: canonical injection morphisms established."
 ```
 

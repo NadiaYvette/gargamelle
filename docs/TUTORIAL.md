@@ -33,29 +33,34 @@ cabal repl gargamelle-workflow
 
 In traditional Haskell verification libraries, predicates and verification conditions are represented as opaque functions `(a -> Bool)` or `(Model -> IO Result)`. These functions cannot be statically inspected, serialized to SQLite, or converted to SMT formulas.
 
-`gargamelle-model` introduces **100% Observable Morphisms** (`ObsMor`):
+`gargamelle-model` and `gargamelle-logic` introduce **100% Observable Morphisms** (`ObsMor`) and Free **Verifier** ASTs:
 
 ```haskell
-import Gargamelle.Model.Observable
-import Gargamelle.Model.Verifier
+module Tutorial.Lesson1_ObservableMorphisms where
+
+import Gargamelle.Logic.Defunctionalize (ObsMor(..))
+import Gargamelle.Model.Satisfaction (Verifier, verifyPredicate, evalVerifier, Evidence(..), inspectVerifierPlan)
+import Gargamelle.Model.Structure (compilePairVerifier)
 
 -- Construct an introspectable morphism AST
-let myMor :: ObsMor (Int, String) Bool
-    myMor = ObsNamed "isPositive" (\(n, _) -> n > 0)
+myMor :: ObsMor (Int, String) Bool
+myMor = SymbolicStep "isPositive" (\(n, _) -> n > 0)
 
--- Build a Free Verifier AST using Divisible (products) and Decidable (sums)
-let myVerifier :: VerifierAST (Int, String)
-    myVerifier = divide (\(n, s) -> (n, s))
-                        (VerifyPred "positiveInt" (ObsNamed "pos" (\n -> n > 0)))
-                        (VerifyPred "nonEmptyStr" (ObsNamed "len" (\s -> not (null s))))
+-- Build a Free Verifier AST using Divisible (products)
+myVerifier :: Verifier (Int, String)
+myVerifier = compilePairVerifier
+  (verifyPredicate "positiveInt" (\n -> n > 0))
+  (verifyPredicate "nonEmptyStr" (\s -> not (null s)))
 
 -- 100% Static Inspection without evaluation:
-putStrLn (T.unpack (inspectVerifierPlan myVerifier))
--- Output: Divide [Pred "positiveInt", Pred "nonEmptyStr"]
+inspectionPlan :: [String]
+inspectionPlan = inspectVerifierPlan myVerifier
+-- Evaluates to: ["Step:divide", "AtomCheck:positiveInt", "AtomCheck:nonEmptyStr"]
 
 -- Evaluate against a model returning an Evidence monoid:
-let result = runVerifier myVerifier (42, "hello")
--- Result: VerifiedSection (success)
+sampleEvaluation :: Evidence
+sampleEvaluation = evalVerifier myVerifier (42, "hello")
+-- Evaluates to: VerifiedSection
 ```
 
 ---
@@ -65,9 +70,12 @@ let result = runVerifier myVerifier (42, "hello")
 Goguen-Burstall **Institutions** formalize logic independently of concrete syntax:
 
 ```haskell
-import Gargamelle.Core.Institution
+{-# LANGUAGE TypeOperators #-}
+
+module Tutorial.Lesson2_Institutions where
+
+import Proarrow.Category.Instance.Unit (Unit(..))
 import Gargamelle.Core.Weaving
-import Proarrow.Core
 
 -- An Institution i provides:
 -- 1. Signatures: s1, s2 :: Sig i
@@ -79,7 +87,12 @@ import Proarrow.Core
 
 -- Pushout Feature Weaving:
 -- Combine a Base signature B and an Aspect signature W over an interface C:
--- weaveAspect :: (c ~> b) -> (c ~> w) -> PushoutDiagram c b w p
+weaveSystem :: IO ()
+weaveSystem = do
+  let inclBase   = Unit
+      inclAspect = Unit
+  weaveAspect inclBase inclAspect $ \_injBase _injAspect -> do
+    putStrLn "Aspect successfully woven into base specification over interface."
 ```
 
 When integrating an aspect (such as authentication or logging) into a core domain model, pushout weaving computes the universal colimit object and amalgamation:
@@ -92,22 +105,37 @@ $$\mathbf{Mod}(B \amalg_C W) \cong \mathbf{Mod}(B) \times_{\mathbf{Mod}(C)} \mat
 `gargamelle-fol` connects directly to host Z3 4.16 via standard SMT-LIB2 streaming pipes:
 
 ```haskell
-import Gargamelle.FOL.Z3
-import qualified Data.Map.Strict as Map
+{-# LANGUAGE DataKinds #-}
 
--- 1. Check satisfiability and extract model
-let formula = "(declare-const x Int) (declare-const y Int) (assert (= (+ x y) 10)) (assert (> x 5))"
-result <- solveZ3 formula
-case result of
-  Sat modelMap -> do
-    putStrLn $ "Satisfiable! x = " ++ Map.findWithDefault "?" "x" modelMap
-  Unsat -> putStrLn "Unsatisfiable"
-  Z3Error err -> putStrLn $ "Error: " ++ T.unpack err
+module Tutorial.Lesson3_SMTZ3Pipe where
+
+import Data.Proxy (Proxy(..))
+import FirstOrder (Formula(..))
+import Gargamelle.FOL.Z3 (checkFormulaZ3, verifyValidityZ3, SMTResult(..))
+import Gargamelle.Model.Satisfaction (Evidence(..))
+
+-- 1. Check satisfiability and extract countermodel
+findSatisfyingModel :: IO ()
+findSatisfyingModel = do
+  let p = Pred (Proxy @"P") []
+      q = Pred (Proxy @"Q") []
+      formula = And p (Not q)
+  result <- checkFormulaZ3 formula
+  case result of
+    Sat model -> putStrLn $ "Satisfying assignment: " ++ show model
+    Unsat     -> putStrLn "Formula is unsatisfiable."
+    Unknown e -> putStrLn $ "Solver inconclusive: " ++ e
 
 -- 2. Verify formal validity (tautology checking)
--- Verifying whether (x > 0 ==> x >= 0) is universally valid:
-validity <- verifyZ3Formula "x_pos" "(assert (not (=> (> x 0) (>= x 0))))"
--- Returns: VerifiedSection "Tautology verified by Z3"
+-- Verifying Law of Excluded Middle: (P \/ not P)
+verifyTautology :: IO ()
+verifyTautology = do
+  let p = Pred (Proxy @"P") []
+      tautology = Or p (Not p)
+  evidence <- verifyValidityZ3 tautology
+  case evidence of
+    VerifiedSection -> putStrLn "Tautology verified by host Z3 across all models."
+    Counterexample sym _wit -> putStrLn $ "Countermodel found in " ++ sym
 ```
 
 ---
@@ -117,38 +145,41 @@ validity <- verifyZ3Formula "x_pos" "(assert (not (=> (> x 0) (>= x 0))))"
 Software architectures are modeled as 1-dimensional cell complexes:
 
 ```haskell
+{-# LANGUAGE OverloadedStrings #-}
+
+module Tutorial.Lesson4_CellularSheaves where
+
+import Data.Text (Text)
 import Gargamelle.Sheaf
 
--- 1. Define a 1-dimensional Cell Complex: 3 services, 2 interfaces
-let complex = fromEdges
-      [ ("api_auth", "ServiceAuth", "ServiceGateway")
-      , ("api_billing", "ServiceGateway", "ServiceBilling")
-      ]
+runSheafLocalization :: IO ()
+runSheafLocalization = do
+  -- 1. Define a 1-dimensional Cell Complex: 3 services, 2 interfaces
+  let (complex :: CellComplex Text Text) = fromEdges
+        [ ("api_auth", "ServiceAuth", "ServiceGateway")
+        , ("api_billing", "ServiceGateway", "ServiceBilling")
+        ]
 
--- 2. Define a cellular sheaf over contracts
-let sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ e -> e)
+  -- 2. Define a cellular sheaf over contracts
+  let sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ (e :: Text) -> e)
 
--- 3. Assign local contracts across services:
--- Notice the discrepancy: ServiceGateway expects "BearerToken", but ServiceBilling expects "OAuth2Secret"
-let spec = fromListCochain0
-      [ ("ServiceAuth", "BearerToken")
-      , ("ServiceGateway", "BearerToken")
-      , ("ServiceBilling", "OAuth2Secret")
-      ]
+  -- 3. Assign local contracts across services:
+  -- Discrepancy: ServiceGateway expects "BearerToken", but ServiceBilling expects "OAuth2Secret"
+  let spec = fromListCochain0
+        [ ("ServiceAuth", "BearerToken")
+        , ("ServiceGateway", "BearerToken")
+        , ("ServiceBilling", "OAuth2Secret")
+        ]
 
--- 4. Evaluate the coboundary operator \delta^0:
-let (Cochain1 diffs, isHarmonic) = coboundary complex sheaf spec
--- isHarmonic is False!
+  -- 4. Evaluate the coboundary operator \delta^0:
+  let (_diffs, isHarmonic) = coboundary complex sheaf spec
+  putStrLn $ "Is globally consistent: " ++ show isHarmonic
 
--- 5. Pinpoint exact failing interfaces via H^1 obstruction localization:
-let obstructions = locateObstructions complex sheaf spec
--- Result:
--- [ InterfaceObstruction
---     { obstructedEdge = "api_billing"
---     , sourceRestriction = "BearerToken"
---     , targetRestriction = "OAuth2Secret"
---     }
--- ]
+  -- 5. Pinpoint exact failing interfaces via H^1 obstruction localization:
+  let obstructions = locateObstructions complex sheaf spec
+  case obstructions of
+    [] -> putStrLn "System globally consistent (H^1 = 0)."
+    obs -> mapM_ (\o -> putStrLn $ "Interface failure on: " ++ show (obstructedEdge o)) obs
 ```
 
 The output gives exact interface names and differing values, allowing automated repair to focus precisely on the offending boundary.
@@ -160,18 +191,24 @@ The output gives exact interface names and differing values, allowing automated 
 When boundary discrepancies exist, we can reconcile them through comonadic diffusion over a contract lattice before falling back to full counterexample repair:
 
 ```haskell
-import Workflow.Synthesis
-import Sandbox.Effect
+{-# LANGUAGE OverloadedStrings #-}
+
+module Tutorial.Lesson5_SheafCEGIS where
+
 import Database.SQLite.Simple (open, close)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Gargamelle.Sheaf
+import Sandbox.Effect (defaultLimits, ResourceLimits(..))
+import Workflow.Synthesis
 
-main :: IO ()
-main = do
+runTutorialCEGIS :: IO ()
+runTutorialCEGIS = do
   conn <- open ":memory:"
-  let complex = fromEdges [("e1", "ServiceA", "ServiceB")]
-  let sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ e -> e)
-  let spec = fromListCochain0 [("ServiceA", "ProtocolV1"), ("ServiceB", "ProtocolV1")]
-
-  let config = SheafCEGISConfig
+  let (complex :: CellComplex Text Text) = fromEdges [("e1", "ServiceA", "ServiceB")]
+      sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ (e :: Text) -> e)
+      spec = fromListCochain0 [("ServiceA", "ProtocolV1"), ("ServiceB", "ProtocolV1")]
+      config = SheafCEGISConfig
         { cegisDbConn        = conn
         , cegisRunId         = 101
         , cegisCandidateName = "candidate_v1"
@@ -192,13 +229,13 @@ main = do
   -- 4. Checks SQLite for historical matching failures.
   -- 5. Evaluates H^1 coboundary obstruction.
   -- 6. If H^1 = 0, records verified global section into Beam SQLite and completes!
-  (outcome, events) <- runSheafGatedCEGIS config
+  (outcome, _events) <- runSheafGatedCEGIS config
   case outcome of
-    SheafCEGISSuccess (GlobalSection sec) msg ->
+    SheafCEGISSuccess (GlobalSection _sec) msg ->
       putStrLn $ "Synthesis Verified! " ++ T.unpack msg
     SheafCEGISObstruction obs ->
       putStrLn $ "Obstructions located: " ++ show obs
-    _ -> putStrLn "Failed"
+    _ -> putStrLn "Failed or Retried"
 
   close conn
 ```

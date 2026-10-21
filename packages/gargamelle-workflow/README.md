@@ -152,8 +152,8 @@ import Workflow.Synthesis
 executeFullSynthesis :: IO ()
 executeFullSynthesis = do
   conn <- open "cegis-runs.db"
-  let complex = fromEdges [("api", "AuthService", "PaymentService")]
-      sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ e -> e)
+  let (complex :: CellComplex Text Text) = fromEdges [("api", "AuthService", "PaymentService")]
+      sheaf = symmetricSheaf (\_ (c :: Text) -> c) (\_ (e :: Text) -> e)
       spec = fromListCochain0 [("AuthService", "JWT_v2"), ("PaymentService", "JWT_v2")]
       config = SheafCEGISConfig
         { cegisDbConn        = conn
@@ -169,7 +169,7 @@ executeFullSynthesis = do
         , cegisTimestamp     = 1700000000
         }
 
-  (outcome, events) <- runSheafGatedCEGIS config
+  (outcome, _events) <- runSheafGatedCEGIS config
   case outcome of
     SheafCEGISSuccess _ msg -> putStrLn $ "CEGIS Verified: " ++ show msg
     SheafCEGISObstruction obs -> putStrLn $ "CEGIS Obstructions: " ++ show obs

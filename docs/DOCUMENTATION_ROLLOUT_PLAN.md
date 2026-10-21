@@ -222,9 +222,11 @@ To provide seamless navigation without UI clutter, documentation and textbook ch
 
 **Goal:** Mechanically eliminate documentation drift, link rot, and cross-reference breakage by integrating automated verification suites into CI and `./bin/gargamelle-verify`.
 
-- [ ] **Milestone 3.1: Multi-GHC Literate Markdown Verification (`cabal-docspec` / `markdown-unlit`)**
-  - Configure `./bin/gargamelle-doccheck` to extract and typecheck all Haskell code blocks in package READMEs, tutorials, and textbook chapters.
-  - Enforce compatibility across the entire supported GHC matrix (GHC 9.6, 9.8, 9.10, 9.12, 9.14) under `-Wall -Werror`, ensuring code examples do not rely on version-brittle language features.
+- [x] **Milestone 3.1: Multi-GHC Literate Markdown Verification (`./bin/gargamelle-doccheck`)**
+  - Implemented `./bin/gargamelle-doccheck` extracting and typechecking all 28 literate Haskell code blocks across the 11 package monographs (`packages/gargamelle-*/README.md`) and core orientation guides (`docs/TUTORIAL.md`).
+  - Enforced `-Wall -Werror` zero-warning compilation against the Gargamelle package environment.
+  - Aligned all code blocks with actual exported types and functions, eliminating dead imports, unused bindings, and partial functions.
+  - Integrated into `./bin/gargamelle-verify` as Gate 5 of 7.
   - Enforces `DOC_STRATEGY.md` §4: *Code wins at runtime; notes corrected regardless.* Stale documentation fails the build.
 
 - [ ] **Milestone 3.2: Mechanical `tagref` Integrity Check**

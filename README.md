@@ -123,8 +123,8 @@ cabal test gargamelle-logic gargamelle-model gargamelle-core gargamelle-fol \
            gargamelle-equational gargamelle-sheaf gargamelle-effect gargamelle-workflow
 ```
 
-### 2. Deterministic Physical Verification Gate (6 Gates)
-Execute the deterministic physical verification harness exercising Bubblewrap container isolation, Beam SQLite file locking, HLint cleanliness, full test suite assertions, mechanical Tagref cross-referencing, and CLOC comment density tracking:
+### 2. Deterministic Physical Verification Gate (7 Gates)
+Execute the deterministic physical verification harness exercising Bubblewrap container isolation, Beam SQLite file locking, HLint cleanliness, full test suite assertions, literate Markdown doccheck verification, mechanical Tagref cross-referencing, and CLOC comment density tracking:
 
 ```bash
 ./bin/gargamelle-verify

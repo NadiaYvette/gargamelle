@@ -120,6 +120,7 @@ import Control.Arrow (Kleisli(..))
 import Control.Category ((.))
 import Prelude hiding ((.))
 import Data.Text (Text)
+import Data.Word (Word64)
 import Effect.Rope
 import Effect.Handlers
 
@@ -138,6 +139,7 @@ runMock = runKleisli (runRope samplePipeline pureMockHandlers) ()
 module ExampleFusion where
 
 import Control.Arrow (arr, Kleisli(..))
+import Data.Text (Text)
 import Effect.Rope
 import Effect.Handlers
 import Gargamelle.Effect.Fusion

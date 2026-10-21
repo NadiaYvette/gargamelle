@@ -80,7 +80,6 @@ module ExamplePersistence where
 
 import Database.SQLite.Simple (open, close)
 import Persistence.Beam
-import Persistence.Schema
 
 recordFailureWitness :: IO ()
 recordFailureWitness = do

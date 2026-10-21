@@ -90,7 +90,7 @@ The package exports 8 modules structured cleanly around algebraic logic and defu
 ```haskell
 module ExampleContract where
 
-import Algebra.Lattice (Lattice(..), BoundedMeetSemiLattice(..))
+import Algebra.Lattice (Lattice(..))
 import Gargamelle.Logic.Contract
 
 -- Define two boolean contracts

@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+"""
+bin/gargamelle-doccheck — Multi-GHC Literate Markdown Verification Harness
+
+Extracts and typechecks all literate Haskell code blocks across:
+  - packages/gargamelle-*/README.md (11 package landing monographs)
+  - docs/TUTORIAL.md (Foundational 5-lesson curriculum)
+  - docs/textbook/**/*.md (Future multi-volume treatise chapters)
+
+Enforces:
+  - -Wall -Werror zero-warning compilation against the package environment
+  - DOC_STRATEGY.md §4: "Code wins at runtime; notes corrected regardless"
+"""
+
+import sys
+import os
+import glob
+import re
+import argparse
+import tempfile
+import subprocess
+import time
+
+def find_default_targets(repo_root):
+    targets = []
+    targets.extend(sorted(glob.glob(os.path.join(repo_root, "packages", "gargamelle-*", "README.md"))))
+    tutorial = os.path.join(repo_root, "docs", "TUTORIAL.md")
+    if os.path.isfile(tutorial):
+        targets.append(tutorial)
+    targets.extend(sorted(glob.glob(os.path.join(repo_root, "docs", "textbook", "**", "*.md"), recursive=True)))
+    return targets
+
+def extract_haskell_blocks(filepath):
+    """
+    Extracts haskell code blocks with start line numbers.
+    Blocks marked ```haskell:ignore or ```haskell:no-test are skipped.
+    """
+    blocks = []
+    with open(filepath, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    in_block = False
+    current_lines = []
+    start_line = 0
+    skip_current = False
+
+    for idx, raw_line in enumerate(lines, 1):
+        line = raw_line.rstrip("\r\n")
+        stripped = line.strip()
+        if stripped.startswith("```haskell"):
+            in_block = True
+            current_lines = []
+            start_line = idx
+            # Check for ignore tags
+            tag = stripped[len("```haskell"):].strip()
+            if tag in (":ignore", ":no-test", ",no-test", ",ignore"):
+                skip_current = True
+            else:
+                skip_current = False
+        elif in_block and stripped == "```":
+            in_block = False
+            if not skip_current and current_lines:
+                blocks.append((start_line, current_lines))
+        elif in_block:
+            current_lines.append(line)
+
+    return blocks
+
+def determine_module_name(lines, block_index):
+    for l in lines:
+        s = l.strip()
+        if s.startswith("module "):
+            parts = s.split()
+            if len(parts) >= 2:
+                # Handle module Foo (exports) where or module Foo where
+                raw_mod = parts[1].split("(")[0].strip()
+                if raw_mod:
+                    return raw_mod
+    return f"DocSnippet_{block_index}"
+
+def typecheck_block(ghc_cmd, repo_root, filepath, start_line, lines, block_index, verbose=False):
+    mod_name = determine_module_name(lines, block_index)
+    # GHC module names cannot contain dots when matching a flat file name
+    # e.g. Tutorial.Lesson1 -> Lesson1 for file naming if placed in flat dir
+    file_basename = mod_name.split(".")[-1]
+    
+    code = "\n".join(lines) + "\n"
+    
+    with tempfile.TemporaryDirectory(prefix="gargamelle-doccheck-") as tmpdir:
+        src_path = os.path.join(tmpdir, f"{file_basename}.hs")
+        with open(src_path, "w", encoding="utf-8") as f:
+            f.write(code)
+
+        cmd = [
+            ghc_cmd,
+            "-Wall",
+            "-Werror",
+            "-Wno-unused-top-binds",
+            "-Wno-missing-signatures",
+            "-no-link",
+            "-fno-code",
+            src_path
+        ]
+
+        t0 = time.time()
+        proc = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True)
+        duration = time.time() - t0
+
+        if proc.returncode == 0:
+            if verbose:
+                rel = os.path.relpath(filepath, repo_root)
+                print(f"  [+] {rel}:{start_line} [{mod_name}] ({duration:.2f}s)")
+            return True, None
+        else:
+            rel = os.path.relpath(filepath, repo_root)
+            diag = (proc.stderr or proc.stdout).strip()
+            return False, (rel, start_line, mod_name, diag)
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Gargamelle Literate Markdown Verification Harness"
+    )
+    parser.add_argument("files", nargs="*", help="Markdown files to verify (defaults to all package monographs and tutorials)")
+    parser.add_argument("--ghc", default="ghc", help="Path or name of GHC compiler (default: ghc)")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Print each snippet as it verifies")
+    parser.add_argument("-q", "--quiet", action="store_true", help="Suppress non-error output")
+    args = parser.parse_args()
+
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+    targets = [os.path.abspath(f) for f in args.files] if args.files else find_default_targets(repo_root)
+    if not targets:
+        print("[!] No markdown target files found.")
+        sys.exit(1)
+
+    if not args.quiet:
+        print(f"=== Gargamelle Literate Markdown Verification ({args.ghc}) ===")
+        print(f"  Scanning {len(targets)} markdown document(s)...")
+
+    total_blocks = 0
+    passed_blocks = 0
+    failures = []
+
+    t_start = time.time()
+
+    for target in targets:
+        blocks = extract_haskell_blocks(target)
+        if not blocks and args.verbose:
+            rel = os.path.relpath(target, repo_root)
+            print(f"  [-] {rel}: no executable haskell blocks found")
+            continue
+
+        for start_line, lines in blocks:
+            total_blocks += 1
+            ok, err_info = typecheck_block(
+                args.ghc, repo_root, target, start_line, lines, total_blocks, verbose=args.verbose
+            )
+            if ok:
+                passed_blocks += 1
+            else:
+                failures.append(err_info)
+
+    total_time = time.time() - t_start
+
+    if failures:
+        print(f"\n[FAIL] {len(failures)} literate snippet(s) failed typechecking:")
+        for rel, start_line, mod_name, diag in failures:
+            print(f"\n--- {rel}:{start_line} ({mod_name}) ---")
+            print(diag)
+        sys.exit(1)
+    else:
+        if not args.quiet:
+            print(f"  [+] 100% PASS: All {total_blocks} literate Haskell snippet(s) verified in {total_time:.2f}s (-Wall -Werror).")
+        sys.exit(0)
+
+if __name__ == "__main__":
+    main()

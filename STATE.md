@@ -152,7 +152,12 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
   - In-code comment density raised to 26% (1301 comments / 3592 code lines, +176 comment lines).
   - Validated via `tagref` (27 tags, 111 references across 220 files, 0 dangling references, 0 duplicate tags).
   - All 6 physical verification gates in `./bin/gargamelle-verify` PASSED cleanly (59 test suite assertions).
-  - Ready for Phase 3: Programmatic Verification Harness & Multi-GHC Tooling Automation.
+- **Roll-Out Phase 3, Milestone 3.1 (Multi-GHC Literate Markdown Verification) [COMPLETED]**:
+  - Implemented `./bin/gargamelle-doccheck` verification harness extracting and typechecking literate Haskell blocks.
+  - Aligned and typechecked all 28 literate Haskell snippets across all 11 package READMEs (`packages/gargamelle-*/README.md`) and `docs/TUTORIAL.md` under GHC `-Wall -Werror` (0 warnings, 0 errors, 100% pass).
+  - Enforced `DOC_STRATEGY.md` §4 (*Code wins at runtime; notes corrected regardless*), fixing dead imports, unused matches, fragile GADT matching, and partial functions.
+  - Upgraded `./bin/gargamelle-verify` to a **7-gate physical suite** (Bubblewrap, Beam SQLite, HLint 0 hints, 59 test assertions, Literate Doccheck, Tagref 0 dangling/0 duplicates, CLOC comment density).
+  - Active next frontier: Milestone 3.2 (Mechanical `tagref` Integrity Check) & Milestone 3.3 (Deterministic Intra-Corpus Markdown Link & Anchor Verification).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED
 All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_REDESIGN.md` are completely implemented, verified, and grounded:

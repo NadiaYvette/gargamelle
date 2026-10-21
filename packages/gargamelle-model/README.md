@@ -58,6 +58,11 @@ $$\operatorname{Mod}(\sigma)(M') \models_{\Sigma} \varphi \iff M' \models_{\Sigm
 
 In `gargamelle-model`, this biconditional is reified as an observable bidirectional arrow pair:
 ```haskell
+module ExampleSatisfactionIso where
+
+import Gargamelle.Logic.Defunctionalize (ObsMor)
+import Gargamelle.Model.Satisfaction (Evidence)
+
 data SatisfactionIso = SatisfactionIso
   { forwardEvidence  :: ObsMor Evidence Evidence
   , backwardEvidence :: ObsMor Evidence Evidence
@@ -92,7 +97,6 @@ The package exports 2 focused modules:
 ```haskell
 module ExampleVerifier where
 
-import Data.Functor.Contravariant.Divisible (divide)
 import Gargamelle.Model.Satisfaction
 import Gargamelle.Model.Structure
 
@@ -125,6 +129,11 @@ module ExampleInspection where
 
 import Gargamelle.Model.Satisfaction
 import Gargamelle.Model.Structure
+
+userVerifier :: Verifier (Int, String)
+userVerifier = compilePairVerifier
+  (verifyPredicate "validAge" (\(age :: Int) -> age >= 0 && age <= 120))
+  (verifyPredicate "nonEmptyName" (not . null))
 
 plan :: [String]
 plan = inspectVerifierPlan userVerifier

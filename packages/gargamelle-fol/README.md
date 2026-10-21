@@ -103,7 +103,7 @@ verifyLEM = do
   evidence <- verifyValidityZ3 tautology
   case evidence of
     VerifiedSection -> putStrLn "Formally verified: tautology holds across all models."
-    Counterexample sym witness -> putStrLn $ "Disproved: countermodel found in " ++ sym
+    Counterexample sym _witness -> putStrLn $ "Disproved: countermodel found in " ++ sym
 ```
 
 ### 4.2 Satisfiability Model Extraction
