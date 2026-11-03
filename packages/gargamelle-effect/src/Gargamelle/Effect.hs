@@ -1,7 +1,6 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE TypeOperators #-}
 
 {-|
 Module      : Gargamelle.Effect

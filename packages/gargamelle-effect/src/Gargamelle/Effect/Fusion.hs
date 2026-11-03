@@ -30,7 +30,7 @@ import Control.Arrow (Arrow, arr, (<<<))
 import Data.Functor.Coyoneda (Coyoneda(..), liftCoyoneda, lowerCoyoneda)
 import Effect.Rope (Rope)
 
--- | Smart constructor for 'Coyoneda' applying a function to a carrier.
+-- | Smart constructor for 't:Coyoneda' applying a function to a carrier.
 coyoneda :: (a -> b) -> f a -> Coyoneda f b
 coyoneda = Coyoneda
 {-# INLINE coyoneda #-}
@@ -51,7 +51,7 @@ newtype FusedPipeline arr a b = FusedPipeline
   { unFusedPipeline :: Coyoneda (arr a) b
   }
 
--- | Chain a pure post-processing function onto a 'Effect.Rope.Rope' pipeline using Coyoneda fusion.
+-- | Chain a pure post-processing function onto a 't:Effect.Rope.Rope' pipeline using Coyoneda fusion.
 fuseRopeMap :: (b -> c) -> Coyoneda (Rope core mantle a) b -> Coyoneda (Rope core mantle a) c
 fuseRopeMap = fmap
 {-# INLINE fuseRopeMap #-}
@@ -83,7 +83,7 @@ This guarantees zero intermediate arrow nodes, eliminating allocations and maxim
 GHC worker-wrapper inlining.
 -}
 
--- | Fuse and materialize a Coyoneda-wrapped 'Effect.Rope.Rope' arrow into a standard 'Effect.Rope.Rope' pipeline
+-- | Fuse and materialize a Coyoneda-wrapped 't:Effect.Rope.Rope' arrow into a standard 't:Effect.Rope.Rope' pipeline
 -- in a single composition step.
 --
 -- See Note [Coyoneda Pipeline Fusion] [ref:note-coyoneda-pipeline-fusion].

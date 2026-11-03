@@ -194,7 +194,12 @@ All packages build cleanly under GHC 9.10.3 (`cabal build all`), HLint reports 0
     - Implemented the standardized dual-link convention linking textbook terms side-by-side to exact repository source files and Hackage API documentation.
     - Built `./bin/gargamelle-mdbook` supporting `--build`, `--check`, `--clean`, `--serve`, and hermetic fallback validation.
     - Elevated `./bin/gargamelle-verify` to a **10-gate physical verification suite** (Gate 10: mdBook Local Site Scaffold & Dual-Link Gate), verifying clean compilation of all 28 treatise modules and 100% intra-corpus link integrity.
-    - Integrated into `.github/workflows/ci.yml` and `.gitlab-ci.yml`.
+  - **CI & Quality Gate Hardening (Gate 3 HLint & Gate 8 Haddock) [COMPLETED]**:
+    - Resolved Haddock docstring identifier ambiguities in `packages/gargamelle-effect` by prefixing ambiguous type/constructor symbols (`'t:Coyoneda'`, `'t:Rope'`, `'t:VariantRouter'`) with `t:`, achieving 100% clean documentation generation across all 46 exposed modules.
+    - Added `-j1` flag to `cabal haddock` in `bin/gargamelle-haddock` to prevent parallel build output interleaving between packages during warning collection.
+    - Cleaned redundant language pragmas (`TypeOperators`, `TypeApplications`) and eta-reduced `branchRope` in `packages/gargamelle-effect/src/Gargamelle/Effect/Router.hs` and `Gargamelle/Effect.hs`, reaching 0 HLint hints.
+    - Refined `.github/workflows/ci.yml` cache configuration to exclude shallow git clones in `dist-newstyle/src` and explicitly cache `dist-newstyle/build` and `dist-newstyle/cache` under `cabal-v2-`, avoiding clone corruption, and installed HLint via release tarball.
+    - Verified all 10 physical verification gates in `./bin/gargamelle-verify` pass with 0 errors and 0 warnings.
   - Active next frontier: Phase 4, Milestone 4.1 (Volume I: Foundations of Abstract Model Theory & Categorical Institutions).
 
 ## Architectural Redesign v2.0 Status: FULLY COMPLETED

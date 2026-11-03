@@ -220,6 +220,7 @@ def run_cabal_haddock(repo_root):
     """
     cmd = [
         "cabal", "haddock",
+        "-j1",
         *[pkg["name"] for pkg in PACKAGES],
         "--haddock-hyperlink-source",
         "--haddock-quickjump"

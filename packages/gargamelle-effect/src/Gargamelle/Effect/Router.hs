@@ -5,9 +5,7 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
 
 {-|
 Module      : Gargamelle.Effect.Router
@@ -86,7 +84,7 @@ newtype VariantRouter core a b = VariantRouter
   { routerTable :: SmallArray (Rep Identity () -> core a b)
   }
 
--- | Construct a 'VariantRouter' from an ordered list of branch handlers corresponding
+-- | Construct a 't:VariantRouter' from an ordered list of branch handlers corresponding
 -- to consecutive constructor tags (0, 1, ..., n-1) of the sum row.
 makeRouter :: [Rep Identity () -> core a b] -> VariantRouter core a b
 makeRouter handlers = VariantRouter (smallArrayFromList handlers)
@@ -101,23 +99,23 @@ routeVariant (VariantRouter table) (RowRep rep) =
        else error ("routeVariant: unhandled variant tag " ++ show idx)
 {-# INLINE routeVariant #-}
 
--- | Route an open variant effect into a Gargamelle 'Effect.Rope.Rope' arrow computation.
+-- | Route an open variant effect into a Gargamelle 't:Effect.Rope.Rope' arrow computation.
 --
 -- See Note [O(1) Variant Jump-Table Dispatch Physics] [ref:note-variant-jump-table-physics].
 routeVariantRope :: VariantRouter core a b -> Variant s -> Rope core mantle a b
 routeVariantRope router var = Rope \_ -> routeVariant router var
 {-# INLINE routeVariantRope #-}
 
--- | Route an open variant effect into a 'Rope' computation using a statically-typed
+-- | Route an open variant effect into a 't:Rope' computation using a statically-typed
 -- 'Polytropos.Record' of core arrow handlers. The compiler verifies full row exhaustiveness.
 routeVariantWith :: Record (HandlerRecordRow s (core a b)) -> Variant s -> Rope core mantle a b
 routeVariantWith handlers var = Rope \_ -> eliminateUniform handlers var
 {-# INLINE routeVariantWith #-}
 
--- | Multi-way branch combinator for 'Rope' arrows over an open variant in O(1) time.
+-- | Multi-way branch combinator for 't:Rope' arrows over an open variant in O(1) time.
 -- Eliminates the need for binary 'Control.Arrow.ArrowChoice' cascades over nested 'Either's.
 branchRope :: Record (HandlerRecordRow s (Rope core mantle a b)) -> Variant s -> Rope core mantle a b
-branchRope handlers var = eliminateUniform handlers var
+branchRope = eliminateUniform
 {-# INLINE branchRope #-}
 
 -- | Number of registered branches in the jump table.
