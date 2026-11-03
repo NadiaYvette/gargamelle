@@ -1,10 +1,22 @@
 cabal-version: 3.0
 name: gargamelle-effect
 version: 0.1.0.0
-synopsis: Kernmantle Arrow Rope effect orchestration layer with Polytropos O(1) routers, optics, and fusion
+synopsis: Kernmantle Arrow Rope effect orchestration with Polytropos routers
+description:
+  Kernmantle Arrow Rope effect orchestration layer with Polytropos O(1)
+  routers, optics, and fusion for Gargamelle. Provides pure optic dispatch,
+  arrow loop handling, strand fusion, and database and sandbox execution
+  strands.
 license: EUPL-1.2
+license-file: LICENSE
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
+category: Control
+homepage: https://github.com/NadiaYvette/gargamelle
+bug-reports: https://github.com/NadiaYvette/gargamelle/issues
+extra-doc-files:
+  README.md
+  CHANGELOG.md
 build-type: Simple
 tested-with:
   GHC == 9.6.7,
@@ -12,6 +24,11 @@ tested-with:
   GHC == 9.10.3,
   GHC == 9.12.4,
   GHC == 9.14.1
+
+source-repository head
+  type: git
+  location: https://github.com/NadiaYvette/gargamelle
+  subdir: packages/gargamelle-effect
 
 library
   exposed-modules:
@@ -29,23 +46,23 @@ library
   ghc-options: -Wall -Wcompat -Wredundant-constraints -Wno-unused-imports -fplugin=Polytropos.Plugin
   build-depends:
     base >= 4.14 && < 5,
-    text,
-    containers,
-    primitive >= 0.8,
-    profunctors >= 5.6,
-    kan-extensions >= 5.2,
-    polytropos-core >= 0.1.0.1,
-    polytropos-plugin >= 0.1.0.1,
-    polytropos-profunctors >= 0.1.0.1,
-    gargamelle-core,
-    gargamelle-persistence,
-    kernmantle >= 0.1.0.1,
-    beam-core,
-    beam-sqlite,
-    sqlite-simple,
-    directory,
-    filepath,
-    process
+    text >= 2.0 && < 2.2,
+    containers >= 0.6 && < 0.9,
+    primitive >= 0.8 && < 0.10,
+    profunctors >= 5.6 && < 5.7,
+    kan-extensions >= 5.2 && < 5.3,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    polytropos-plugin >= 0.1.0.1 && < 0.2,
+    polytropos-profunctors >= 0.1.0.1 && < 0.2,
+    gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-persistence >= 0.1 && < 0.2,
+    kernmantle >= 0.1.0.1 && < 0.2,
+    beam-core >= 0.10 && < 0.12,
+    beam-sqlite >= 0.5 && < 0.8,
+    sqlite-simple >= 0.4 && < 0.5,
+    directory >= 1.3 && < 1.4,
+    filepath >= 1.4 && < 1.6,
+    process >= 1.6 && < 1.7
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -56,15 +73,15 @@ test-suite tests
   build-depends:
     base >= 4.14 && < 5,
     gargamelle-effect,
-    gargamelle-core,
-    gargamelle-persistence,
-    polytropos-core >= 0.1.0.1,
-    polytropos-plugin >= 0.1.0.1,
-    polytropos-profunctors >= 0.1.0.1,
-    kernmantle >= 0.1.0.1,
-    primitive,
-    profunctors,
-    kan-extensions,
-    containers,
-    text,
-    hspec >= 2.10
+    gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-persistence >= 0.1 && < 0.2,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    polytropos-plugin >= 0.1.0.1 && < 0.2,
+    polytropos-profunctors >= 0.1.0.1 && < 0.2,
+    kernmantle >= 0.1.0.1 && < 0.2,
+    primitive >= 0.8 && < 0.10,
+    profunctors >= 5.6 && < 5.7,
+    kan-extensions >= 5.2 && < 5.3,
+    containers >= 0.6 && < 0.9,
+    text >= 2.0 && < 2.2,
+    hspec >= 2.10 && < 2.12

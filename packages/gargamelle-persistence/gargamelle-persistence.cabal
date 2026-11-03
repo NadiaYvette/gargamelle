@@ -2,9 +2,20 @@ cabal-version: 3.0
 name: gargamelle-persistence
 version: 0.1.0.0
 synopsis: Beam SQLite database persistence for evidence and run tracking
+description:
+  Beam SQLite database persistence for evidence and run tracking in
+  Gargamelle. Provides schema definitions, migration runners, and query
+  interfaces for institutional verification proofs and synthesis traces.
 license: EUPL-1.2
+license-file: LICENSE
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
+category: Database
+homepage: https://github.com/NadiaYvette/gargamelle
+bug-reports: https://github.com/NadiaYvette/gargamelle/issues
+extra-doc-files:
+  README.md
+  CHANGELOG.md
 build-type: Simple
 tested-with:
   GHC == 9.6.7,
@@ -12,6 +23,11 @@ tested-with:
   GHC == 9.10.3,
   GHC == 9.12.4,
   GHC == 9.14.1
+
+source-repository head
+  type: git
+  location: https://github.com/NadiaYvette/gargamelle
+  subdir: packages/gargamelle-persistence
 
 library
   exposed-modules:
@@ -23,12 +39,12 @@ library
   ghc-options: -Wall
   build-depends:
     base >= 4.14 && < 5,
-    text,
-    beam-core,
-    beam-sqlite,
-    sqlite-simple,
-    polytropos-core >= 0.1.0.1,
-    gargamelle-core
+    text >= 2.0 && < 2.2,
+    beam-core >= 0.10 && < 0.12,
+    beam-sqlite >= 0.5 && < 0.8,
+    sqlite-simple >= 0.4 && < 0.5,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    gargamelle-core >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -39,7 +55,6 @@ test-suite tests
   build-depends:
     base >= 4.14 && < 5,
     gargamelle-persistence,
-    text,
-    sqlite-simple,
-    hspec >= 2.10
-
+    text >= 2.0 && < 2.2,
+    sqlite-simple >= 0.4 && < 0.5,
+    hspec >= 2.10 && < 2.12

@@ -1,10 +1,22 @@
 cabal-version: 3.0
 name: gargamelle-logic
 version: 0.1.0.0
-synopsis: Pure syntax, defunctionalized arrows, order theory, and refinement calculi for Gargamelle
+synopsis: Pure syntax, order theory, and refinement calculi for Gargamelle
+description:
+  Pure syntax, defunctionalized arrows, order theory, and refinement
+  calculi for the Gargamelle institutional synthesis framework.
+  Provides Galois connections, behavioral contracts, holes, and MPST
+  multiparty session types.
 license: EUPL-1.2
+license-file: LICENSE
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
+category: Logic
+homepage: https://github.com/NadiaYvette/gargamelle
+bug-reports: https://github.com/NadiaYvette/gargamelle/issues
+extra-doc-files:
+  README.md
+  CHANGELOG.md
 build-type: Simple
 tested-with:
   GHC == 9.6.7,
@@ -12,6 +24,11 @@ tested-with:
   GHC == 9.10.3,
   GHC == 9.12.4,
   GHC == 9.14.1
+
+source-repository head
+  type: git
+  location: https://github.com/NadiaYvette/gargamelle
+  subdir: packages/gargamelle-logic
 
 library
   exposed-modules:
@@ -28,11 +45,11 @@ library
   ghc-options: -Wall -Wcompat -Wredundant-constraints
   build-depends:
     base >= 4.18 && < 5,
-    containers >= 0.6,
-    polytropos-core >= 0.1.0.1,
-    lattices >= 2.2,
-    constraints >= 0.14,
-    profunctors >= 5.6
+    containers >= 0.6 && < 0.9,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    lattices >= 2.2 && < 2.3,
+    constraints >= 0.14 && < 0.15,
+    profunctors >= 5.6 && < 5.7
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -43,8 +60,8 @@ test-suite tests
   build-depends:
     base >= 4.18 && < 5,
     gargamelle-logic,
-    polytropos-core >= 0.1.0.1,
-    lattices,
-    constraints,
-    profunctors,
-    hspec >= 2.10
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    lattices >= 2.2 && < 2.3,
+    constraints >= 0.14 && < 0.15,
+    profunctors >= 5.6 && < 5.7,
+    hspec >= 2.10 && < 2.12

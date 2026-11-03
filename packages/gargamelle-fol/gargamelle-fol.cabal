@@ -1,10 +1,21 @@
 cabal-version: 3.0
 name: gargamelle-fol
 version: 0.1.0.0
-synopsis: First-order logic institution and streaming Z3 SMT pipe for gargamelle
+synopsis: First-order logic institution and streaming Z3 SMT pipe for Gargamelle
+description:
+  First-order logic institution and streaming Z3 SMT solver pipeline for
+  Gargamelle. Provides hyperdoctrine structures, quantifier elimination,
+  and refinement calculus generation for formal program verification.
 license: EUPL-1.2
+license-file: LICENSE
 author: Nadia Yvette Chambers
 maintainer: nadia.yvette.chambers@ik.me
+category: Logic
+homepage: https://github.com/NadiaYvette/gargamelle
+bug-reports: https://github.com/NadiaYvette/gargamelle/issues
+extra-doc-files:
+  README.md
+  CHANGELOG.md
 build-type: Simple
 tested-with:
   GHC == 9.6.7,
@@ -12,6 +23,11 @@ tested-with:
   GHC == 9.10.3,
   GHC == 9.12.4,
   GHC == 9.14.1
+
+source-repository head
+  type: git
+  location: https://github.com/NadiaYvette/gargamelle
+  subdir: packages/gargamelle-fol
 
 library
   exposed-modules:
@@ -24,11 +40,11 @@ library
   ghc-options: -Wall -Wcompat
   build-depends:
     base >= 4.18 && < 5,
-    containers >= 0.6,
-    process >= 1.6,
-    polytropos-core >= 0.1.0.1,
-    gargamelle-core,
-    gargamelle-model
+    containers >= 0.6 && < 0.9,
+    process >= 1.6 && < 1.7,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-model >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -38,9 +54,9 @@ test-suite tests
   ghc-options: -Wall
   build-depends:
     base >= 4.18 && < 5,
-    containers >= 0.6,
-    process >= 1.6,
+    containers >= 0.6 && < 0.9,
+    process >= 1.6 && < 1.7,
     gargamelle-fol,
-    gargamelle-core,
-    gargamelle-model,
-    hspec >= 2.10
+    gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-model >= 0.1 && < 0.2,
+    hspec >= 2.10 && < 2.12
