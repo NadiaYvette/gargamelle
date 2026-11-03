@@ -5,13 +5,12 @@
 
 {-|
 Module      : Gargamelle.Effect.Fusion
-Description : Re-exports Coyoneda pipeline fusion from Kernmantle
+Description : Coyoneda pipeline fusion for Penelope and Gargamelle ropes
 Copyright   : (c) 2026 The Gargamelle Authors
 License     : EUPL-1.2
 Maintainer  : nadia.yvette.chambers@ik.me
 
-Re-exports 'Control.Kernmantle.Rope.Fusion' upstreamed into @kernmantle@,
-adapting pipeline fusion to Gargamelle's domain-specific 'Effect.Rope.Rope'.
+Provides Coyoneda pipeline fusion for 'Effect.Rope.Rope' and Penelope arrow computations.
 -}
 module Gargamelle.Effect.Fusion
   ( -- * Coyoneda Array and Effect Fusion
@@ -28,15 +27,23 @@ module Gargamelle.Effect.Fusion
   ) where
 
 import Control.Arrow (Arrow, arr, (<<<))
-import Control.Kernmantle.Rope.Fusion
-  ( Coyoneda(..)
-  , liftCoyoneda
-  , lowerCoyoneda
-  , coyoneda
-  , fuseMap
-  , runFused
-  )
+import Data.Functor.Coyoneda (Coyoneda(..), liftCoyoneda, lowerCoyoneda)
 import Effect.Rope (Rope)
+
+-- | Smart constructor for 'Coyoneda' applying a function to a carrier.
+coyoneda :: (a -> b) -> f a -> Coyoneda f b
+coyoneda = Coyoneda
+{-# INLINE coyoneda #-}
+
+-- | Fuse an additional transformation onto a Coyoneda pipeline.
+fuseMap :: (b -> c) -> Coyoneda f b -> Coyoneda f c
+fuseMap = fmap
+{-# INLINE fuseMap #-}
+
+-- | Materialize the accumulated Coyoneda pipeline over an arbitrary functor carrier.
+runFused :: Functor f => Coyoneda f a -> f a
+runFused = lowerCoyoneda
+{-# INLINE runFused #-}
 
 -- | A wrapper for an arrow computation whose post-processing transformations
 -- are deferred and fused via Coyoneda.

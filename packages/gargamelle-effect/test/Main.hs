@@ -2,6 +2,9 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# OPTIONS_GHC -fplugin=Polytropos.Plugin #-}
 
 module Main (main) where
 
@@ -20,8 +23,11 @@ import Effect.Handlers
 import Gargamelle.Effect.Router
 import Gargamelle.Effect.Optics
 import Gargamelle.Effect.Fusion
-import Polytropos (Record, Variant)
+import Penelope.Core
+import qualified Penelope.Effects.Binary as Pen
+import Polytropos (Field(..), Record, Variant, emptyRecord, insertField, getField, Pair(..))
 import Polytropos.Core (Rep(..), RowRep(..))
+import Polytropos.RowMorph (unsafeMkRowMorph)
 
 main :: IO ()
 main = hspec do
@@ -104,3 +110,21 @@ main = hspec do
       case runKleisli (runRope pipeline pureMockHandlers) () of
         Right res -> res `shouldBe` 42
         Left err  -> expectationFailure (T.unpack err)
+
+  describe "Penelope Polycategorical Effect System Integration" do
+    it "executes Penelope polycategorical pipelines within Gargamelle" do
+      let pipe :: Penelope '[] '[] '["in" ':= Int] '["out" ':= Int]
+          pipe = LiftPure (unsafeMkRowMorph [0]) (\(frame :: Record '["in" ':= Int]) ->
+            let x :: Int = getField @"in" frame
+            in insertField (Field @"out") (x * 2 + 10) emptyRecord
+            ) (BranchCont (\_ -> Route (unsafeMkRowMorph [0])))
+          inputFrame = insertField (Field @"in") (5 :: Int) emptyRecord
+          outFrame = runPenelopePure pipe inputFrame
+      (getField @"out" outFrame :: Int) `shouldBe` (20 :: Int)
+
+    it "executes Penelope binary Rope arrows within Gargamelle" do
+      let rope :: Pen.Rope '[] '[] Int Int
+          rope = arr (\x -> x * 3)
+          res = Pen.runRopePure rope (10 :: Int)
+      res `shouldBe` (30 :: Int)
+
