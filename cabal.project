@@ -75,19 +75,19 @@ source-repository-package
 
 source-repository-package
   type: git
-  location: /home/nyc/src/penelope
+  location: https://github.com/NadiaYvette/penelope
   tag: 0.1.0.0
   subdir: packages/penelope-core
 
 source-repository-package
   type: git
-  location: /home/nyc/src/penelope
+  location: https://github.com/NadiaYvette/penelope
   tag: 0.1.0.0
   subdir: packages/penelope-effects
 
 source-repository-package
   type: git
-  location: /home/nyc/src/penelope
+  location: https://github.com/NadiaYvette/penelope
   tag: 0.1.0.0
   subdir: packages/penelope-static
 
