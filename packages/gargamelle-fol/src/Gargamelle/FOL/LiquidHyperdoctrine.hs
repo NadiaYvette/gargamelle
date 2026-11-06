@@ -200,18 +200,54 @@ folFormulaToSMTLib = \case
   FForall v s f ->
     "(forall ((" ++ T.unpack v ++ " " ++ sortToSMTLib s ++ ")) " ++ folFormulaToSMTLib f ++ ")"
 
+collectMeasureNamesInFOL :: FOLFormula -> Set SymName
+collectMeasureNamesInFOL = \case
+  FTrue -> Set.empty
+  FFalse -> Set.empty
+  FAtom p -> collectMeasureNamesInPred p
+  FAnd fs -> Set.unions (map collectMeasureNamesInFOL fs)
+  FOr fs -> Set.unions (map collectMeasureNamesInFOL fs)
+  FImplies f1 f2 -> collectMeasureNamesInFOL f1 `Set.union` collectMeasureNamesInFOL f2
+  FNot f -> collectMeasureNamesInFOL f
+  FExists _ _ f -> collectMeasureNamesInFOL f
+  FForall _ _ f -> collectMeasureNamesInFOL f
+
+collectMeasureNamesInPred :: LiquidPred -> Set SymName
+collectMeasureNamesInPred = \case
+  PTrue -> Set.empty
+  PFalse -> Set.empty
+  PVar _ -> Set.empty
+  PIntLit _ -> Set.empty
+  PEmptySet _ -> Set.empty
+  PMeasureApp m e -> Set.insert m (collectMeasureNamesInPred e)
+  PFieldProj _ e -> collectMeasureNamesInPred e
+  PVariantTag _ e -> collectMeasureNamesInPred e
+  PBinOp _ l r -> collectMeasureNamesInPred l `Set.union` collectMeasureNamesInPred r
+  PRel _ l r -> collectMeasureNamesInPred l `Set.union` collectMeasureNamesInPred r
+  PNot e -> collectMeasureNamesInPred e
+  PAnd es -> Set.unions (map collectMeasureNamesInPred es)
+  POr es -> Set.unions (map collectMeasureNamesInPred es)
+  PImplies l r -> collectMeasureNamesInPred l `Set.union` collectMeasureNamesInPred r
+  PIff l r -> collectMeasureNamesInPred l `Set.union` collectMeasureNamesInPred r
+  PLiquidHole _ _ -> Set.empty
+
 instance Hyperdoctrine Z3Hyperdoctrine where
   pullback = substPredInFOL
 
-  -- | Check Gamma |- phi => psi by asserting Context decls and (phi /\ not psi), checking UNSAT.
+  -- | Check Gamma |- phi => psi by asserting Context decls, measure fun decls, and (phi /\ not psi), checking UNSAT.
   entails (Context env) phi psi = do
-    let decls = unlines
+    let vc = FAnd [phi, FNot psi]
+        measures = collectMeasureNamesInFOL vc
+        measDecls = unlines
+          [ "(declare-fun " ++ T.unpack m ++ " (Int) Int)"
+          | m <- Set.toList measures
+          ]
+        decls = unlines
           [ "(declare-const " ++ T.unpack v ++ " " ++ sortToSMTLib s ++ ")"
           | (v, s) <- Map.toList env
           ]
-        vc = FAnd [phi, FNot psi]
         smtVc = folFormulaToSMTLib vc
-        query = "(set-logic ALL)\n" ++ decls ++ "(assert " ++ smtVc ++ ")\n(check-sat)\n"
+        query = "(set-logic ALL)\n" ++ measDecls ++ decls ++ "(assert " ++ smtVc ++ ")\n(check-sat)\n"
     res <- solveZ3Raw query
     case res of
       Unsat -> pure True

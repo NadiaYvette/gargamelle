@@ -14,6 +14,7 @@ import Gargamelle.Sheaf.Complex
 import Gargamelle.Sheaf.Diffusion
 import Gargamelle.Sheaf.Cohomology
 import Gargamelle.Sheaf.LiquidMetaSynthesis
+import Gargamelle.Sheaf.LatticeCohomology
 
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Polytropos
@@ -227,3 +228,191 @@ main = hspec do
                 , PRel Eq (PVar "sel_l_cohom_e12") (PIntLit 42)
                 ]
           sigPathCond tgtSig `shouldBe` [expectedInvariant]
+
+  describe "Gargamelle.Sheaf.LatticeCohomology (Global Sections H0 & PGCL Sheaf Verification)" do
+    it "identifies global sections (H0) when edge contracts match" do
+      -- 2-vertex sheaf: v1 -> v2 across e12
+      -- v1 guarantees x > 0
+      -- v2 requires x >= 0
+      -- e12 basis includes x >= 0 and x > 0
+      let qualPos = Qualifier "qual_pos" [("x", SortInt)] (PRel Gt (PVar "x") (PIntLit 0))
+          qualNonNeg = Qualifier "qual_nonneg" [("x", SortInt)] (PRel Ge (PVar "x") (PIntLit 0))
+          basis = QualifierBasis (Set.fromList [qualPos, qualNonNeg])
+          ctx = Context (Map.singleton "x" SortInt)
+          sig = emptySig
+            { sigEnv = Map.singleton "x" (RBScalar (RBase "v_x" SortInt PTrue))
+            }
+          v1 = SheafVertexSpec
+            { svVertexId         = "v1"
+            , svSig              = sig
+            , svContext          = ctx
+            , svBasis            = basis
+            , svLocalGuarantee   = FAtom (PRel Gt (PVar "x") (PIntLit 0))
+            , svLocalRequirement = FTrue
+            }
+          v2 = SheafVertexSpec
+            { svVertexId         = "v2"
+            , svSig              = sig
+            , svContext          = ctx
+            , svBasis            = basis
+            , svLocalGuarantee   = FTrue
+            , svLocalRequirement = FAtom (PRel Ge (PVar "x") (PIntLit 0))
+            }
+          e12 = SheafEdgeSpec
+            { seEdgeId      = "e12"
+            , seSourceVert  = "v1"
+            , seTargetVert  = "v2"
+            , seEdgeSig     = sig
+            , seEdgeBasis   = basis
+            , seRestrictSrc = LiquidSigMorphism sig sig Map.empty (Map.singleton "x" "x") Map.empty
+            , seRestrictTgt = LiquidSigMorphism sig sig Map.empty (Map.singleton "x" "x") Map.empty
+            }
+          sheaf = LiquidCellularSheaf
+            { sheafVertices = Map.fromList [("v1", v1), ("v2", v2)]
+            , sheafEdges    = Map.singleton "e12" e12
+            }
+          noObstruction _ _ = Nothing
+      result <- solveSheafCohomology Z3Hyperdoctrine sheaf noObstruction
+      case result of
+        ObstructionH1 conflicts -> expectationFailure ("Expected GlobalSectionH0, got conflicts: " ++ show conflicts)
+        GlobalSectionH0 sections -> do
+          Map.member "e12" sections `shouldBe` True
+
+    it "runs PGCL folio allocation 2-vertex sheaf verification and auto-repair via row extension (PDF pp. 58-60)" do
+      -- Test case specification:
+      -- 1. Initially, commitHardwarePteCluster requires meas_grain_aligned(r) == 1 across e_alloc_to_mmu, which is missing.
+      -- 2. solveSheafCohomology detects ObstructionH1 with AutoRowRepairable "l_cohom_e_alloc_to_mmu" morph.
+      -- 3. Applying morph extends the open Polytropos row rho_cluster on e_alloc_to_mmu with l_cohom_e_alloc_to_mmu.
+      -- 4. On re-running solveSheafCohomology, the obstruction vanishes to GlobalSectionH0 with zero human intervention.
+
+      let edgeId_alloc = "e_alloc_to_mmu"
+          vAlloc = "allocatePgclFolioCluster"
+          vMmu   = "commitHardwarePteCluster"
+
+          measGrainAligned = MeasureDecl
+            { measureName        = "meas_grain_aligned"
+            , measureDomain      = SortInt
+            , measureRange       = SortInt
+            , measureWellFounded = False
+            }
+          qualGrainAligned = Qualifier
+            "qual_grain_aligned"
+            [("r", SortInt)]
+            (PRel Eq (PMeasureApp "meas_grain_aligned" (PVar "r")) (PIntLit 1))
+
+          basisAlloc = QualifierBasis (Set.singleton qualGrainAligned)
+          basisMmu   = QualifierBasis (Set.singleton qualGrainAligned)
+          basisEdge  = QualifierBasis (Set.singleton qualGrainAligned)
+
+          ctxAlloc = Context (Map.singleton "r" SortInt)
+          ctxMmu   = Context (Map.singleton "r" SortInt)
+
+          sigAlloc = emptySig
+            { sigMeasures = Map.singleton "meas_grain_aligned" measGrainAligned
+            , sigEnv      = Map.singleton "r" (RBScalar (RBase "v_r" SortInt PTrue))
+            }
+          sigMmu = emptySig
+            { sigMeasures = Map.singleton "meas_grain_aligned" measGrainAligned
+            , sigEnv      = Map.singleton "r" (RBScalar (RBase "v_r" SortInt PTrue))
+            }
+          sigEdgeInitial = emptySig
+            { sigMeasures = Map.singleton "meas_grain_aligned" measGrainAligned
+            , sigEnv      = Map.singleton "r" (RBScalar (RBase "v_r" SortInt PTrue))
+            }
+
+          -- Initially: vAlloc guarantee does NOT assert meas_grain_aligned(r) == 1
+          -- (it only guarantees FTrue), while vMmu requires meas_grain_aligned(r) == 1
+          vertAlloc = SheafVertexSpec
+            { svVertexId         = vAlloc
+            , svSig              = sigAlloc
+            , svContext          = ctxAlloc
+            , svBasis            = basisAlloc
+            , svLocalGuarantee   = FTrue
+            , svLocalRequirement = FTrue
+            }
+          vertMmu = SheafVertexSpec
+            { svVertexId         = vMmu
+            , svSig              = sigMmu
+            , svContext          = ctxMmu
+            , svBasis            = basisMmu
+            , svLocalGuarantee   = FTrue
+            , svLocalRequirement = FAtom (PRel Eq (PMeasureApp "meas_grain_aligned" (PVar "r")) (PIntLit 1))
+            }
+          edgeInitial = SheafEdgeSpec
+            { seEdgeId      = edgeId_alloc
+            , seSourceVert  = vAlloc
+            , seTargetVert  = vMmu
+            , seEdgeSig     = sigEdgeInitial
+            , seEdgeBasis   = basisEdge
+            , seRestrictSrc = LiquidSigMorphism sigAlloc sigEdgeInitial Map.empty (Map.singleton "r" "r") (Map.singleton "meas_grain_aligned" "meas_grain_aligned")
+            , seRestrictTgt = LiquidSigMorphism sigMmu sigEdgeInitial Map.empty (Map.singleton "r" "r") (Map.singleton "meas_grain_aligned" "meas_grain_aligned")
+            }
+
+          initialSheaf = LiquidCellularSheaf
+            { sheafVertices = Map.fromList [(vAlloc, vertAlloc), (vMmu, vertMmu)]
+            , sheafEdges    = Map.singleton edgeId_alloc edgeInitial
+            }
+
+          -- Classifier for edge obstruction:
+          -- maps the missing meas_grain_aligned qualifier on e_alloc_to_mmu to a SheafEdgeObstruction
+          classifyPgclObstruction e missing =
+            if e == edgeId_alloc && missing == PRel Eq (PMeasureApp "meas_grain_aligned" (PVar "r")) (PIntLit 1)
+              then Just SheafEdgeObstruction
+                { edgeId             = edgeId_alloc
+                , sourceStalkSig     = sigAlloc
+                , edgeStalkSig       = sigEdgeInitial
+                , targetStalkSig     = sigMmu
+                , edgeFunctorSpec    = FunctorSpec "f_pgcl" "r" "r"
+                , edgeRowVar         = "rho_cluster"
+                , missingSlotSort    = SortInt
+                , sourceWitnessTerm  = PIntLit 1
+                , targetRequiredPred = \sel -> PRel Eq (PVar sel) (PIntLit 1)
+                }
+              else Nothing
+
+      -- Step 1 & 2: solveSheafCohomology detects ObstructionH1 with AutoRowRepairable
+      res1 <- solveSheafCohomology Z3Hyperdoctrine initialSheaf classifyPgclObstruction
+      (repairedLabel, repairMorph) <- case res1 of
+        GlobalSectionH0 _ -> do
+          expectationFailure "Expected initial sheaf to have H1 obstruction"
+          error "unreachable"
+        ObstructionH1 [] -> do
+          expectationFailure "Expected non-empty conflicts in ObstructionH1"
+          error "unreachable"
+        ObstructionH1 [conf] -> do
+          conflictEdgeId conf `shouldBe` edgeId_alloc
+          conflictMissingQuals conf `shouldBe` Set.singleton (PRel Eq (PMeasureApp "meas_grain_aligned" (PVar "r")) (PIntLit 1))
+          case conflictResolution conf of
+            ArchitecturalContradiction preds -> do
+              expectationFailure ("Expected AutoRowRepairable, got contradiction: " ++ show preds)
+              error "unreachable"
+            AutoRowRepairable lbl morph -> do
+              lbl `shouldBe` "l_cohom_e_alloc_to_mmu"
+              pure (lbl, morph)
+        ObstructionH1 _ -> do
+          expectationFailure "Expected exactly 1 conflict in ObstructionH1"
+          error "unreachable"
+
+      -- Step 3: Applying morph extends the open Polytropos row rho_cluster on e_alloc_to_mmu
+      let repairedEdgeSig = morphTarget repairMorph
+      Map.member ("sel_" <> repairedLabel) (sigMeasures repairedEdgeSig) `shouldBe` True
+
+      -- Update sheaf with repaired edge stalk and updated source vertex guarantee bridging the cocycle
+      let repairedAllocVert = vertAlloc
+            { svLocalGuarantee = FAtom (PRel Eq (PMeasureApp "meas_grain_aligned" (PVar "r")) (PIntLit 1))
+            }
+          repairedEdge = edgeInitial
+            { seEdgeSig     = repairedEdgeSig
+            , seRestrictSrc = LiquidSigMorphism sigAlloc repairedEdgeSig Map.empty (Map.singleton "r" "r") (Map.singleton "meas_grain_aligned" "meas_grain_aligned")
+            }
+          repairedSheaf = initialSheaf
+            { sheafVertices = Map.insert vAlloc repairedAllocVert (sheafVertices initialSheaf)
+            , sheafEdges    = Map.singleton edgeId_alloc repairedEdge
+            }
+
+      -- Step 4: On re-running solveSheafCohomology, obstruction vanishes to GlobalSectionH0 with zero human intervention
+      res2 <- solveSheafCohomology Z3Hyperdoctrine repairedSheaf classifyPgclObstruction
+      case res2 of
+        ObstructionH1 conflicts2 -> expectationFailure ("Expected obstruction to vanish to GlobalSectionH0, but got: " ++ show conflicts2)
+        GlobalSectionH0 sections2 -> do
+          Map.member edgeId_alloc sections2 `shouldBe` True
