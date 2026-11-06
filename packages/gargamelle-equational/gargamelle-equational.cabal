@@ -33,25 +33,32 @@ library
   exposed-modules:
     Equational
     Gargamelle.Equational.DPO
+    Gargamelle.Equational.AbductiveEGraph
   hs-source-dirs: src
   default-language: Haskell2010
-  ghc-options: -Wall -Wcompat
+  ghc-options: -Wall -Werror -Wcompat -Werror
   build-depends:
     base >= 4.18 && < 5,
     containers >= 0.6 && < 0.9,
     proarrow >= 0.2 && < 0.3,
-    gargamelle-core >= 0.1 && < 0.2
+    gargamelle-core >= 0.1 && < 0.2,
+    text >= 2.0 && < 3,
+    gargamelle-fol >= 0.1 && < 0.2,
+    gargamelle-model >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
   hs-source-dirs: test
   default-language: Haskell2010
-  ghc-options: -Wall
+  ghc-options: -Wall -Werror
   build-depends:
     base >= 4.18 && < 5,
     containers >= 0.6 && < 0.9,
     proarrow >= 0.2 && < 0.3,
     gargamelle-equational,
     gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-fol >= 0.1 && < 0.2,
+    gargamelle-model >= 0.1 && < 0.2,
+    text >= 2.0 && < 3,
     hspec >= 2.10 && < 2.12
