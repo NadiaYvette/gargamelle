@@ -17,6 +17,7 @@ import qualified RefinementCalculus as RC
 import Gargamelle.FOL.Z3
 import Gargamelle.FOL.LiquidBridge
 import Gargamelle.FOL.PenelopeBridge
+import Gargamelle.FOL.LiquidHyperdoctrine
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Penelope
 import Gargamelle.Model.Satisfaction (Evidence(..))
@@ -181,4 +182,48 @@ main = hspec do
             }
       valid <- verifyEffectBudgetZ3 emptySig effTypeInvalid
       valid `shouldBe` False
+
+  describe "Gargamelle.FOL.LiquidHyperdoctrine with Galois Adjoints" do
+    let ctx = Context (Map.singleton "x" SortInt)
+        qualPos = Qualifier "Q_pos" [("n", SortInt)] (PRel Gt (PVar "n") (PIntLit 0))
+        qualNonNeg = Qualifier "Q_nonneg" [("n", SortInt)] (PRel Ge (PVar "n") (PIntLit 0))
+        basis = QualifierBasis (Set.fromList [qualPos, qualNonNeg])
+
+    it "verifies left Galois adjunction law: phi => i(q) entails alpha^strong(phi) <= q" do
+      -- Let phi be x > 5. In context {x : Int}, phi entails both x > 0 and x >= 0.
+      -- So alpha^strong(phi) will contain both {x > 0, x >= 0}.
+      -- If q is {x >= 0}, then phi entails i(q).
+      -- In the subset lattice of conjuncts (ordering where stronger = larger subset of conjuncts),
+      -- alpha^strong(phi) contains all conjuncts entailed by phi, hence q is a subset of alpha^strong(phi),
+      -- which means alpha^strong(phi) <= q in the dual / logical implication order:
+      -- i(alpha^strong(phi)) entails i(q), and as sets of conjuncts, q is a subset of qcConjuncts alpha^strong(phi).
+      let phi = FAtom (PRel Gt (PVar "x") (PIntLit 5))
+          q = QualifierConj (Set.singleton (PRel Ge (PVar "x") (PIntLit 0)))
+      -- 1. Check phi entails i(q)
+      hyp <- entails @Z3Hyperdoctrine ctx phi (embedQualifier @Z3Hyperdoctrine q)
+      hyp `shouldBe` True
+
+      -- 2. Compute alpha^strong(phi)
+      alphaStrong <- strongGaloisConsequence @Z3Hyperdoctrine ctx basis phi
+      -- Conjuncts of q must be a subset of alphaStrong conjuncts
+      Set.isSubsetOf (qcConjuncts q) (qcConjuncts alphaStrong) `shouldBe` True
+
+    it "verifies right Galois adjunction law: i(q) => psi entails q <= alpha^weak(psi)" do
+      -- Let psi be x >= 0.
+      -- If q is {x > 0}, then i(q) = (x > 0) entails psi = (x >= 0).
+      -- weakGaloisImplicant finds a valid implicant q_weak such that i(q_weak) entails psi.
+      let psi = FAtom (PRel Ge (PVar "x") (PIntLit 0))
+          q = QualifierConj (Set.singleton (PRel Gt (PVar "x") (PIntLit 0)))
+      -- 1. Check i(q) entails psi
+      premise <- entails @Z3Hyperdoctrine ctx (embedQualifier @Z3Hyperdoctrine q) psi
+      premise `shouldBe` True
+
+      -- 2. Compute alpha^weak(psi)
+      mAlphaWeak <- weakGaloisImplicant @Z3Hyperdoctrine ctx basis psi
+      case mAlphaWeak of
+        Nothing -> expectationFailure "Expected weakGaloisImplicant to find a candidate"
+        Just alphaWeak -> do
+          -- Both i(q) and i(alphaWeak) entail psi
+          valid <- entails @Z3Hyperdoctrine ctx (embedQualifier @Z3Hyperdoctrine alphaWeak) psi
+          valid `shouldBe` True
 
