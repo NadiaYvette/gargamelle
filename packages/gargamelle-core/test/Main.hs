@@ -25,6 +25,8 @@ import Gargamelle.Logic.Defunctionalize (ObsMor(..))
 import Propositional (PropSig(..), SentProp(..), ModProp(..))
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Instance (checkSatisfactionCondition)
+import Gargamelle.Core.Institution.Liquid.Polytropos
+import Gargamelle.Core.Institution.Liquid.Penelope
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Institution as Legacy
@@ -214,3 +216,129 @@ main = hspec $ do
             , termInitialParam = PIntLit 2
             }
       checkSatisfactionCondition sigma m2 phi `shouldBe` True
+
+  describe "Polytropos Open Rows & Measures" $ do
+    let recRow = OpenRow
+          { rowFields = Map.fromList [("x", SortInt), ("flag", SortBool)]
+          , rowTail   = Just "rho"
+          , rowLacks  = Set.singleton "z"
+          }
+        foldSpec = MonoidFoldSpec
+          { foldMeasureName = "rowWeight"
+          , foldSlotWeight  = "slotWeight"
+          , foldZero        = 0
+          , foldCombine     = Add
+          }
+        emptySig = LiquidSig
+          { sigSorts      = Set.empty
+          , sigMeasures   = Map.empty
+          , sigCtorAxioms = []
+          , sigQualifiers = Set.empty
+          , sigEnv        = Map.empty
+          , sigPathCond   = []
+          }
+
+    it "registers record row measures, McCarthy frame axioms, and fold axioms" $ do
+      let sig = registerRecordRowMeasures "Point" recRow (Just foldSpec) emptySig
+      -- Verify measures
+      Map.member "sel_x" (sigMeasures sig) `shouldBe` True
+      Map.member "sel_flag" (sigMeasures sig) `shouldBe` True
+      Map.member "rowWeight" (sigMeasures sig) `shouldBe` True
+
+      -- Verify axioms exist (sel_x hit + miss + fold)
+      length (sigCtorAxioms sig) `shouldBe` 6
+
+      -- Verify qualifiers
+      Set.member "Point" (sigSorts sig) `shouldBe` True
+      Set.size (sigQualifiers sig) `shouldBe` 3
+
+    it "generates Polytropos record combinators" $ do
+      let combs = polyRecordCombinators recRow
+      Map.member "getF_x" combs `shouldBe` True
+      Map.member "setF_x" combs `shouldBe` True
+      Map.member "getF_flag" combs `shouldBe` True
+      Map.member "setF_flag" combs `shouldBe` True
+
+    it "registers variant row measures, payload measures, and tag qualifiers" $ do
+      let varRow = OpenRow
+            { rowFields = Map.fromList [("LeftVal", SortInt), ("RightVal", SortBool)]
+            , rowTail   = Nothing
+            , rowLacks  = Set.empty
+            }
+          sig = registerVariantRowMeasures "EitherVal" varRow emptySig
+      Map.member "vtags" (sigMeasures sig) `shouldBe` True
+      Map.member "vpayload_LeftVal" (sigMeasures sig) `shouldBe` True
+      Map.member "vpayload_RightVal" (sigMeasures sig) `shouldBe` True
+      length (sigCtorAxioms sig) `shouldBe` 4
+      Set.size (sigQualifiers sig) `shouldBe` 2
+
+    it "generates Polytropos variant combinators" $ do
+      let varRow = OpenRow
+            { rowFields = Map.fromList [("Ok", SortInt), ("Err", SortInt)]
+            , rowTail   = Nothing
+            , rowLacks  = Set.empty
+            }
+          combs = polyVariantCombinators varRow
+      Map.member "absurdVariantF" combs `shouldBe` True
+      Map.member "injF_Ok" combs `shouldBe` True
+      Map.member "matchTagF_Ok" combs `shouldBe` True
+      Map.member "narrowOutTagF_Ok" combs `shouldBe` True
+
+    it "instantiates row tail morphisms correctly" $ do
+      let srcSig = emptySig
+            { sigSorts = Set.singleton "rho"
+            , sigEnv   = Map.singleton "r" (RBScalar (RBase "v" (SortVar "rho") PTrue))
+            }
+          tgtRow = OpenRow
+            { rowFields = Map.fromList [("x", SortInt), ("y", SortInt)]
+            , rowTail   = Nothing
+            , rowLacks  = Set.empty
+            }
+          tgtSig = emptySig
+            { sigSorts = Set.fromList ["Point", "rho"]
+            , sigEnv   = Map.singleton "r" (RBScalar (RBase "v" (SortRecordRow (RowSchema (rowFields tgtRow))) PTrue))
+            }
+          mor = instantiateRowTailMorphism "rho" tgtRow srcSig tgtSig
+      Map.lookup "rho" (morphSortMap mor) `shouldBe` Just (SortRecordRow (RowSchema (rowFields tgtRow)))
+      Map.lookup "r" (morphVarMap mor) `shouldBe` Just "r"
+
+  describe "Penelope Effect Rows & Combinators" $ do
+    let effRow = EffectRow
+          { effList  = ["State", "Console"]
+          , effTail  = Just "es"
+          , effLacks = Set.empty
+          }
+        getOp = EffectType
+          { effOpName     = "get"
+          , effOpParams   = []
+          , effOpResult   = SortInt
+          , effOpPreCond  = PTrue
+          , effOpPostCond = PRel Eq (PVar "v_res") (PVar "v_res")
+          }
+        putOp = EffectType
+          { effOpName     = "put"
+          , effOpParams   = [("s", SortInt)]
+          , effOpResult   = SortADT "Unit" []
+          , effOpPreCond  = PTrue
+          , effOpPostCond = PTrue
+          }
+        emptySig = LiquidSig mempty mempty [] mempty mempty []
+
+    it "registers effect signatures and budget qualifiers" $ do
+      let sig = registerEffectSignatures effRow [getOp, putOp] (Just "fuel") emptySig
+      Map.member "pre_get" (sigMeasures sig) `shouldBe` True
+      Map.member "post_get" (sigMeasures sig) `shouldBe` True
+      Map.member "pre_put" (sigMeasures sig) `shouldBe` True
+      Map.member "post_put" (sigMeasures sig) `shouldBe` True
+      Map.member "fuel" (sigMeasures sig) `shouldBe` True
+      Set.member "State" (sigSorts sig) `shouldBe` True
+      Set.member "Console" (sigSorts sig) `shouldBe` True
+      -- 2 budget qualifiers + 2 op qualifiers = 4 qualifiers
+      Set.size (sigQualifiers sig) `shouldBe` 4
+
+    it "generates Penelope perform and handle effect combinators" $ do
+      let combs = penelopeEffectCombinators effRow [getOp, putOp]
+      Map.member "perform_get" combs `shouldBe` True
+      Map.member "handle_get" combs `shouldBe` True
+      Map.member "perform_put" combs `shouldBe` True
+      Map.member "handle_put" combs `shouldBe` True
