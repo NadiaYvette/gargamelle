@@ -210,3 +210,28 @@ All six implementation phases specified in `docs/notes/GARGAMELLE_ARCHITECTURAL_
 - **Phase 4**: Cellular Sheaves & Homological Fault Localization (`gargamelle-sheaf`) [COMPLETED]
 - **Phase 5**: Polytropos-Kernmantle Rope & Optics (`gargamelle-effect`, upstreamed to `polytropos` & `kernmantle`) [COMPLETED]
 - **Phase 6**: End-to-End Sheaf-Gated CEGIS Workflow (`gargamelle-workflow`) [COMPLETED]
+
+## Autonomous Synthesis Roadmap: Wave 1A (TP-META-002) [COMPLETED]
+Integrated Synquid liquid refinement types, Polytropos row-polymorphism, Penelope algebraic effects, Lawvere hyperdoctrine Galois adjunctions, and counterexample-guided Galois collision separation across `gargamelle-core` and `gargamelle-fol`:
+- **TP-002A** (`gargamelle-core`): `Gargamelle.Core.Institution.Liquid` and `Gargamelle.Core.Institution.Liquid.Instance`.
+  - Defined `LiquidSort`, `RowSchema`, `MeasureDecl`, `CtorMeasureAxiom`, `Qualifier`, `LiquidPred`, `RBase`, `RType`, `RSchema`, `LiquidSig`, `LiquidSigMorphism`, `LiquidSentence`, and `LiquidModel`.
+  - Implemented `LiquidInstitution` instance with `senMap`, `modReduct`, `satisfies`, and `checkSatisfactionCondition`.
+  - Verified satisfaction condition invariance across signature morphisms for subtyping and termination obligations.
+- **TP-002B** (`gargamelle-core`): `Gargamelle.Core.Institution.Liquid.Polytropos` and `Liquid.Penelope`.
+  - Defined `OpenRow`, `FunctorSpec`, `MonoidFoldSpec`, `EffectRow`, `EffectSort`, and `EffectType`.
+  - Implemented `registerRecordRowMeasures` (field projections `sel_<l>`, McCarthy frame axioms, monoidal fold axioms `rowWeight(ext_l(x, r)) == slotWeight(x) + rowWeight(r)`, qualifiers), `registerVariantRowMeasures` (`vtags`, `vpayload_<l>`, injection axioms, tag tests), and `instantiateRowTailMorphism`.
+  - Implemented `registerEffectSignatures` and Penelope combinators (`perform_<eff>`, `handle_<eff>`).
+  - Added unit tests verifying open row instantiation morphisms and measure registration.
+- **TP-002C** (`gargamelle-fol`): `Gargamelle.FOL.LiquidBridge` and `Gargamelle.FOL.PenelopeBridge`.
+  - Wired `lowerSigToFOL`, `lowerSentenceToNegatedFOL`, `checkLiquidSubtypingZ3`, and `abductConditionZ3` into `Gargamelle.FOL.Z3`'s streaming Z3 pipe.
+  - Implemented `verifyEffectBudgetZ3` verifying resource fuel budgets via negated refutation in Z3.
+  - Added unit tests for subtyping refutation, counterexample extraction, and budget verification.
+- **TP-002D** (`gargamelle-fol`): `Gargamelle.FOL.LiquidHyperdoctrine`.
+  - Implemented Lawvere `Hyperdoctrine` and `LiquidSubHyperdoctrine` over finite qualifier lattices.
+  - Implemented left Galois adjoint `strongGaloisConsequence` ($\alpha^{\text{strong}}$) and right adjoint `weakGaloisImplicant` ($\alpha^{\text{weak}}$) forming the Galois connection $\alpha^{\text{strong}} \dashv i \dashv \alpha^{\text{weak}}$.
+  - Verified Galois adjunction laws in Z3-backed unit tests.
+- **TP-002E** (`gargamelle-fol`): `Gargamelle.FOL.GaloisSeparator`.
+  - Implemented `GaloisCollision` resolution: Tier-1 relational qualifier synthesis over existing measures/variables (`tryTier1RelationalQualifier`) and Tier-2 catamorphic measure invention (`tryTier2CatamorphicMeasure`) over differing ADT constructor frequencies and variant payloads.
+  - Added unit tests verifying relational and catamorphic separation of models.
+- **Verification Gate**: All 17 tests in `gargamelle-core` and 18 tests in `gargamelle-fol` (35 total) pass cleanly. Zero warnings under GHC 9.14.1.
+
