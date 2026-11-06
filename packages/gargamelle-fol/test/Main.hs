@@ -2,6 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main (main) where
 
@@ -14,6 +15,10 @@ import qualified FirstOrder as FO
 import qualified Hyperdoctrine as HD
 import qualified RefinementCalculus as RC
 import Gargamelle.FOL.Z3
+import Gargamelle.FOL.LiquidBridge
+import Gargamelle.FOL.PenelopeBridge
+import Gargamelle.Core.Institution.Liquid
+import Gargamelle.Core.Institution.Liquid.Penelope
 import Gargamelle.Model.Satisfaction (Evidence(..))
 import qualified Institution as Legacy
 
@@ -110,3 +115,70 @@ main = hspec do
             , FO.constants               = Set.empty
             }
       Legacy.satisfies (Proxy @(RC.RCSig '["preA", "postA", "preB", "postB"])) model refinement `shouldBe` True
+
+  describe "Gargamelle.FOL.LiquidBridge & PenelopeBridge" do
+    let emptySig = LiquidSig
+          { sigSorts      = Set.empty
+          , sigMeasures   = Map.empty
+          , sigCtorAxioms = []
+          , sigQualifiers = Set.empty
+          , sigEnv        = Map.empty
+          , sigPathCond   = []
+          }
+
+    it "validates tautological liquid subtyping obligations (x > 0 <: x >= 0)" do
+      let sen = SenSubtype
+            { subValueVar = "x"
+            , subSort     = SortInt
+            , subLhs      = PRel Gt (PVar "x") (PIntLit 0)
+            , subRhs      = PRel Ge (PVar "x") (PIntLit 0)
+            }
+      res <- checkLiquidSubtypingZ3 emptySig sen
+      res `shouldBe` SubtypeValid
+
+    it "rejects non-subtypes and produces counterexample model (x >= 0 </: x > 0)" do
+      let sen = SenSubtype
+            { subValueVar = "x"
+            , subSort     = SortInt
+            , subLhs      = PRel Ge (PVar "x") (PIntLit 0)
+            , subRhs      = PRel Gt (PVar "x") (PIntLit 0)
+            }
+      res <- checkLiquidSubtypingZ3 emptySig sen
+      case res of
+        SubtypeRejected (LiquidModel varEnv _ _) -> do
+          Map.lookup "x" varEnv `shouldBe` Just (VInt 0)
+        SubtypeValid -> expectationFailure "Expected SubtypeRejected for non-subtype"
+
+    it "abducts branch guard condition from qualifiers" do
+      let qualXPos = Qualifier
+            { qualName   = "Q_pos"
+            , qualParams = [("n", SortInt)]
+            , qualBody   = PRel Gt (PVar "n") (PIntLit 0)
+            }
+          sig = emptySig { sigQualifiers = Set.singleton qualXPos }
+          goal = PRel Ge (PVar "x") (PIntLit 0)
+      mGuard <- abductConditionZ3 sig ["x"] goal
+      mGuard `shouldBe` Just (PRel Gt (PVar "x") (PIntLit 0))
+
+    it "verifies Penelope effect resource budget bounds via verifyEffectBudgetZ3" do
+      let effType = EffectType
+            { effOpName     = "consumeFuel"
+            , effOpParams   = []
+            , effOpResult   = SortInt
+            , effOpPreCond  = PRel Gt (PVar "fuel") (PIntLit 0)
+            , effOpPostCond = PRel Ge (PVar "fuel") (PIntLit 1)
+            }
+      valid <- verifyEffectBudgetZ3 emptySig effType
+      valid `shouldBe` True
+
+    it "rejects invalid Penelope effect resource budget bounds" do
+      let effTypeInvalid = EffectType
+            { effOpName     = "badFuel"
+            , effOpParams   = []
+            , effOpResult   = SortInt
+            , effOpPreCond  = PRel Ge (PVar "fuel") (PIntLit 0)
+            , effOpPostCond = PRel Gt (PVar "fuel") (PIntLit 5)
+            }
+      valid <- verifyEffectBudgetZ3 emptySig effTypeInvalid
+      valid `shouldBe` False
+
