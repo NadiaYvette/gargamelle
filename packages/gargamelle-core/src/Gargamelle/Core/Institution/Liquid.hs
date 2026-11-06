@@ -7,6 +7,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE LambdaCase #-}
 
 module Gargamelle.Core.Institution.Liquid
   ( -- * Sorts, Measures, and Qualifiers
@@ -30,11 +31,15 @@ module Gargamelle.Core.Institution.Liquid
   , LiquidSentence (..)
   , LiquidModel (..)
   , LiquidVal (..)
+  -- * Synthesized Program AST
+  , SynTerm (..)
+  , termToLiquidPred
   ) where
 
 import Data.Map.Strict (Map)
 import Data.Set (Set)
 import Data.Text (Text)
+import qualified Data.Text as T
 import GHC.Generics (Generic)
 
 type SymName = Text
@@ -215,3 +220,39 @@ data LiquidModel = LiquidModel
   , modelMeasureInterp :: Map (SymName, LiquidVal) LiquidVal
   , modelAbductSol     :: Map SymName LiquidPred -- ^ Solved liquid holes / abducted conditions
   } deriving stock (Eq, Ord, Show, Generic)
+
+--------------------------------------------------------------------------------
+-- 4. Synthesized Program AST (Polymorphic over Polytropos & Penelope)
+--------------------------------------------------------------------------------
+
+data SynTerm
+  = TVar SymName
+  | TIntLit Integer
+  | TBoolLit Bool
+  | TLam SymName SynTerm
+  | TApp SynTerm [SynTerm]
+  -- ^ N-ary spine application: f e_1 ... e_n (used for Polytropos getF/setF/matchTagF)
+  | TIf LiquidPred SynTerm SynTerm
+  -- ^ Abducted branch: if P then C_t else C_f
+  | TEffPure SynTerm
+  -- ^ Pure return inside a Penelope effect row
+  | TEffBind SymName SynTerm SynTerm
+  -- ^ Penelope effectful bind: x <- perform_E arg; continuation
+  deriving stock (Eq, Ord, Show, Generic)
+
+-- | Projects pure scalar/measure-level SynTerms into LiquidPreds so dependent
+-- arrow refinements (x:T1 -> T2) can substitute synthesized arguments directly.
+termToLiquidPred :: SynTerm -> Maybe LiquidPred
+termToLiquidPred = \case
+  TVar v         -> Just (PVar v)
+  TIntLit i      -> Just (PIntLit i)
+  TBoolLit True  -> Just PTrue
+  TBoolLit False -> Just PFalse
+  TApp (TVar fn) [arg] -> do
+    pArg <- termToLiquidPred arg
+    if "getF_" `T.isPrefixOf` fn
+      then Just (PMeasureApp ("sel_" <> T.drop 5 fn) pArg)
+      else if "matchTagF_" `T.isPrefixOf` fn
+        then Just (PMeasureApp ("vpayload_" <> T.drop 10 fn) pArg)
+        else Just (PMeasureApp fn pArg)
+  _ -> Nothing
