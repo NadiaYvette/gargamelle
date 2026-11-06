@@ -235,3 +235,29 @@ Integrated Synquid liquid refinement types, Polytropos row-polymorphism, Penelop
   - Added unit tests verifying relational and catamorphic separation of models.
 - **Verification Gate**: All 17 tests in `gargamelle-core` and 18 tests in `gargamelle-fol` (35 total) pass cleanly. Zero warnings under GHC 9.14.1.
 
+## Autonomous Synthesis Roadmap: Wave 1B (TP-META-003) [COMPLETED]
+Integrated Sheaf Lattice Cohomology, $H^0 / H^1$ classification, autonomous Polytropos open row extension repair, and abductive equality saturation / E-Graphs across `gargamelle-sheaf` and `gargamelle-equational`:
+- **TP-003A** (`gargamelle-sheaf`): `Gargamelle.Sheaf.LiquidMetaSynthesis`.
+  - Implemented `GaloisCollision` detection (`detectGaloisCollision`) identifying models colliding under coarse qualifier bases.
+  - Implemented `repairGaloisCompleteness` extending `LiquidSig` dynamically via institution signature morphisms with synthesized separating measures and qualifiers.
+  - Defined `SheafEdgeObstruction` modeling 1-cocycle obstructions across directed sheaf edges.
+  - Implemented `killH1ObstructionViaRowExtension` deterministically killing $H^1$ obstructions by extending open Polytropos row variable `rho` on the edge interface with fresh field `l_cohom_<edgeId>` and strengthening edge path conditions with bridged invariants.
+- **TP-003B** (`gargamelle-sheaf`): `Gargamelle.Sheaf.LatticeCohomology`.
+  - Defined `SheafVertexSpec`, `SheafEdgeSpec`, `LiquidCellularSheaf`, `H1ConflictClassification` (`AutoRowRepairable` vs `ArchitecturalContradiction`), `H1QualifierConflict`, and `CohomologyResult` (`GlobalSectionH0` vs `ObstructionH1`).
+  - Implemented `solveSheafCohomology` computing global sections $H^0$ and classifying cohomological obstructions $H^1$ across cellular sheaf edges.
+  - Added unit tests and verified the two-vertex PGCL folio allocation test case `buildPgclCellularSheaf` (PDF pp. 58–60): detects $H^1$ gap across `e_alloc_to_mmu` (`meas_grain_aligned(r) == 1`), automatically applies `killH1ObstructionViaRowExtension` extending open row `rho_cluster` with `l_cohom_e_alloc_to_mmu`, and verifies re-solving yields certified `GlobalSectionH0` with zero human intervention.
+- **TP-003C** (`gargamelle-equational`): `Gargamelle.Equational.AbductiveEGraph`.
+  - Defined `EClassId`, `ENode`, `AbductiveEdge`, `GuardedCandidate`, `EClassData`, `DPORule`, and `AbductiveEGraph`.
+  - Implemented `applyAbductiveDPORule`: speculatively applies presheaf DPO rewriting rules by abducting weakest qualifier guards under which structural measures agree via `weakGaloisImplicant`, attaching guarded `AbductiveEdge`s.
+  - Implemented `propagateGuardedFrontiers`: bottom-up Bellman-Ford / semiring relaxation maintaining Pareto frontiers of guarded candidates using `dominates` and `pruneParetoFrontier`.
+  - Implemented `solveWeightedSetCover`: Chvátal's greedy weighted set-cover algorithm minimizing cost per newly covered witness model.
+  - Implemented `extractVerifiedDecisionTree`: folds verified covers into sound right-nested `TIf` decision trees eliminating redundant runtime checks.
+  - Added unit tests in `packages/gargamelle-equational/test/Main.hs` verifying rule application, frontier propagation, weighted set-cover, and decision tree synthesis.
+- **Verification Gate**:
+  - `cabal test gargamelle-sheaf`: 14 examples, 0 failures (100% pass).
+  - `cabal test gargamelle-equational`: 9 examples, 0 failures (100% pass).
+  - Total test suite across gargamelle packages: 102 examples, 0 failures.
+  - Zero compiler warnings under GHC 9.14.1 (`-Wall -Wcompat`).
+  - Pure ASCII Kanban projection (`yamaarashi-exec kanban`): All 8 task packets (`TP-002A`–`TP-002E`, `TP-003A`–`TP-003C`) marked `DONE (8)`, `FAILED (0)`.
+
+
