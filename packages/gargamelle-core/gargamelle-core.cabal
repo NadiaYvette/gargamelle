@@ -33,6 +33,8 @@ library
   exposed-modules:
     Institution
     Gargamelle.Core.Institution
+    Gargamelle.Core.Institution.Liquid
+    Gargamelle.Core.Institution.Liquid.Instance
     Gargamelle.Core.Weaving
     Gargamelle.Core.Discovery
     Gargamelle.Core.Colimit
@@ -47,6 +49,7 @@ library
   build-depends:
     base >= 4.18 && < 5,
     containers >= 0.6 && < 0.9,
+    text >= 2.0 && < 3,
     polytropos-core >= 0.1.0.1 && < 0.2,
     proarrow >= 0.2 && < 0.3,
     proarrow-equipment >= 0 && < 0.1,
@@ -67,5 +70,6 @@ test-suite tests
     gargamelle-logic >= 0.1 && < 0.2,
     gargamelle-model >= 0.1 && < 0.2,
     containers >= 0.6 && < 0.9,
+    text >= 2.0 && < 3,
     proarrow >= 0.2 && < 0.3,
     hspec >= 2.10 && < 2.12

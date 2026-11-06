@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -22,6 +23,10 @@ import Gargamelle.Core.Colimit
 import Gargamelle.Model.Satisfaction (verifyPredicate)
 import Gargamelle.Logic.Defunctionalize (ObsMor(..))
 import Propositional (PropSig(..), SentProp(..), ModProp(..))
+import Gargamelle.Core.Institution.Liquid
+import Gargamelle.Core.Institution.Liquid.Instance (checkSatisfactionCondition)
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import qualified Institution as Legacy
 import Data.Proxy (Proxy(..))
 import GHC.TypeLits (symbolVal)
@@ -146,3 +151,66 @@ main = hspec $ do
             "q" -> False
             _   -> False)
       Legacy.satisfies (Proxy @(PropSig '["p", "q"])) badModel formula `shouldBe` False
+
+  describe "Liquid Institution & Satisfaction Condition" $ do
+    it "verifies checkSatisfactionCondition holds invariant across signature morphisms for subtyping" $ do
+      let sig1 = LiquidSig
+            { sigSorts = Set.singleton "Int"
+            , sigMeasures = Map.empty
+            , sigCtorAxioms = []
+            , sigQualifiers = Set.empty
+            , sigEnv = Map.singleton "x" (RBScalar (RBase "v" SortInt (PRel Gt (PVar "v") (PIntLit 0))))
+            , sigPathCond = []
+            }
+          sig2 = LiquidSig
+            { sigSorts = Set.singleton "Int"
+            , sigMeasures = Map.empty
+            , sigCtorAxioms = []
+            , sigQualifiers = Set.empty
+            , sigEnv = Map.singleton "y" (RBScalar (RBase "v" SortInt (PRel Gt (PVar "v") (PIntLit 0))))
+            , sigPathCond = []
+            }
+          sigma = LiquidSigMorphism
+            { morphSource = sig1
+            , morphTarget = sig2
+            , morphSortMap = Map.empty
+            , morphVarMap = Map.singleton "x" "y"
+            , morphMeasMap = Map.empty
+            }
+          m2 = LiquidModel
+            { modelVarEnv = Map.singleton "y" (VInt 5)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol = Map.empty
+            }
+          phi = SenSubtype
+            { subValueVar = "v"
+            , subSort = SortInt
+            , subLhs = PRel Gt (PVar "x") (PIntLit 0)
+            , subRhs = PRel Ge (PVar "x") (PIntLit 0)
+            }
+      checkSatisfactionCondition sigma m2 phi `shouldBe` True
+
+    it "verifies checkSatisfactionCondition holds invariant for termination obligations" $ do
+      let sig1 = LiquidSig mempty mempty [] mempty mempty []
+          sig2 = LiquidSig mempty mempty [] mempty mempty []
+          sigma = LiquidSigMorphism
+            { morphSource = sig1
+            , morphTarget = sig2
+            , morphSortMap = Map.empty
+            , morphVarMap = Map.empty
+            , morphMeasMap = Map.singleton "len" "size"
+            }
+          m2 = LiquidModel
+            { modelVarEnv = Map.empty
+            , modelMeasureInterp = Map.fromList
+                [ (("size", VInt 1), VInt 1)
+                , (("size", VInt 2), VInt 2)
+                ]
+            , modelAbductSol = Map.empty
+            }
+          phi = SenTermination
+            { termMeasure = "len"
+            , termRecursiveArg = PIntLit 1
+            , termInitialParam = PIntLit 2
+            }
+      checkSatisfactionCondition sigma m2 phi `shouldBe` True
