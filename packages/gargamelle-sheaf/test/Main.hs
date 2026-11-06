@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -6,11 +7,17 @@ module Main (main) where
 
 import Test.Hspec
 import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import Algebra.Lattice (Lattice(..), BoundedMeetSemiLattice(..))
 
 import Gargamelle.Sheaf.Complex
 import Gargamelle.Sheaf.Diffusion
 import Gargamelle.Sheaf.Cohomology
+import Gargamelle.Sheaf.LiquidMetaSynthesis
+
+import Gargamelle.Core.Institution.Liquid
+import Gargamelle.Core.Institution.Liquid.Polytropos
+import Gargamelle.FOL.LiquidHyperdoctrine
 
 -- A simple bounded lattice of contract specifications for testing diffusion
 -- Ordered by specificity / constraint strength: Top is least constrained (True),
@@ -24,6 +31,16 @@ instance Lattice ContractLevel where
 
 instance BoundedMeetSemiLattice ContractLevel where
   top = Unconstrained
+
+emptySig :: LiquidSig
+emptySig = LiquidSig
+  { sigSorts      = Set.empty
+  , sigMeasures   = Map.empty
+  , sigCtorAxioms = []
+  , sigQualifiers = Set.empty
+  , sigEnv        = Map.empty
+  , sigPathCond   = []
+  }
 
 main :: IO ()
 main = hspec do
@@ -141,3 +158,72 @@ main = hspec do
                           then Just (fst modelA, fst modelB, snd modelB)
                           else Nothing
       amalgamated `shouldBe` Just (10, True, "ok")
+
+  describe "Gargamelle.Sheaf.LiquidMetaSynthesis (Galois Collision & H1 Row Repair)" do
+    it "detects indistinguishable models under coarse qualifier basis" do
+      let ctx = Context (Map.singleton "x" SortInt)
+          qualNonNeg = Qualifier "qual_nonneg" [("x", SortInt)] (PRel Ge (PVar "x") (PIntLit 0))
+          basis = QualifierBasis (Set.singleton qualNonNeg)
+          evalM m p = case p of
+            PRel Ge (PVar "x") (PIntLit 0) -> case Map.lookup "x" (modelVarEnv m) of
+              Just (VInt i) -> i >= 0
+              _             -> False
+            _ -> False
+          mPos = LiquidModel
+            { modelVarEnv        = Map.singleton "x" (VInt 10)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+          mNeg = LiquidModel
+            { modelVarEnv        = Map.singleton "x" (VInt 2)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+      case detectGaloisCollision ctx basis evalM mPos mNeg of
+        Nothing -> expectationFailure "Expected collision between models sharing all qualifiers"
+        Just collision -> do
+          colContext collision `shouldBe` ctx
+          colPosModel collision `shouldBe` mPos
+          colNegModel collision `shouldBe` mNeg
+          colSharedSig collision `shouldBe` Set.singleton (PRel Ge (PVar "x") (PIntLit 0))
+
+    it "repairs Galois completeness by dynamically extending LiquidSig with synthesized qualifier" do
+      let baseSig = emptySig
+          ctx = Context (Map.singleton "x" SortInt)
+          collision = GaloisCollision
+            { colContext   = ctx
+            , colPosModel  = LiquidModel (Map.singleton "x" (VInt 10)) Map.empty Map.empty
+            , colNegModel  = LiquidModel (Map.singleton "x" (VInt 2)) Map.empty Map.empty
+            , colSharedSig = Set.empty
+            }
+          fakeSeparator _ = pure
+            ( Nothing
+            , Qualifier "qual_gt5" [("x", SortInt)] (PRel Gt (PVar "x") (PIntLit 5))
+            )
+      morphism <- repairGaloisCompleteness baseSig collision fakeSeparator
+      let tgt = morphTarget morphism
+      Set.size (sigQualifiers tgt) `shouldBe` 1
+
+    it "kills H1 cocycle obstruction via Polytropos open row extension and path condition strengthening" do
+      let obs = SheafEdgeObstruction
+            { edgeId             = "e12"
+            , sourceStalkSig     = emptySig
+            , edgeStalkSig       = emptySig
+            , targetStalkSig     = emptySig
+            , edgeFunctorSpec    = FunctorSpec "f" "x" "y"
+            , edgeRowVar         = "rho"
+            , missingSlotSort    = SortInt
+            , sourceWitnessTerm  = PIntLit 42
+            , targetRequiredPred = \sel -> PRel Eq (PVar sel) (PIntLit 42)
+            }
+      case killH1ObstructionViaRowExtension obs of
+        Left err -> expectationFailure ("Unexpected failure: " <> show err)
+        Right (auxLabel, morphism) -> do
+          auxLabel `shouldBe` "l_cohom_e12"
+          let tgtSig = morphTarget morphism
+          Map.member "sel_l_cohom_e12" (sigMeasures tgtSig) `shouldBe` True
+          let expectedInvariant = PAnd
+                [ PRel Eq (PMeasureApp "sel_l_cohom_e12" (PVar "r_edge")) (PIntLit 42)
+                , PRel Eq (PVar "sel_l_cohom_e12") (PIntLit 42)
+                ]
+          sigPathCond tgtSig `shouldBe` [expectedInvariant]
