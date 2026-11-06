@@ -38,6 +38,7 @@ library
     Gargamelle.FOL.LiquidBridge
     Gargamelle.FOL.PenelopeBridge
     Gargamelle.FOL.LiquidHyperdoctrine
+    Gargamelle.FOL.GaloisSeparator
   hs-source-dirs: src
   default-language: Haskell2010
   ghc-options: -Wall -Wcompat

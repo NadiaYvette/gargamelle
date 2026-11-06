@@ -3,6 +3,7 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Main (main) where
 
@@ -18,6 +19,7 @@ import Gargamelle.FOL.Z3
 import Gargamelle.FOL.LiquidBridge
 import Gargamelle.FOL.PenelopeBridge
 import Gargamelle.FOL.LiquidHyperdoctrine
+import Gargamelle.FOL.GaloisSeparator
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Penelope
 import Gargamelle.Model.Satisfaction (Evidence(..))
@@ -226,4 +228,88 @@ main = hspec do
           -- Both i(q) and i(alphaWeak) entail psi
           valid <- entails @Z3Hyperdoctrine ctx (embedQualifier @Z3Hyperdoctrine alphaWeak) psi
           valid `shouldBe` True
+
+  describe "Gargamelle.FOL.GaloisSeparator for Meta-Abduction" do
+    let emptySig = LiquidSig
+          { sigSorts      = Set.empty
+          , sigMeasures   = Map.empty
+          , sigCtorAxioms = []
+          , sigQualifiers = Set.empty
+          , sigEnv        = Map.empty
+          , sigPathCond   = []
+          }
+
+    it "separates models with differing integer values via tryTier1RelationalQualifier" do
+      let mPos = LiquidModel
+            { modelVarEnv        = Map.singleton "x" (VInt 10)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+          mNeg = LiquidModel
+            { modelVarEnv        = Map.singleton "x" (VInt 2)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+      case tryTier1RelationalQualifier emptySig mPos mNeg of
+        Nothing -> expectationFailure "Expected Tier 1 relational qualifier to separate models"
+        Just qual -> do
+          evalTermValInModel mPos (qualBody qual) `shouldBe` Just (VBool True)
+          evalTermValInModel mNeg (qualBody qual) `shouldBe` Just (VBool False)
+
+    it "invents a catamorphic measure separating distinct ADT structures via tryTier2CatamorphicMeasure" do
+      -- Model + has a list [1, 2] represented as Cons(1, Cons(2, Nil))
+      -- Model - has a list [1] represented as Cons(1, Nil)
+      let treePos = VADT "Cons" [VInt 1, VADT "Cons" [VInt 2, VADT "Nil" []]]
+          treeNeg = VADT "Cons" [VInt 1, VADT "Nil" []]
+          mPos = LiquidModel
+            { modelVarEnv        = Map.singleton "t" treePos
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+          mNeg = LiquidModel
+            { modelVarEnv        = Map.singleton "t" treeNeg
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+      case tryTier2CatamorphicMeasure emptySig mPos mNeg of
+        Nothing -> expectationFailure "Expected Tier 2 catamorphic measure invention to separate models"
+        Just SeparatorSynthesisResult{..} -> do
+          case sepNewMeasure of
+            Nothing -> expectationFailure "Expected new measure declaration"
+            Just m  -> measureName m `shouldBe` "count_Cons"
+          length sepNewAxioms `shouldBe` 2
+          -- Check qualifier body separates
+          -- For mPos, count_Cons is 2, for mNeg count_Cons is 1
+          -- Qual body is PRel Gt (PMeasureApp "count_Cons" (PVar "t")) (PIntLit 1)
+          let mPosInterp = mPos
+                { modelMeasureInterp = Map.fromList
+                    [ (("count_Cons", treePos), VInt 2)
+                    , (("count_Cons", treeNeg), VInt 1)
+                    ]
+                }
+              mNegInterp = mNeg
+                { modelMeasureInterp = Map.fromList
+                    [ (("count_Cons", treePos), VInt 2)
+                    , (("count_Cons", treeNeg), VInt 1)
+                    ]
+                }
+          evalTermValInModel mPosInterp (qualBody sepQualifier) `shouldBe` Just (VBool True)
+          evalTermValInModel mNegInterp (qualBody sepQualifier) `shouldBe` Just (VBool False)
+
+    it "synthesizes separator end-to-end via synthesizeSeparator" do
+      let mPos = LiquidModel
+            { modelVarEnv        = Map.singleton "v" (VInt 42)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+          mNeg = LiquidModel
+            { modelVarEnv        = Map.singleton "v" (VInt 0)
+            , modelMeasureInterp = Map.empty
+            , modelAbductSol     = Map.empty
+            }
+          collision = GaloisCollision mPos mNeg
+      res <- synthesizeSeparator emptySig collision
+      evalTermValInModel mPos (qualBody (sepQualifier res)) `shouldBe` Just (VBool True)
+      evalTermValInModel mNeg (qualBody (sepQualifier res)) `shouldBe` Just (VBool False)
+
 
