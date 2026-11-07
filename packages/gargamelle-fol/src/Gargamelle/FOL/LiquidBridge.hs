@@ -150,9 +150,10 @@ liquidPredToSMTLib = \case
   PIff l r -> "(= " ++ liquidPredToSMTLib l ++ " " ++ liquidPredToSMTLib r ++ ")"
   PLiquidHole h _ -> T.unpack h
 
--- | Parse raw model map into LiquidModel.
-z3ModelToLiquidModel :: Map String String -> LiquidModel
-z3ModelToLiquidModel raw =
+-- | Parse raw model map into LiquidModel, reconstructing record structures from
+-- signature environment declarations and projection constants.
+z3ModelToLiquidModel :: LiquidSig -> Map String String -> LiquidModel
+z3ModelToLiquidModel sig raw =
   let parseVal s = case s of
         "true" -> VBool True
         "false" -> VBool False
@@ -160,9 +161,25 @@ z3ModelToLiquidModel raw =
             VInt (read s)
           | otherwise -> VInt 0
       varEnv = Map.fromList [ (T.pack k, parseVal v) | (k, v) <- Map.toList raw ]
+      -- Synthesize records in varEnv from meas_<f>_<v>
+      recordVals =
+        [ (v, VRecord (Map.fromList [ (f, Map.findWithDefault (VInt 0) (T.pack ("meas_" ++ T.unpack f ++ "_" ++ T.unpack v)) varEnv) | f <- Map.keys fields ]))
+        | (v, rType) <- Map.toList (sigEnv sig)
+        , fields <- case rType of
+                      RBScalar (RBase _ (SortRecordRow (RowSchema fs)) _) -> [fs]
+                      RBScalar (RBase _ (SortADT _ [SortRecordRow (RowSchema fs), _]) _) -> [fs]
+                      _ -> []
+        ]
+      varEnvWithRecords = foldr (\(k, v) env -> Map.insert k v env) varEnv recordVals
+      -- Populate measure interpretations
+      measureInterp = Map.fromList
+        [ (("sel_" <> f, recVal), Map.findWithDefault (VInt 0) f fieldMap)
+        | (_v, recVal@(VRecord fieldMap)) <- recordVals
+        , f <- Map.keys fieldMap
+        ]
   in LiquidModel
-       { modelVarEnv = varEnv
-       , modelMeasureInterp = Map.empty
+       { modelVarEnv = varEnvWithRecords
+       , modelMeasureInterp = measureInterp
        , modelAbductSol = Map.empty
        }
 
@@ -177,12 +194,25 @@ checkLiquidSubtypingZ3 sig sen = do
       envVars = Map.keysSet (sigEnv sig)
       extraVars = Set.difference fvs envVars
       extraDecls = unlines [ "(declare-const " ++ T.unpack v ++ " Int)" | v <- Set.toList extraVars ]
+      -- Generate scalar projection constants for records in sigEnv to extract measure values directly
+      recordProjections =
+        [ (v, f, "meas_" ++ T.unpack f ++ "_" ++ T.unpack v)
+        | (v, rType) <- Map.toList (sigEnv sig)
+        , f <- case rType of
+                 RBScalar (RBase _ (SortRecordRow (RowSchema fields)) _) -> Map.keys fields
+                 RBScalar (RBase _ (SortADT _ [SortRecordRow (RowSchema fields), _]) _) -> Map.keys fields
+                 _ -> []
+        ]
+      recDecls = unlines
+        [ "(declare-const " ++ c ++ " Int)\n(assert (= " ++ c ++ " (sel_" ++ T.unpack f ++ " " ++ T.unpack v ++ ")))"
+        | (v, f, c) <- recordProjections
+        ]
       assertion = "(assert " ++ liquidPredToSMTLib negPred ++ ")\n"
-      query = "(set-logic ALL)\n" ++ sigDecls ++ extraDecls ++ assertion ++ "(check-sat)\n(get-model)\n"
+      query = "(set-logic ALL)\n" ++ sigDecls ++ extraDecls ++ recDecls ++ assertion ++ "(check-sat)\n(get-model)\n"
   res <- solveZ3Raw query
   case res of
     Unsat -> pure SubtypeValid
-    Sat mdl -> pure $ SubtypeRejected (z3ModelToLiquidModel mdl)
+    Sat mdl -> pure $ SubtypeRejected (z3ModelToLiquidModel sig mdl)
     Unknown _err ->
       let defaultModel = LiquidModel Map.empty Map.empty Map.empty
       in pure $ SubtypeRejected defaultModel

@@ -13,6 +13,7 @@ module Gargamelle.FOL.Z3
   ) where
 
 import Control.Exception (SomeException, try)
+import Data.List (isPrefixOf)
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import System.Exit (ExitCode)
@@ -81,9 +82,19 @@ formulaToSMTLib f =
 -- | Parse the output model from Z3 into a map of variable assignments.
 parseZ3Model :: String -> Map.Map String String
 parseZ3Model out =
-  let extract ("(define-fun" : name : "()" : _type : val : rest) =
+  let extract ("(define-fun" : name : "()" : _type : "(-" : num : rest) =
+        let cleanNum = filter (`notElem` "()") num
+        in (name, "-" ++ cleanNum) : extract rest
+      extract ("(define-fun" : name : "()" : _type : val : rest) =
         let cleanVal = filter (`notElem` "()") val
         in (name, cleanVal) : extract rest
+      extract ("(define-fun" : name : _arg1 : _arg2 : _type : "(-" : num : rest) =
+        let cleanNum = filter (`notElem` "()") num
+        in (name, "-" ++ cleanNum) : extract rest
+      extract ("(define-fun" : name : _arg1 : _arg2 : _type : val : rest)
+        | not ("(ite" `isPrefixOf` val) =
+            let cleanVal = filter (`notElem` "()") val
+            in (name, cleanVal) : extract rest
       extract (_ : rest) = extract rest
       extract [] = []
       tokens = words out

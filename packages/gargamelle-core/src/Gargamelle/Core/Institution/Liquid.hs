@@ -248,6 +248,14 @@ termToLiquidPred = \case
   TIntLit i      -> Just (PIntLit i)
   TBoolLit True  -> Just PTrue
   TBoolLit False -> Just PFalse
+  TApp (TVar "add") [l, r] -> do
+    pl <- termToLiquidPred l
+    pr <- termToLiquidPred r
+    Just (PBinOp Add pl pr)
+  TApp (TVar "sub") [l, r] -> do
+    pl <- termToLiquidPred l
+    pr <- termToLiquidPred r
+    Just (PBinOp Sub pl pr)
   TApp (TVar fn) [arg] -> do
     pArg <- termToLiquidPred arg
     if "getF_" `T.isPrefixOf` fn
