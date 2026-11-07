@@ -43,8 +43,7 @@ library
     proarrow >= 0.2 && < 0.3,
     gargamelle-core >= 0.1 && < 0.2,
     text >= 2.0 && < 3,
-    gargamelle-fol >= 0.1 && < 0.2,
-    gargamelle-model >= 0.1 && < 0.2
+    gargamelle-fol >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -59,6 +58,5 @@ test-suite tests
     gargamelle-equational,
     gargamelle-core >= 0.1 && < 0.2,
     gargamelle-fol >= 0.1 && < 0.2,
-    gargamelle-model >= 0.1 && < 0.2,
     text >= 2.0 && < 3,
     hspec >= 2.10 && < 2.12

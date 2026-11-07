@@ -20,7 +20,7 @@ import System.Process (readProcessWithExitCode)
 import GHC.TypeLits (symbolVal)
 
 import FirstOrder (Formula(..), Term(..))
-import Gargamelle.Model.Satisfaction (Evidence(..))
+import Gargamelle.Logic.Satisfaction (Evidence(..))
 
 -- | Result of an SMT query.
 data SMTResult

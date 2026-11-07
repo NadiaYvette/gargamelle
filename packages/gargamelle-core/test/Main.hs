@@ -20,7 +20,7 @@ import Gargamelle.Core.Institution
 import Gargamelle.Core.Weaving
 import Gargamelle.Core.Discovery
 import Gargamelle.Core.Colimit
-import Gargamelle.Model.Satisfaction (verifyPredicate)
+import Gargamelle.Logic.Satisfaction (verifyPredicate)
 import Gargamelle.Logic.Defunctionalize (ObsMor(..))
 import Propositional (PropSig(..), SentProp(..), ModProp(..))
 import Gargamelle.Core.Institution.Liquid

@@ -56,9 +56,9 @@ library
     proarrow >= 0.2 && < 0.3,
     proarrow-equipment >= 0 && < 0.1,
     gargamelle-logic >= 0.1 && < 0.2,
-    gargamelle-model >= 0.1 && < 0.2,
     lattices >= 2.2 && < 2.3,
-    contravariant >= 1.5 && < 1.6
+    contravariant >= 1.5 && < 1.6,
+    mtl >= 2.2 && < 2.4
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -70,7 +70,6 @@ test-suite tests
     base >= 4.18 && < 5,
     gargamelle-core,
     gargamelle-logic >= 0.1 && < 0.2,
-    gargamelle-model >= 0.1 && < 0.2,
     containers >= 0.6 && < 0.9,
     text >= 2.0 && < 3,
     proarrow >= 0.2 && < 0.3,

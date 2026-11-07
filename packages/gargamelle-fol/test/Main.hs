@@ -22,7 +22,7 @@ import Gargamelle.FOL.LiquidHyperdoctrine
 import Gargamelle.FOL.GaloisSeparator
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Penelope
-import Gargamelle.Model.Satisfaction (Evidence(..))
+import Gargamelle.Logic.Satisfaction (Evidence(..))
 import qualified Institution as Legacy
 
 main :: IO ()

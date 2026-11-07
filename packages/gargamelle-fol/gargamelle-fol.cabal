@@ -49,7 +49,7 @@ library
     text >= 2.0 && < 3,
     polytropos-core >= 0.1.0.1 && < 0.2,
     gargamelle-core >= 0.1 && < 0.2,
-    gargamelle-model >= 0.1 && < 0.2
+    gargamelle-logic >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -63,5 +63,5 @@ test-suite tests
     process >= 1.6 && < 1.7,
     gargamelle-fol,
     gargamelle-core >= 0.1 && < 0.2,
-    gargamelle-model >= 0.1 && < 0.2,
+    gargamelle-logic >= 0.1 && < 0.2,
     hspec >= 2.10 && < 2.12

@@ -21,7 +21,7 @@ module Gargamelle.Core.Institution
 
 import Data.Kind (Type)
 import Proarrow.Core (CategoryOf(..), type (~>))
-import Gargamelle.Model.Satisfaction (Verifier, Evidence, evalVerifier)
+import Gargamelle.Logic.Satisfaction (Verifier, Evidence, evalVerifier)
 import Gargamelle.Logic.Defunctionalize (TyFun, Apply, ObsMor, evalObsMor)
 
 -- | Signature category of an institution.
