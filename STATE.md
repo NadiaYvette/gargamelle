@@ -260,4 +260,48 @@ Integrated Sheaf Lattice Cohomology, $H^0 / H^1$ classification, autonomous Poly
   - Zero compiler warnings under GHC 9.14.1 (`-Wall -Wcompat`).
   - Pure ASCII Kanban projection (`yamaarashi-exec kanban`): All 8 task packets (`TP-002A`–`TP-002E`, `TP-003A`–`TP-003C`) marked `DONE (8)`, `FAILED (0)`.
 
+## Autonomous Synthesis Roadmap: Wave 1C (TP-META-004) [COMPLETED]
+Integrated active ambiguity elimination, Wake-Sleep memory consolidation, rewrite mining of conditional DPO laws, and dual backend code generation (Polytropos Haskell & Lavenza OrganIR SSA) across `gargamelle-model`, `gargamelle-persistence`, and `gargamelle-core`:
+- **TP-004A** (`gargamelle-model`): `Gargamelle.Model.AmbiguityOracle`.
+  - Defined `ConcreteModel`, `WitnessModel`, `OracleDiagnostic`.
+  - Implemented concrete term evaluator `evalSynTermInModel` supporting record/variant operations and intermediate variable bindings (`TEffBind`).
+  - Implemented `extractWitnessFromSMT`, `discriminateAmbiguity`, and `runAmbiguityEliminationStep` querying the streaming Z3 pipe to extract discriminating countermodels that split competing candidate syntheses.
+  - Implemented `rankAmbiguitiesByInformationGain` prioritizing ambiguous choice points that maximize expected entropy reduction.
+  - Added unit tests in `packages/gargamelle-model/test/Main.hs`.
+- **TP-004B** (`gargamelle-persistence`): `Gargamelle.Persistence.Crystallize`.
+  - Implemented Wake-Sleep memory consolidation for synthesized programs:
+    - **Sleep Phase**: `clusterVerifiedTraceRuns` (clustering verified execution traces by signature and effect footprint), `synthesizeCandidateCombinator` (inducing reusable higher-order combinators from common subgraphs), `verifyCandidateCombinator` (Z3 relational verification proving candidate preserves functional semantics).
+    - **Wake Phase**: `registerCrystallizedCombinator` (promoting verified combinators into the persistent library in Beam SQLite `LibraryCombinatorRecordT`), `exportCrystallizedLibrary` (emitting Polytropos row combinators for downstream synthesis passes).
+  - Added unit tests in `packages/gargamelle-persistence/test/Main.hs`.
+- **TP-004C** (`gargamelle-persistence`): `Gargamelle.Persistence.RewriteMining`.
+  - Implemented automated mining of equational rewrite laws from crystallized execution traces:
+    - Defined `CandidateLawSchema`, `MiningContext`, and `MiningConfig`.
+    - Implemented `computeBeamEqualityOverlap` identifying semantic overlaps across candidate combinator pairs while filtering out identity/trivial instances.
+    - Implemented `abductAndVerifyConditionalLaw` using Z3 relational verification and SMT sort alignment (`RecordF_*` and `VariantF_*` mapped to `Int` flat slots) to abduct weakest qualifier guards under which structural equalities hold.
+    - Implemented `compileLawToDPORule` translating verified conditional laws into executable Double-Pushout (DPO) rewriting rules for `AbductiveEGraph`.
+  - Added unit tests in `packages/gargamelle-persistence/test/Main.hs`.
+- **TP-004D** (`gargamelle-core`): `Gargamelle.CodeGen.Haskell` and `Gargamelle.CodeGen.OrganIR`.
+  - Implemented `Gargamelle.CodeGen.Haskell`:
+    - `lowerSynTermToHaskell`: lowers `SynTerm` ASTs into zero-cost Polytropos row combinators (`getF @"lbl"`, `setF @"lbl"`, `matchF @"lbl"`, `absurdVariant`) and Penelope algebraic effect handlers (`Penelope.perform @Eff arg`).
+    - `lowerLiquidPred`, `renderRelOp`, `renderBinOp`, `wrapAtom`.
+    - `generateModule`: generates complete self-contained Haskell module with `DataKinds`, `OverloadedStrings`, `TypeApplications`.
+  - Implemented `Gargamelle.CodeGen.OrganIR`:
+    - Layout descriptors: `SlotIndex`, `RowLayoutDescriptor`, `ResumptionKind`, `EffectVectorDescriptor`, `buildRowLayoutDescriptor`, `buildEffectVectorDescriptor`, `resolveRowSlot`.
+    - SSA AST: `SSAVal`, `OrganType`, `OrganPrimOp`, `OrganRhs`, `OrganStmt`, `OrganProc`.
+    - Lowering: `lowerStalkToOrganProc`, `lowerLiquidSort`, `OrganLowerM` monad emitting `StmtAssume` for entry invariants and structuring `StmtIf` / `StmtUnreachable`.
+    - Dual backend emitters:
+      - `emitMLIRProc`: emits MLIR `func.func` with Lavenza `organ.rep` / `organ.eff`, `scf.if`, `arith`, and `llvm` intrinsics.
+      - `emitGimpleProc`: emits GCC `-fgimple` SSA with basic blocks `__BB(2)`, `__PHI` nodes, and direct struct pointer indexing `r->slots[c_idx]`.
+  - Exposed both modules in `packages/gargamelle-core/gargamelle-core.cabal`.
+  - Added 5 unit tests in `packages/gargamelle-core/test/Main.hs`.
+- **Verification Gate**:
+  - `gargamelle-core`: 22 examples, 0 failures (100% pass).
+  - `gargamelle-fol`: 18 examples, 0 failures (100% pass).
+  - `gargamelle-equational`: 9 examples, 0 failures (100% pass).
+  - `gargamelle-model`: 12 examples, 0 failures (100% pass).
+  - `gargamelle-sheaf`: 14 examples, 0 failures (100% pass).
+  - `gargamelle-persistence`: 12 examples, 0 failures (100% pass).
+  - Total across all active package test suites: 87 examples, 0 failures (100% pass, 0 compiler warnings).
+  - Pure ASCII Kanban projection (`yamaarashi-exec kanban`): All 12 task packets (`TP-002A`–`TP-002E`, `TP-003A`–`TP-003C`, `TP-004A`–`TP-004D`) marked `DONE (12)`, `FAILED (0)`.
+
 
