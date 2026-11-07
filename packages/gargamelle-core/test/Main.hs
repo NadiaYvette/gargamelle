@@ -27,8 +27,11 @@ import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Instance (checkSatisfactionCondition)
 import Gargamelle.Core.Institution.Liquid.Polytropos
 import Gargamelle.Core.Institution.Liquid.Penelope
+import Gargamelle.CodeGen.Haskell
+import Gargamelle.CodeGen.OrganIR
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
+import qualified Data.Text as T
 import qualified Institution as Legacy
 import Data.Proxy (Proxy(..))
 import GHC.TypeLits (symbolVal)
@@ -342,3 +345,99 @@ main = hspec $ do
       Map.member "handle_get" combs `shouldBe` True
       Map.member "perform_put" combs `shouldBe` True
       Map.member "handle_put" combs `shouldBe` True
+
+  describe "Gargamelle.CodeGen.Haskell (Zero-Cost Haskell Lowering)" $ do
+    let guardCond = PRel Ge (PBinOp Add (PMeasureApp "sel_quota" (PVar "r")) (PVar "d"))
+                            (PMeasureApp "sel_used" (PVar "r"))
+        termAdjust = TIf guardCond
+                         (TApp (TVar "setF_quota") [TApp (TVar "add") [TApp (TVar "getF_quota") [TVar "r"], TVar "d"], TVar "r"])
+                         (TApp (TVar "setF_quota") [TApp (TVar "getF_used") [TVar "r"], TVar "r"])
+        termEffect = TEffBind "res" (TApp (TVar "perform_AuditLog") [TVar "d"])
+                       (TEffPure (TVar "res"))
+
+    it "1. lowerSynTermToHaskell lowers Polytropos row and Penelope effect operations" $ do
+      let hsCode = lowerSynTermToHaskell termAdjust
+      T.isInfixOf "Polytropos.getF @\"quota\" r" hsCode `shouldBe` True
+      T.isInfixOf "Polytropos.setF @\"quota\"" hsCode `shouldBe` True
+      T.isInfixOf "Polytropos.getF @\"used\" r" hsCode `shouldBe` True
+      T.isInfixOf "if" hsCode `shouldBe` True
+
+      let hsEff = lowerSynTermToHaskell termEffect
+      T.isInfixOf "Penelope.perform @AuditLog d" hsEff `shouldBe` True
+      T.isInfixOf "pure (res)" hsEff `shouldBe` True
+
+    it "2. generateModule generates complete Haskell module" $ do
+      let modText = generateModule "Generated.QuotaPipeline" "adjustQuota" termAdjust
+      T.isInfixOf "module Generated.QuotaPipeline where" modText `shouldBe` True
+      T.isInfixOf "import qualified Polytropos" modText `shouldBe` True
+      T.isInfixOf "import qualified Penelope" modText `shouldBe` True
+      T.isInfixOf "adjustQuota :: _" modText `shouldBe` True
+      T.isInfixOf "adjustQuota =" modText `shouldBe` True
+
+  describe "Gargamelle.CodeGen.OrganIR (Dual-Backend MLIR & GIMPLE SSA)" $ do
+    let recRow = OpenRow
+          { rowFields = Map.fromList [("quota", SortInt), ("used", SortInt)]
+          , rowTail   = Just "rho_r"
+          , rowLacks  = Set.empty
+          }
+        rowDesc = buildRowLayoutDescriptor recRow
+        effRow = EffectRow
+          { effList  = ["AuditLog"]
+          , effTail  = Nothing
+          , effLacks = Set.empty
+          }
+        effDesc = buildEffectVectorDescriptor (\_ -> TailResumptive) effRow
+        recordSort = SortADT "RecordF_Tenant" [SortRecordRow (RowSchema (rowFields recRow)), SortVar "rho_r"]
+        sig = LiquidSig
+          { sigSorts      = Set.empty
+          , sigMeasures   = Map.fromList
+              [ ("sel_quota", MeasureDecl "sel_quota" recordSort SortInt False)
+              , ("sel_used",  MeasureDecl "sel_used"  recordSort SortInt False)
+              ]
+          , sigCtorAxioms = []
+          , sigQualifiers = Set.empty
+          , sigEnv        = Map.fromList
+              [ ("r", RBScalar (RBase "v" recordSort PTrue))
+              , ("d", RBScalar (RBase "v" SortInt PTrue))
+              ]
+          , sigPathCond   = [PRel Ge (PMeasureApp "sel_quota" (PVar "r")) (PMeasureApp "sel_used" (PVar "r"))]
+          }
+        goalBase = RBase "v" recordSort (PRel Ge (PMeasureApp "sel_quota" (PVar "v")) (PMeasureApp "sel_used" (PVar "v")))
+        guardCond = PRel Ge (PBinOp Add (PMeasureApp "sel_quota" (PVar "r")) (PVar "d"))
+                            (PMeasureApp "sel_used" (PVar "r"))
+        termAdjust = TIf guardCond
+                         (TApp (TVar "setF_quota") [TApp (TVar "add") [TApp (TVar "getF_quota") [TVar "r"], TVar "d"], TVar "r"])
+                         (TApp (TVar "setF_quota") [TApp (TVar "getF_used") [TVar "r"], TVar "r"])
+
+    it "1. lowerStalkToOrganProc lowers SynTerm into structured SSA with StmtAssume optimizer hints" $ do
+      let proc = lowerStalkToOrganProc "adjustQuota" rowDesc effDesc sig goalBase termAdjust
+      procName proc `shouldBe` "adjustQuota"
+      let assumes = [ s | s@(StmtAssume _ _) <- procBody proc ]
+      assumes `shouldNotSatisfy` null
+      let ifStmts = [ s | s@(StmtIf {}) <- procBody proc ]
+      ifStmts `shouldNotSatisfy` null
+
+    it "2. emitMLIRProc produces valid MLIR func.func with organ.rep and scf.if constructs" $ do
+      let proc = lowerStalkToOrganProc "adjustQuota" rowDesc effDesc sig goalBase termAdjust
+          mlirText = emitMLIRProc proc
+      T.isInfixOf "func.func @adjustQuota(" mlirText `shouldBe` True
+      T.isInfixOf "!organ.eff_vec<1>" mlirText `shouldBe` True
+      T.isInfixOf "!organ.rep<2>" mlirText `shouldBe` True
+      T.isInfixOf "llvm.intr.assume" mlirText `shouldBe` True
+      T.isInfixOf "scf.if" mlirText `shouldBe` True
+      T.isInfixOf "organ.rep.slot_load" mlirText `shouldBe` True
+      T.isInfixOf "organ.rep.slot_update" mlirText `shouldBe` True
+      T.isInfixOf "func.return" mlirText `shouldBe` True
+
+    it "3. emitGimpleProc produces valid GCC -fgimple SSA with basic blocks and __PHI nodes" $ do
+      let proc = lowerStalkToOrganProc "adjustQuota" rowDesc effDesc sig goalBase termAdjust
+          gimpleText = emitGimpleProc proc
+      T.isInfixOf "struct PolytroposRep * __GIMPLE (ssa)" gimpleText `shouldBe` True
+      T.isInfixOf "adjustQuota (" gimpleText `shouldBe` True
+      T.isInfixOf "__BB(2):" gimpleText `shouldBe` True
+      T.isInfixOf "__builtin_unreachable ();" gimpleText `shouldBe` True
+      T.isInfixOf "r->slots[0]" gimpleText `shouldBe` True
+      T.isInfixOf "__organ_rep_update" gimpleText `shouldBe` True
+      T.isInfixOf "__PHI (" gimpleText `shouldBe` True
+      T.isInfixOf "return" gimpleText `shouldBe` True
+
