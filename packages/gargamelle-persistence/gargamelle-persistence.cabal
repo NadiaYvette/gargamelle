@@ -34,17 +34,23 @@ library
     Persistence.Schema
     Persistence.Beam
     Persistence.Queries
+    Gargamelle.Persistence.Crystallize
   hs-source-dirs: src
   default-language: Haskell2010
   ghc-options: -Wall
   build-depends:
     base >= 4.14 && < 5,
     text >= 2.0 && < 2.2,
+    containers >= 0.6 && < 0.9,
     beam-core >= 0.10 && < 0.12,
     beam-sqlite >= 0.5 && < 0.8,
     sqlite-simple >= 0.4 && < 0.5,
     polytropos-core >= 0.1.0.1 && < 0.2,
-    gargamelle-core >= 0.1 && < 0.2
+    gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-fol >= 0.1 && < 0.2,
+    gargamelle-equational >= 0.1 && < 0.2,
+    gargamelle-sheaf >= 0.1 && < 0.2,
+    gargamelle-model >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
@@ -56,5 +62,12 @@ test-suite tests
     base >= 4.14 && < 5,
     gargamelle-persistence,
     text >= 2.0 && < 2.2,
+    containers >= 0.6 && < 0.9,
     sqlite-simple >= 0.4 && < 0.5,
-    hspec >= 2.10 && < 2.12
+    hspec >= 2.10 && < 2.12,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    gargamelle-core >= 0.1 && < 0.2,
+    gargamelle-fol >= 0.1 && < 0.2,
+    gargamelle-equational >= 0.1 && < 0.2,
+    gargamelle-sheaf >= 0.1 && < 0.2,
+    gargamelle-model >= 0.1 && < 0.2
