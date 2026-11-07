@@ -256,8 +256,10 @@ evalSynTermInModel evalPred mdl = go
         go body
       TEffPure t ->
         go t
-      TEffBind _ opTerm contTerm ->
-        let _ = go opTerm in go contTerm
+      TEffBind x opTerm contTerm ->
+        let v = go opTerm
+            mdl' = mdl { modelVarEnv = Map.insert x v (modelVarEnv mdl) }
+        in evalSynTermInModel evalPred mdl' contTerm
       TIf g t1 t2 ->
         if evalPred mdl g then go t1 else go t2
       TApp (TVar fn) args

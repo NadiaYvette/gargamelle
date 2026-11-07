@@ -36,7 +36,9 @@ sortToSMT = \case
   SortBool -> "Bool"
   SortSet _ -> "Int" -- modeled or uninterpreted
   SortVar tv -> T.unpack tv
-  SortADT name _ -> T.unpack name
+  SortADT name _
+    | "RecordF_" `T.isPrefixOf` name || "VariantF_" `T.isPrefixOf` name -> "Int"
+    | otherwise -> T.unpack name
   SortRecordRow _ -> "Int"
   SortVariantRow _ -> "Int"
   SortEffectRow _ -> "Int"

@@ -176,7 +176,9 @@ sortToSMTLib = \case
   SortBool -> "Bool"
   SortSet _ -> "Int"
   SortVar tv -> T.unpack tv
-  SortADT name _ -> T.unpack name
+  SortADT name _
+    | "RecordF_" `T.isPrefixOf` name || "VariantF_" `T.isPrefixOf` name -> "Int"
+    | otherwise -> T.unpack name
   SortRecordRow _ -> "Int"
   SortVariantRow _ -> "Int"
   SortEffectRow _ -> "Int"
@@ -199,6 +201,37 @@ folFormulaToSMTLib = \case
     "(exists ((" ++ T.unpack v ++ " " ++ sortToSMTLib s ++ ")) " ++ folFormulaToSMTLib f ++ ")"
   FForall v s f ->
     "(forall ((" ++ T.unpack v ++ " " ++ sortToSMTLib s ++ ")) " ++ folFormulaToSMTLib f ++ ")"
+
+collectFreeVarsInFOL :: FOLFormula -> Set SymName
+collectFreeVarsInFOL = \case
+  FTrue -> Set.empty
+  FFalse -> Set.empty
+  FAtom p -> collectFreeVarsInPred p
+  FAnd fs -> Set.unions (map collectFreeVarsInFOL fs)
+  FOr fs -> Set.unions (map collectFreeVarsInFOL fs)
+  FImplies f1 f2 -> collectFreeVarsInFOL f1 `Set.union` collectFreeVarsInFOL f2
+  FNot f -> collectFreeVarsInFOL f
+  FExists v _ f -> Set.delete v (collectFreeVarsInFOL f)
+  FForall v _ f -> Set.delete v (collectFreeVarsInFOL f)
+
+collectFreeVarsInPred :: LiquidPred -> Set SymName
+collectFreeVarsInPred = \case
+  PTrue -> Set.empty
+  PFalse -> Set.empty
+  PVar v -> Set.singleton v
+  PIntLit _ -> Set.empty
+  PEmptySet _ -> Set.empty
+  PMeasureApp _ e -> collectFreeVarsInPred e
+  PFieldProj _ e -> collectFreeVarsInPred e
+  PVariantTag _ e -> collectFreeVarsInPred e
+  PBinOp _ l r -> collectFreeVarsInPred l `Set.union` collectFreeVarsInPred r
+  PRel _ l r -> collectFreeVarsInPred l `Set.union` collectFreeVarsInPred r
+  PNot e -> collectFreeVarsInPred e
+  PAnd es -> Set.unions (map collectFreeVarsInPred es)
+  POr es -> Set.unions (map collectFreeVarsInPred es)
+  PImplies l r -> collectFreeVarsInPred l `Set.union` collectFreeVarsInPred r
+  PIff l r -> collectFreeVarsInPred l `Set.union` collectFreeVarsInPred r
+  PLiquidHole _ vs -> Set.fromList vs
 
 collectMeasureNamesInFOL :: FOLFormula -> Set SymName
 collectMeasureNamesInFOL = \case
@@ -242,12 +275,19 @@ instance Hyperdoctrine Z3Hyperdoctrine where
           [ "(declare-fun " ++ T.unpack m ++ " (Int) Int)"
           | m <- Set.toList measures
           ]
+        fvs = collectFreeVarsInFOL vc
+        envVars = Map.keysSet env
+        extraVars = Set.difference fvs envVars
+        extraDecls = unlines
+          [ "(declare-const " ++ T.unpack v ++ " Int)"
+          | v <- Set.toList extraVars
+          ]
         decls = unlines
           [ "(declare-const " ++ T.unpack v ++ " " ++ sortToSMTLib s ++ ")"
           | (v, s) <- Map.toList env
           ]
         smtVc = folFormulaToSMTLib vc
-        query = "(set-logic ALL)\n" ++ measDecls ++ decls ++ "(assert " ++ smtVc ++ ")\n(check-sat)\n"
+        query = "(set-logic ALL)\n" ++ measDecls ++ extraDecls ++ decls ++ "(assert " ++ smtVc ++ ")\n(check-sat)\n"
     res <- solveZ3Raw query
     case res of
       Unsat -> pure True
