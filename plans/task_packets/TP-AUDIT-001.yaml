@@ -1,0 +1,146 @@
+id: "TP-AUDIT-001"
+title: "Core Audit Schema, Ratchet Baseline & CST Working-Memory Analyzer"
+packages:
+  - "gargamelle-audit"
+executor: "agy"
+model: "flash"
+max_turns: 8
+run_budget: 900
+max_repair_attempts: 3
+allow_metered: false
+description: |
+  Initialize the `gargamelle-audit` package in `packages/gargamelle-audit` and implement:
+  1. The core audit domain types and thresholds (`Gargamelle.Audit.Types`).
+  2. The diff-gated ratchet baseline engine (`Gargamelle.Audit.Baseline`) backed by `.audit-baseline.json`.
+  3. The language-extensible CST Working-Memory & Parameter-Arity analyzer (`Gargamelle.Audit.WorkingMemory`) for Haskell source files.
+
+  ### Architectural & Invariant Specifications:
+
+  #### 1. Package Configuration (`packages/gargamelle-audit/gargamelle-audit.cabal`)
+  - Register `packages/gargamelle-audit` in the top-level `cabal.project`.
+  - Build with `GHC2021` and `-Wall -Werror`.
+  - Dependencies: `base >= 4.14 && < 5`, `aeson >= 2.0 && < 2.3`, `bytestring >= 0.10 && < 0.13`, `containers >= 0.6 && < 0.9`, `directory >= 1.3 && < 1.4`, `filepath >= 1.4 && < 1.6`, `text >= 2.0 && < 2.2`, `gargamelle-evidence >= 0.1 && < 0.2`, and `tasty >= 1.4 && < 1.6` / `tasty-hunit >= 0.10 && < 0.11` for tests.
+
+  #### 2. Core Types (`Gargamelle.Audit.Types`)
+  Implement the following strict data structures with `FromJSON` and `ToJSON` instances:
+  ```haskell
+  {-# LANGUAGE DeriveAnyClass #-}
+  {-# LANGUAGE DeriveGeneric #-}
+  {-# LANGUAGE DerivingStrategies #-}
+  {-# LANGUAGE OverloadedStrings #-}
+  {-# LANGUAGE StrictData #-}
+
+  module Gargamelle.Audit.Types
+    ( AuditThresholds (..)
+    , defaultAuditThresholds
+    , SubstrateMode (..)
+    , ViolationCategory (..)
+    , KnowledgeSlot (..)
+    , AuditViolation (..)
+    , BaselineFingerprints (..)
+    , RatchetVerdict (..)
+    , CstLangAdapter (..)
+    ) where
+
+  import Data.Aeson (FromJSON, ToJSON)
+  import Data.Set (Set)
+  import Data.Text (Text)
+  import GHC.Generics (Generic)
+
+  data AuditThresholds = AuditThresholds
+    { maxLiveBindings     :: !Int     -- Default: 7
+    , minLiveSpanLines    :: !Int     -- Default: 15
+    , maxExplicitParams   :: !Int     -- Default: 4
+    , minNovelStemRatio   :: !Double  -- Default: 1.5
+    , maxApiHops          :: !Int     -- Default: 2
+    , maxDefUseParagraphs :: !Int    -- Default: 3
+    } deriving stock (Eq, Show, Generic)
+      deriving anyclass (FromJSON, ToJSON)
+
+  defaultAuditThresholds :: AuditThresholds
+  defaultAuditThresholds = AuditThresholds
+    { maxLiveBindings     = 7
+    , minLiveSpanLines    = 15
+    , maxExplicitParams   = 4
+    , minNovelStemRatio   = 1.5
+    , maxApiHops          = 2
+    , maxDefUseParagraphs = 3
+    }
+
+  data SubstrateMode
+    = StandardModule
+    | SubstrateModule -- Triggered by `.Internal` module suffix or `{-# ANN module "audit:substrate" #-}`
+    deriving stock (Eq, Ord, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
+
+  data KnowledgeSlot
+    = SlotPurpose
+    | SlotBehavior
+    | SlotTheory
+    | SlotContracts
+    | SlotPattern
+    | SlotExample
+    | SlotSafetyInvariant -- Mandatory when SubstrateMode == SubstrateModule
+    deriving stock (Eq, Ord, Show, Enum, Bounded, Generic)
+    deriving anyclass (FromJSON, ToJSON)
+
+  data ViolationCategory
+    = WorkingMemoryPeakExceeded { peakCount :: !Int, limitCount :: !Int, spanLines :: !Int }
+    | ExcessiveParameterArity   { paramCount :: !Int, limitParams :: !Int }
+    | TautologicalDocstring     { measuredRatio :: !Double, requiredRatio :: !Double }
+    | MissingKnowledgeSlots     { missingSlots :: ![KnowledgeSlot] }
+    | MissingFunctionContract
+    | ApiReachabilityExceeded   { helperType :: !Text, measuredHops :: !(Maybe Int), maxHops :: !Int }
+    | PedagogicalForwardRef     { conceptOrSymbol :: !Text, usedInDoc :: !Text, definedInDoc :: !(Maybe Text) }
+    | ExcessiveDefUseGap        { symbolName :: !Text, paragraphGap :: !Int }
+    deriving stock (Eq, Ord, Show, Generic)
+    deriving anyclass (FromJSON, ToJSON)
+
+  data AuditViolation = AuditViolation
+    { avFilePath    :: !FilePath
+    , avSymbol      :: !Text
+    , avStartLine   :: !Int
+    , avEndLine     :: !Int
+    , avCategory    :: !ViolationCategory
+    , avRemediation :: !Text
+    } deriving stock (Eq, Ord, Show, Generic)
+      deriving anyclass (FromJSON, ToJSON)
+
+  newtype BaselineFingerprints = BaselineFingerprints
+    { unFingerprints :: Set (FilePath, Text, ViolationCategory)
+    } deriving stock (Eq, Show, Generic)
+      deriving anyclass (FromJSON, ToJSON)
+
+  data RatchetVerdict = RatchetVerdict
+    { rvBlockingViolations    :: ![AuditViolation]
+    , rvGrandfatheredCount    :: !Int
+    , rvResolvedBaselineCount :: !Int
+    } deriving stock (Eq, Show, Generic)
+      deriving anyclass (FromJSON, ToJSON)
+
+  data CstLangAdapter = CstLangAdapter
+    { claLanguageName :: !Text
+    , claExtensions   :: ![String]
+    , claAnalyzeFile  :: AuditThresholds -> FilePath -> Text -> [AuditViolation]
+    }
+  ```
+
+  #### 3. Ratchet Baseline Engine (`Gargamelle.Audit.Baseline`)
+  Implement `evaluateRatchet :: BaselineFingerprints -> Set FilePath -> [AuditViolation] -> RatchetVerdict`:
+  - If `avFilePath` is a member of `touchedFiles` (passed via `--touched` or `git diff --name-only`), **zero grandfathering applies**: every `AuditViolation` in a touched file is placed into `rvBlockingViolations`.
+  - For untouched files, a violation is grandfathered if and only if `(avFilePath, avSymbol, avCategory)` exists in `BaselineFingerprints`. Any net-new violation is added to `rvBlockingViolations`.
+  - Provide `loadBaseline :: FilePath -> IO BaselineFingerprints` and `saveBaseline :: FilePath -> [AuditViolation] -> IO ()`.
+
+  #### 4. Working-Memory & Parameter-Arity Analyzer (`Gargamelle.Audit.WorkingMemory`)
+  Implement `haskellCstAdapter :: CstLangAdapter` and `analyzeHaskellSource :: AuditThresholds -> FilePath -> Text -> (SubstrateMode, [AuditViolation])`:
+  - **Substrate Detection:** Return `SubstrateModule` if the module name ends with `.Internal` (or contains `.Internal.`) OR if the file contains `{-# ANN module "audit:substrate" #-}`.
+  - **Parameter-Arity Gate:** For every top-level exported function signature, count explicit curried value parameters `(a -> b -> c -> ...)`, ignoring typeclass constraints `(=>)`. If `SubstrateMode == StandardModule` and `paramCount > maxExplicitParams` (default `4`), emit `ExcessiveParameterArity` with remediation advising bundling parameters into a `Polytropos.Record` or domain ADT.
+  - **Working-Memory Live-Binding Peak (`|W(n)|`):** For every top-level binding spanning more than `minLiveSpanLines` (default `15` lines):
+    1. Extract local bindings introduced by function arguments, `let`/`in`, `where`, lambda patterns `\x ->`, `case ... of` branches, and `do`-notation `x <-` binds, recording each binding's introduction line `defLine` and final lexical reference line `lastUseLine`.
+    2. For each line $L$ in the binding's span, compute $W(L) = \{ v \mid \text{defLine}(v) \le L \le \text{lastUseLine}(v) \}$.
+    3. If $\max_L |W(L)| > \text{maxLiveBindings}$ (default `7`), emit `WorkingMemoryPeakExceeded`.
+
+  #### 5. Unit Test Requirements (`packages/gargamelle-audit/test/Main.hs`)
+  1. Verify that a 20-line Haskell function with 8 simultaneously live `let`/`do` bindings triggers `WorkingMemoryPeakExceeded`, whereas a 20-line function with 8 sequentially scoped non-overlapping bindings passes.
+  2. Verify that a 5-parameter function in `MyPkg.Public` triggers `ExcessiveParameterArity`, whereas the exact same signature in `MyPkg.Internal` or a module with `{-# ANN module "audit:substrate" #-}` is exempted.
+  3. Verify that `evaluateRatchet` grandfathers an existing untouched violation but immediately blocks it when the file is included in `touchedFiles`.
