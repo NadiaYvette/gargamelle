@@ -335,8 +335,8 @@ partitionIntoSemanticQuotients
   -> LiquidSort
   -> [(SynTerm, Int)]
   -> IO ([SemanticClass], [LiquidModel])
-partitionIntoSemanticQuotients session sig evalPred resultSort candidates =
-  foldM insertCandidate ([], []) candidates
+partitionIntoSemanticQuotients session sig evalPred resultSort =
+  foldM insertCandidate ([], [])
   where
     insertCandidate
       :: ([SemanticClass], [LiquidModel])
@@ -460,7 +460,7 @@ analyzeStalkAmbiguity _proxy session vid ctx basis sig evalPred goalBase@RBase{.
          then 0.0
          else negate $ sum
            [ let p = fromIntegral c / total
-             in p * (log p / log 2.0)
+             in p * logBase 2.0 p
            | c <- counts
            , c > 0
            ]

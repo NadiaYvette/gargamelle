@@ -1,9 +1,7 @@
-{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -28,6 +26,7 @@ module Gargamelle.Sheaf.LatticeCohomology
   ) where
 
 import Control.Monad (filterM)
+import Data.Either (lefts)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Set (Set)
@@ -147,7 +146,7 @@ solveSheafCohomology
   -> IO CohomologyResult
 solveSheafCohomology _ LiquidCellularSheaf{..} classifyObstruction = do
   edgeResults <- mapM checkEdge (Map.toList sheafEdges)
-  let conflicts = [ c | Left c <- edgeResults ]
+  let conflicts = lefts edgeResults
   if null conflicts
     then
       let globalSec = Map.fromList [ (eId, qc) | Right (eId, qc) <- edgeResults ]

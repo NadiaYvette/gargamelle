@@ -416,7 +416,7 @@ compileLawToDPORule DiscoveredConditionalLaw{..} =
        { dpoName       = ruleName
        , dpoSort       = clsTargetSort
        , dpoCostDelta  = clsCostDelta
-       , dpoExtraOblig = \substMap -> substMapInPred substMap guardPred
+       , dpoExtraOblig = (`substMapInPred` guardPred)
        , dpoMatchLHS   = \targetId eg ->
            case IntMap.lookup (unEClassId targetId) (egClasses eg) of
              Nothing -> []
@@ -434,8 +434,7 @@ compileLawToDPORule DiscoveredConditionalLaw{..} =
                      lhsTerm = TApp (TVar gName) [TApp (TVar fName) [repX, repA], repB]
                      rhsTerm = buildRhsRepTerm clsMotif fName gName repX repA repB
                ]
-       , dpoRHSBuilder = \subst eg ->
-           materializeRHS clsMotif fName gName xSym subst eg
+       , dpoRHSBuilder = materializeRHS clsMotif fName gName xSym
        }
 
 buildRhsRepTerm :: RewriteMotifKind -> SymName -> SymName -> SynTerm -> SynTerm -> SynTerm -> SynTerm

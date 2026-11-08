@@ -181,7 +181,7 @@ substVar oldV newV = translatePred (LiquidSigMorphism emptySig emptySig Map.empt
 -- Evaluates linear arithmetic, sets, and measure lookups against modelVarEnv
 -- and modelMeasureInterp.
 evalPred :: LiquidModel -> LiquidPred -> Bool
-evalPred model pred0 = go pred0
+evalPred model = go
   where
     go PTrue = True
     go PFalse = False

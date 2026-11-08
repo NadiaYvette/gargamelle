@@ -1,7 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 
@@ -91,7 +90,7 @@ strongGaloisConsequence ctx basis phi = do
   let candidates = instantiateBasis @h ctx basis
       allPreds = Set.toList (Set.unions (map qcConjuncts candidates))
   -- Filter predicates q such that phi entails q
-  validPreds <- filterM (\q -> entails @h ctx phi (FAtom q)) allPreds
+  validPreds <- filterM (entails @h ctx phi . FAtom) allPreds
   pure $ QualifierConj (Set.fromList validPreds)
   where
     filterM _ [] = pure []

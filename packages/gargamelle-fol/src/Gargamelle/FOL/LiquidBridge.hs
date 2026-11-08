@@ -266,7 +266,7 @@ solveAbductionLoop sig remaining chosen goal = do
   case res of
     SubtypeValid -> pure (Just currentGuard)
     SubtypeRejected cexModel ->
-      case filter (\q -> not (evalPredInModel cexModel q)) remaining of
+      case filter (not . evalPredInModel cexModel) remaining of
         [] -> pure Nothing
         (q:qs) -> solveAbductionLoop sig qs (q : chosen) goal
 

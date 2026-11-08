@@ -27,10 +27,12 @@ module Gargamelle.Persistence.Crystallize
   , injectLibraryIntoStalkSig
   ) where
 
+import qualified Data.Bifunctor as Bifunctor
 import Data.IntMap.Strict (IntMap)
 import qualified Data.IntMap.Strict as IntMap
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import qualified Data.Maybe as Maybe
 import Data.Set (Set)
 import qualified Data.Set as Set
 import qualified Data.Text as T
@@ -138,8 +140,8 @@ extractAccessedRowLabels = go
       TApp (TVar fn) args
         | "getF_" `T.isPrefixOf` fn ->
             let lbl = T.drop 5 fn
-                recLbls = foldr unionPairs (Set.empty, Set.empty) (map go args)
-            in (Set.insert lbl (fst recLbls), snd recLbls)
+                recLbls = foldr (unionPairs . go) (Set.empty, Set.empty) args
+            in Bifunctor.first (Set.insert lbl) recLbls
         | "setF_" `T.isPrefixOf` fn, [valArg, recArg] <- args ->
             let lbl = T.drop 5 fn
                 (rv, wv) = go valArg
@@ -147,12 +149,12 @@ extractAccessedRowLabels = go
             in (Set.union rv rr, Set.insert lbl (Set.union wv wr))
         | "matchTagF_" `T.isPrefixOf` fn ->
             let lbl = T.drop 10 fn
-                argLbls = foldr unionPairs (Set.empty, Set.empty) (map go args)
-            in (Set.insert lbl (fst argLbls), snd argLbls)
+                argLbls = foldr (unionPairs . go) (Set.empty, Set.empty) args
+            in Bifunctor.first (Set.insert lbl) argLbls
         | otherwise ->
-            foldr unionPairs (Set.empty, Set.empty) (map go args)
+            foldr (unionPairs . go) (Set.empty, Set.empty) args
       TApp hd args ->
-        foldr unionPairs (go hd) (map go args)
+        foldr (unionPairs . go) (go hd) args
 
 -- | Extracts row labels occurring in a LiquidPred.
 extractPredRowLabels :: LiquidPred -> Set SymName
@@ -271,7 +273,7 @@ crystallizeStalkToCombinator _proxy bank artifact@WakeStalkArtifact{..} = do
 
   guaranteedPost <- strongGaloisConsequence @h ctxOut basisOut relFormula
   mRequiredPre <- weakGaloisImplicant @h wsaInputContext basisIn (FImplies relFormula (FAtom (rRefine wsaDisambiguatedGoal)))
-  let requiredPre = maybe (QualifierConj Set.empty) id mRequiredPre
+  let requiredPre = Maybe.fromMaybe (QualifierConj Set.empty) mRequiredPre
       symStep = LiquidSymbolicStep
         { stepName       = combName
         , stepCtxIn      = wsaInputContext
