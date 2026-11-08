@@ -1,0 +1,44 @@
+cabal-version: 3.0
+name: gargamelle-audit
+version: 0.1.0.0
+synopsis: Core Audit Schema, Ratchet Baseline & CST Working-Memory Analyzer
+license: EUPL-1.2
+author: Nadia Yvette Chambers
+maintainer: nadia.yvette.chambers@ik.me
+category: Development
+build-type: Simple
+
+library
+  exposed-modules:
+    Gargamelle.Audit.Types
+    Gargamelle.Audit.Baseline
+    Gargamelle.Audit.WorkingMemory
+  hs-source-dirs: src
+  default-language: GHC2021
+  ghc-options: -Wall -Werror
+  build-depends:
+    base >= 4.14 && < 5,
+    aeson >= 2.0 && < 2.3,
+    bytestring >= 0.10 && < 0.13,
+    containers >= 0.6 && < 0.9,
+    directory >= 1.3 && < 1.4,
+    filepath >= 1.4 && < 1.6,
+    text >= 2.0 && < 2.2,
+    gargamelle-evidence >= 0.1 && < 0.2
+
+test-suite gargamelle-audit-test
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs: test
+  default-language: GHC2021
+  ghc-options: -Wall -Werror
+  build-depends:
+    base >= 4.14 && < 5,
+    gargamelle-audit,
+    gargamelle-evidence >= 0.1 && < 0.2,
+    containers >= 0.6 && < 0.9,
+    filepath >= 1.4 && < 1.6,
+    directory >= 1.3 && < 1.4,
+    text >= 2.0 && < 2.2,
+    tasty >= 1.4 && < 1.6,
+    tasty-hunit >= 0.10 && < 0.11

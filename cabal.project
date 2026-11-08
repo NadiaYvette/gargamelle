@@ -10,6 +10,7 @@ packages:
   packages/gargamelle-fol
   packages/gargamelle-equational
   packages/gargamelle-evidence
+  packages/gargamelle-audit
   packages/gargamelle-effect
   packages/gargamelle-persistence
   packages/gargamelle-sandbox
