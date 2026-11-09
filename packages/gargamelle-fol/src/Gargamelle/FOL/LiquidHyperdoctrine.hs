@@ -81,7 +81,7 @@ class Hyperdoctrine h => LiquidSubHyperdoctrine h where
 -- By construction, phi entails /\\ { q | phi entails q }, and whenever phi entails q',
 -- every conjunct in q' is entailed by phi, so {q'} subset-of {q in Basis | phi entails q}.
 strongGaloisConsequence
-  :: forall h. (Hyperdoctrine h, LiquidSubHyperdoctrine h)
+  :: forall h. LiquidSubHyperdoctrine h
   => Context
   -> QualifierBasis
   -> FOLFormula
@@ -104,7 +104,7 @@ strongGaloisConsequence ctx basis phi = do
 -- Returns Just q if there exists a qualifier conjunction q such that i(q) entails psi,
 -- choosing the weakest (minimal conjuncts) valid candidate. If none entails psi, returns Nothing.
 weakGaloisImplicant
-  :: forall h. (Hyperdoctrine h, LiquidSubHyperdoctrine h)
+  :: forall h. LiquidSubHyperdoctrine h
   => Context
   -> QualifierBasis
   -> FOLFormula
