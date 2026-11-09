@@ -7,7 +7,7 @@ module Gargamelle.Audit.WorkingMemory
   , detectSubstrateMode
   ) where
 
-import Data.Char (isAlphaNum, isSpace)
+import Data.Char (isAlphaNum, isAsciiLower, isSpace)
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text (Text)
@@ -77,7 +77,7 @@ extractModuleName src =
     ("module" : name : _) -> Just (cleanModName name)
     _ -> Nothing
   where
-    cleanModName t = T.takeWhile (\c -> isAlphaNum c || c == '.' || c == '_') t
+    cleanModName = T.takeWhile (\c -> isAlphaNum c || c == '.' || c == '_')
 
 -- | Replace comments and string/char literals with whitespace, preserving line and column offsets.
 sanitizeSource :: Text -> Text
@@ -90,7 +90,7 @@ sanitizeSource txt = T.pack (go Normal (T.unpack txt))
     go Normal ('{' : '-' : cs) = ' ' : ' ' : go (InBlockComment 1) cs
     go Normal ('-' : '-' : c : cs)
       | isCommentStartChar c = ' ' : ' ' : ' ' : go InLineComment cs
-    go Normal ('-' : '-' : []) = "  "
+    go Normal ['-', '-'] = "  "
     go Normal (c : cs) = c : go Normal cs
 
     go InLineComment ('\n' : cs) = '\n' : go Normal cs
@@ -191,7 +191,7 @@ isVarIdent t
   | Set.member t haskellKeywords = False
   | otherwise =
       let h = T.head t
-      in (h >= 'a' && h <= 'z') || (h == '_' && T.length t > 1)
+      in isAsciiLower h || (h == '_' && T.length t > 1)
 
 -- | Extract all identifier tokens from a line of text.
 tokenizeIdents :: Text -> [Text]
@@ -428,22 +428,20 @@ analyzeDecl thresholds fp decl =
                       let liveNow = countLiveAtLine l bindings
                       in max mAcc liveNow) 0 liveLines
              limit = maxLiveBindings thresholds
-         in if peak > limit
-              then
-                [ AuditViolation
-                    { avFilePath    = fp
-                    , avSymbol      = dbSymbol decl
-                    , avStartLine   = dbStartLine decl
-                    , avEndLine     = dbEndLine decl
-                    , avCategory    = WorkingMemoryPeakExceeded
-                                        { peakCount  = peak
-                                        , limitCount = limit
-                                        , spanLines  = spanLinesCount
-                                        }
-                    , avRemediation = "Decompose function or refactor local scopes to reduce simultaneous working-memory cognitive load below threshold."
-                    }
-                ]
-              else []
+         in [ AuditViolation
+                { avFilePath    = fp
+                , avSymbol      = dbSymbol decl
+                , avStartLine   = dbStartLine decl
+                , avEndLine     = dbEndLine decl
+                , avCategory    = WorkingMemoryPeakExceeded
+                                    { peakCount  = peak
+                                    , limitCount = limit
+                                    , spanLines  = spanLinesCount
+                                    }
+                , avRemediation = "Decompose function or refactor local scopes to reduce simultaneous working-memory cognitive load below threshold."
+                }
+            | peak > limit
+            ]
   where
     countLiveAtLine l = foldl' (\c b ->
       if bDefLine b <= l && l <= bLastUse b then c + 1 else c) 0
