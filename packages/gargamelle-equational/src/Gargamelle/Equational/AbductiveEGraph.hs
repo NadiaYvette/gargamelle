@@ -158,7 +158,7 @@ addEClass cId s measures nodes eg@AbductiveEGraph{..} =
 -- Abducts the weakest qualifier guard q in Q(Gamma) under which all active structural measures
 -- of the e-class sort agree between LHS and RHS via 'weakGaloisImplicant', attaching 'AbductiveEdge'.
 applyAbductiveDPORule
-  :: forall h. (Hyperdoctrine h, LiquidSubHyperdoctrine h)
+  :: forall h. LiquidSubHyperdoctrine h
   => h
   -> DPORule
   -> EClassId
@@ -359,8 +359,7 @@ foldIntoDecisionTree (c:cs) =
 -- | Extracts a verified decision tree for an e-class meeting refinement specification 'RBase'.
 -- Verifies the semantic cover and folds into an optimal non-redundant 'TIf' tree.
 extractVerifiedDecisionTree
-  :: forall h. (Hyperdoctrine h, LiquidSubHyperdoctrine h)
-  => h
+  :: forall h. h
   -> Z3StreamSession
   -> EClassId
   -> RBase
