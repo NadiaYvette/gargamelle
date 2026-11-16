@@ -4,6 +4,7 @@ write-ghc-environment-files: always
 constraints: some < 1.1
 
 packages:
+  packages/darcs-patch-index-prim
   packages/gargamelle-core
   packages/gargamelle-logic
   packages/gargamelle-model
