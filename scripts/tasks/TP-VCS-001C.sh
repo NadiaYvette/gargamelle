@@ -240,11 +240,11 @@ main = do
   let p1 = PrimCabalSet "pkg.cabal" CabalExposedModules SetInsert "Foo.Bar" :: StructuralPrim () ()
       p2 = PrimCabalSet "pkg.cabal" CabalExposedModules SetInsert "Foo.Baz" :: StructuralPrim () ()
   case commute (p1 :> p2) of
-    Just (p2' :> p1') -> do
-      unless (p2' == p2 && p1' == p1) $ do
+    Just (PrimCabalSet f2 _ _ it2 :> PrimCabalSet f1 _ _ it1) -> do
+      unless (f2 == "pkg.cabal" && it2 == "Foo.Baz" && f1 == "pkg.cabal" && it1 == "Foo.Bar") $ do
         putStrLn "Failed: Cabal set commute returned incorrect values"
         exitFailure
-    Nothing -> do
+    _ -> do
       putStrLn "Failed: Cabal set insertions should commute"
       exitFailure
 
@@ -252,11 +252,11 @@ main = do
   let d1 = PrimDeclRewrite "src/Lib.hs" "funcA" "funcA = 1" "funcA = 2" :: StructuralPrim () ()
       d2 = PrimDeclRewrite "src/Lib.hs" "funcB" "funcB = True" "funcB = False" :: StructuralPrim () ()
   case commute (d1 :> d2) of
-    Just (d2' :> d1') -> do
-      unless (d2' == d2 && d1' == d1) $ do
+    Just (PrimDeclRewrite f2 sym2 _ _ :> PrimDeclRewrite f1 sym1 _ _) -> do
+      unless (f2 == "src/Lib.hs" && sym2 == "funcB" && f1 == "src/Lib.hs" && sym1 == "funcA") $ do
         putStrLn "Failed: Decl rewrite commute returned incorrect values"
         exitFailure
-    Nothing -> do
+    _ -> do
       putStrLn "Failed: Distinct symbol rewrites should commute"
       exitFailure
 
