@@ -58,7 +58,6 @@ import Darcs.Patch.Witnesses
 import Gargamelle.Core.Institution.Liquid
   ( LiquidSig(..)
   , LiquidSigMorphism(..)
-  , FOLFormula(..)
   )
 import Gargamelle.Evidence.GitBundle
   ( BlobOid(..)
@@ -79,7 +78,8 @@ import Gargamelle.Evidence.Patch.Prim
   , PatchId(..)
   )
 import Gargamelle.FOL.LiquidHyperdoctrine
-  ( Hyperdoctrine(..)
+  ( FOLFormula(..)
+  , Hyperdoctrine(..)
   )
 import Gargamelle.Sheaf.LatticeCohomology
   ( SheafVertexSpec(..)
@@ -259,7 +259,7 @@ import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Evidence.GitBundle
 import Gargamelle.Evidence.Patch.Prim
 import Gargamelle.Evidence.Patch.Bundle
-import Gargamelle.FOL.LiquidHyperdoctrine (Z3Hyperdoctrine(..))
+import Gargamelle.FOL.LiquidHyperdoctrine (Z3Hyperdoctrine(..), FOLFormula(..))
 import Gargamelle.Sheaf.LatticeCohomology (SheafVertexSpec(..))
 
 -- Dummy signature for testing EvidenceContext
