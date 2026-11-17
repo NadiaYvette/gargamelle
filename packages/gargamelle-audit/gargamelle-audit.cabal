@@ -17,6 +17,8 @@ library
     Gargamelle.Audit.DocTier
     Gargamelle.Audit.ApiGraph
     Gargamelle.Audit.Pedagogy
+    Gargamelle.Audit.Repair
+    Gargamelle.Audit.Runner
   hs-source-dirs: src
   default-language: GHC2021
   ghc-options: -Wall -Werror
@@ -29,6 +31,15 @@ library
     filepath >= 1.4 && < 1.6,
     text >= 2.0 && < 2.2,
     gargamelle-evidence >= 0.1 && < 0.2
+
+executable gargamelle-audit
+  main-is: Main.hs
+  hs-source-dirs: app
+  default-language: GHC2021
+  ghc-options: -Wall -Werror
+  build-depends:
+    base >= 4.14 && < 5,
+    gargamelle-audit
 
 test-suite gargamelle-audit-test
   type: exitcode-stdio-1.0

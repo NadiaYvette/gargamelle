@@ -144,20 +144,23 @@ checkParagraphDefUseGap thresholds (docPath, txt) =
   let paragraphs = splitParagraphs txt
       defMap = [ (c, idx) | (idx, p) <- zip [1..] paragraphs, c <- extractDefs p ]
       usesList = [ (c, idx) | (idx, p) <- zip [1..] paragraphs, c <- extractUses p ]
-      maxGap = maxDefUseParagraphs thresholds
-  in [ AuditViolation
-        { avFilePath    = docPath
-        , avSymbol      = sym
-        , avStartLine   = uIdx
-        , avEndLine     = uIdx
-        , avCategory    = ExcessiveDefUseGap { symbolName = sym, paragraphGap = gap }
-        , avRemediation = "Introduce definition within " <> T.pack (show maxGap) <> " paragraphs"
-        }
-     | (sym, uIdx) <- usesList
-     , Just dIdx <- [lookup sym defMap]
-     , let gap = dIdx - uIdx
-     , gap > maxGap
-     ]
+  in findGapViolations docPath (maxDefUseParagraphs thresholds) defMap usesList
+
+findGapViolations :: FilePath -> Int -> [(Text, Int)] -> [(Text, Int)] -> [AuditViolation]
+findGapViolations docPath maxGap defMap usesList =
+  [ AuditViolation
+      { avFilePath    = docPath
+      , avSymbol      = sym
+      , avStartLine   = uIdx
+      , avEndLine     = uIdx
+      , avCategory    = ExcessiveDefUseGap { symbolName = sym, paragraphGap = gap }
+      , avRemediation = "Introduce definition within " <> T.pack (show maxGap) <> " paragraphs"
+      }
+  | (sym, uIdx) <- usesList
+  , Just dIdx <- [lookup sym defMap]
+  , let gap = dIdx - uIdx
+  , gap > maxGap
+  ]
 
 splitParagraphs :: Text -> [Text]
 splitParagraphs txt =

@@ -187,33 +187,37 @@ checkTypeDecl mode path lineNum sym doc =
 
 checkFuncSig :: AuditThresholds -> SubstrateMode -> FilePath -> Int -> Text -> Text -> Text -> [AuditViolation]
 checkFuncSig thresholds mode path lineNum sym sig doc =
+  checkTautology thresholds path lineNum sym sig doc
+  ++ checkContract mode path lineNum sym doc
+
+checkTautology :: AuditThresholds -> FilePath -> Int -> Text -> Text -> Text -> [AuditViolation]
+checkTautology thresholds path lineNum sym sig doc =
   let cleanDoc = extractDocBody doc
       novelRatio = computeNovelStemRatio sym sig cleanDoc
       minRatio = minNovelStemRatio thresholds
-      hasContract = checkContractAnnotation doc
-      tautologyViol =
-        if T.null cleanDoc || novelRatio < minRatio
-          then [AuditViolation
-                 { avFilePath    = path
-                 , avSymbol      = sym
-                 , avStartLine   = lineNum
-                 , avEndLine     = lineNum
-                 , avCategory    = TautologicalDocstring novelRatio minRatio
-                 , avRemediation = "Increase information scent; ratio " <> T.pack (show novelRatio) <> " < required " <> T.pack (show minRatio)
-                 }]
-          else []
-      contractViol =
-        if not hasContract && mode /= SubstrateModule
-          then [AuditViolation
-                 { avFilePath    = path
-                 , avSymbol      = sym
-                 , avStartLine   = lineNum
-                 , avEndLine     = lineNum
-                 , avCategory    = MissingFunctionContract
-                 , avRemediation = "Add @contracts / @complexity tag or domain contract keyword (O(...), invariant, guarantees, preserves)"
-                 }]
-          else []
-  in tautologyViol ++ contractViol
+  in if T.null cleanDoc || novelRatio < minRatio
+       then [AuditViolation
+              { avFilePath    = path
+              , avSymbol      = sym
+              , avStartLine   = lineNum
+              , avEndLine     = lineNum
+              , avCategory    = TautologicalDocstring novelRatio minRatio
+              , avRemediation = "Increase information scent; ratio " <> T.pack (show novelRatio) <> " < required " <> T.pack (show minRatio)
+              }]
+       else []
+
+checkContract :: SubstrateMode -> FilePath -> Int -> Text -> Text -> [AuditViolation]
+checkContract mode path lineNum sym doc =
+  if not (checkContractAnnotation doc) && mode /= SubstrateModule
+    then [AuditViolation
+           { avFilePath    = path
+           , avSymbol      = sym
+           , avStartLine   = lineNum
+           , avEndLine     = lineNum
+           , avCategory    = MissingFunctionContract
+           , avRemediation = "Add @contracts / @complexity tag or domain contract keyword (O(...), invariant, guarantees, preserves)"
+           }]
+    else []
 
 extractDocBody :: Text -> Text
 extractDocBody doc =

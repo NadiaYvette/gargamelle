@@ -85,16 +85,18 @@ analyzeHaskellSource thresholds fp rawSrc =
 --   2. The file contains @{-# ANN module "audit:substrate" #-}@ (or substrate annotation).
 detectSubstrateMode :: Text -> SubstrateMode
 detectSubstrateMode rawSrc =
-  if T.isInfixOf "ANN module \"audit:substrate\"" rawSrc
-    then SubstrateModule
-    else case extractModuleName rawSrc of
-      Nothing -> StandardModule
-      Just modName ->
-        if modName == "Internal"
-           || ".Internal" `T.isSuffixOf` modName
-           || ".Internal." `T.isInfixOf` modName
-          then SubstrateModule
-          else StandardModule
+  let lns = T.lines rawSrc
+      hasPragma = any (\l -> let s = T.stripStart l in "{-#" `T.isPrefixOf` s && "ANN module \"audit:substrate\"" `T.isInfixOf` s) lns
+  in if hasPragma
+       then SubstrateModule
+       else case extractModuleName rawSrc of
+         Nothing -> StandardModule
+         Just modName ->
+           if modName == "Internal"
+              || ".Internal" `T.isSuffixOf` modName
+              || ".Internal." `T.isInfixOf` modName
+             then SubstrateModule
+             else StandardModule
 
 -- | Extract module name from source.
 extractModuleName :: Text -> Maybe Text
@@ -552,28 +554,23 @@ computeBindingSpan
   -> (Int, (Text, Int))
   -> Binding
 computeBindingSpan allLines allIntros declEnd (myId, (var, defLine)) =
-  let nextDefLine = findNextDefLine
-      candidateLines = [ lNo | (lNo, lText) <- allLines
-                             , lNo >= defLine
-                             , lNo < nextDefLine
-                             , var `elem` tokenizeIdents lText
-                             ]
-      lastUse = case candidateLines of
-        [] -> defLine
-        ls -> maximum ls
+  let nextDefLine = findNextDef allIntros myId var defLine declEnd
+      lastUse = findLastUse allLines defLine nextDefLine var
   in Binding
        { bId      = myId
        , bVar     = var
        , bDefLine = defLine
        , bLastUse = max defLine lastUse
        }
-  where
-    findNextDefLine =
-      let subsequent = [ otherDef | (otherId, (otherVar, otherDef)) <- allIntros
-                                 , otherId > myId
-                                 , otherVar == var
-                                 , otherDef > defLine
-                       ]
-      in case subsequent of
-        [] -> declEnd + 1
-        (firstNext : _) -> firstNext
+
+findNextDef :: [(Int, (Text, Int))] -> Int -> Text -> Int -> Int -> Int
+findNextDef allIntros myId var defLine declEnd =
+  case [ oDef | (oId, (oVar, oDef)) <- allIntros, oId > myId, oVar == var, oDef > defLine ] of
+    []        -> declEnd + 1
+    (firstNext:_) -> firstNext
+
+findLastUse :: [(Int, Text)] -> Int -> Int -> Text -> Int
+findLastUse allLines defLine nextDefLine var =
+  case [ lNo | (lNo, lText) <- allLines, lNo >= defLine, lNo < nextDefLine, var `elem` tokenizeIdents lText ] of
+    [] -> defLine
+    ls -> maximum ls
