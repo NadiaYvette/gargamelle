@@ -30,6 +30,7 @@ verifyModuleDocs defaultAuditThresholds StandardModule "src/Foo.hs" content
 
 module Gargamelle.Audit.DocTier
   ( verifyModuleDocs
+  , checkModuleHeader
   ) where
 
 import Data.Char (isSpace)

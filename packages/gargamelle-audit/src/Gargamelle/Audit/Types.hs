@@ -3,6 +3,34 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE StrictData #-}
 
+{-|
+Module      : Gargamelle.Audit.Types
+Description : Core Audit Schema, Violations, & Configuration Types
+Copyright   : (c) Nadia Yvette Chambers, 2026
+License     : EUPL-1.2
+
+@purpose
+Defines the core data structures for architectural audits, cognitive threshold
+configuration, AST violation categories, ratchet baselines, and language adapters.
+
+@behavior
+Provides serialization and deserialization instances for threshold configuration,
+violation reports, and baseline comparison records.
+
+@theory
+Cognitive load limits (Miller's Law, Sweller's cognitive load theory),
+Maalej-Robillard documentation taxonomy, and zero-regression architectural ratchets.
+
+@contracts
+Purity: Pure value types with total Ord, Eq, Show, Generic, and Aeson instances.
+
+@pattern
+Typed domain model and immutable configuration record.
+
+@example
+let cfg = defaultAuditThresholds in maxLiveBindings cfg == 7
+-}
+
 module Gargamelle.Audit.Types
   ( AuditThresholds (..)
   , defaultAuditThresholds

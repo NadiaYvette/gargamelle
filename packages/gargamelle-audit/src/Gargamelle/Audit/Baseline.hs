@@ -1,6 +1,33 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+{-|
+Module      : Gargamelle.Audit.Baseline
+Description : Architectural Ratchet Baseline Persistence & Comparison Engine
+Copyright   : (c) Nadia Yvette Chambers, 2026
+License     : EUPL-1.2
+
+@purpose
+Evaluates audit violations against baseline snapshots to enforce zero new regressions
+on touched files while quarantining existing technical debt.
+
+@behavior
+Loads and persists JSON baseline fingerprints, partitions violations into new vs legacy,
+and produces actionable RatchetVerdict results.
+
+@theory
+Software architectural ratchet (Fowler / Lehman) and non-regression invariant gates.
+
+@contracts
+Purity: Deterministic fingerprinting and set-partition comparison.
+
+@pattern
+Snapshot baseline comparator and ratchet gate.
+
+@example
+evaluateRatchet basePrints touchedFiles currentViolations
+-}
+
 module Gargamelle.Audit.Baseline
   ( evaluateRatchet
   , loadBaseline

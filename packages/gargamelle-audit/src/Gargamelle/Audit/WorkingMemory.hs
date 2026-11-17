@@ -1,6 +1,34 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StrictData #-}
 
+{-|
+Module      : Gargamelle.Audit.WorkingMemory
+Description : CST Working-Memory & Function Arity Analyzer
+Copyright   : (c) Nadia Yvette Chambers, 2026
+License     : EUPL-1.2
+
+@purpose
+Analyzes Haskell CST/AST to measure simultaneous live bindings within statement spans
+and enforces parameter arity limits on exported functions.
+
+@behavior
+Scans function definitions, computes live variable intervals over statement spans,
+and flags WorkingMemoryPeakExceeded (default > 7 live over >= 15 lines) or
+ExcessiveParameterArity (default > 4 parameters).
+
+@theory
+Baddeley & Hitch working-memory model, Miller's Law (7 ± 2), and cognitive complexity.
+
+@contracts
+Purity: Total CST text scan with deterministic violation reporting.
+
+@pattern
+Interval graph live-range analysis and line-span sweeping.
+
+@example
+analyzeHaskellSource defaultAuditThresholds "src/Module.hs" content
+-}
+
 module Gargamelle.Audit.WorkingMemory
   ( haskellCstAdapter
   , analyzeHaskellSource
