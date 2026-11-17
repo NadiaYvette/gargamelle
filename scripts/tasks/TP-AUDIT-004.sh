@@ -20,6 +20,7 @@ cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-DocTier.hs packages/gargamelle-audi
 cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Types.hs packages/gargamelle-audit/src/Gargamelle/Audit/Types.hs
 cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Baseline.hs packages/gargamelle-audit/src/Gargamelle/Audit/Baseline.hs
 cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-WorkingMemory.hs packages/gargamelle-audit/src/Gargamelle/Audit/WorkingMemory.hs
+cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Pedagogy.hs packages/gargamelle-audit/src/Gargamelle/Audit/Pedagogy.hs
 
 # 2. Create bin/gargamelle-audit wrapper
 cat << 'EOF' > bin/gargamelle-audit
