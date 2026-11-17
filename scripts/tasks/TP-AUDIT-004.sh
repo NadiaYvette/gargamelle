@@ -16,6 +16,10 @@ cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Repair.hs packages/gargamelle-audit
 cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Runner.hs packages/gargamelle-audit/src/Gargamelle/Audit/Runner.hs
 cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Main.hs packages/gargamelle-audit/app/Main.hs
 cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004.cabal packages/gargamelle-audit/gargamelle-audit.cabal
+cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-DocTier.hs packages/gargamelle-audit/src/Gargamelle/Audit/DocTier.hs
+cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Types.hs packages/gargamelle-audit/src/Gargamelle/Audit/Types.hs
+cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-Baseline.hs packages/gargamelle-audit/src/Gargamelle/Audit/Baseline.hs
+cp -f /home/nyc/src/plans/seeds/TP-AUDIT-004-WorkingMemory.hs packages/gargamelle-audit/src/Gargamelle/Audit/WorkingMemory.hs
 
 # 2. Create bin/gargamelle-audit wrapper
 cat << 'EOF' > bin/gargamelle-audit
