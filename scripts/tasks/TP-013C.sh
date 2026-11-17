@@ -53,6 +53,7 @@ import Darcs.Patch.Witnesses
   , (:/\:)(..)
   , Sealed2(..)
   , seal2
+  , Invert(..)
   , Commute(..)
   , CleanMerge(..)
   )
