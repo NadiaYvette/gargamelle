@@ -10,6 +10,7 @@ import qualified Data.ByteString as BS
 import Data.TreeDiff.Tree (treeDiff)
 import Evidence
 import Gargamelle.Evidence.GitBundle
+import Gargamelle.Evidence.Patch.Prim
 
 -- Dummy signature for testing EvidenceContext
 data DummySig
@@ -75,3 +76,31 @@ main = hspec $ do
         Left err -> expectationFailure ("Bundle header decode failed: " ++ err)
         Right (_, refs, _) -> do
           length refs `shouldBe` 2
+
+  describe "Gargamelle.Evidence.Patch.Prim" $ do
+    it "inverts AST DPO edits involutively" $ do
+      let dpo = PrimAstDPO "src/Foo.hs" (SymbolKey "bar") (DPOSpan "bar = 1" "bar = 2") :: PrimPatch () ()
+      invert (invert dpo) `shouldBe` dpo
+
+    it "commutes distinct declaration-keyed AST DPO edits" $ do
+      let d1 = PrimAstDPO "src/Foo.hs" (SymbolKey "funcA") (DPOSpan "funcA = 1" "funcA = 2") :: PrimPatch () ()
+          d2 = PrimAstDPO "src/Foo.hs" (SymbolKey "funcB") (DPOSpan "funcB = True" "funcB = False") :: PrimPatch () ()
+      case commute (d1 :> d2) of
+        Just (PrimAstDPO f2 sym2 _ :> PrimAstDPO f1 sym1 _) -> do
+          f2 `shouldBe` "src/Foo.hs"
+          sym2 `shouldBe` SymbolKey "funcB"
+          f1 `shouldBe` "src/Foo.hs"
+          sym1 `shouldBe` SymbolKey "funcA"
+        _ -> expectationFailure "Expected commute to succeed"
+
+    it "clean-merges parallel independent structural edits" $ do
+      let p = PrimCabalSet "foo.cabal" "exposed-modules" SetInsert "ModuleA" :: PrimPatch () ()
+          q = PrimCabalSet "foo.cabal" "exposed-modules" SetInsert "ModuleB" :: PrimPatch () ()
+      case cleanMerge (p :\/: q) of
+        Just (q_after :/\: p_after) -> do
+          case (q_after, p_after) of
+            (PrimCabalSet _ _ _ itQ, PrimCabalSet _ _ _ itP) -> do
+              itQ `shouldBe` "ModuleB"
+              itP `shouldBe` "ModuleA"
+            _ -> expectationFailure "Unexpected merged constructors"
+        Nothing -> expectationFailure "Expected cleanMerge to succeed"

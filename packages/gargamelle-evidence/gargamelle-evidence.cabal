@@ -33,6 +33,7 @@ library
   exposed-modules:
     Evidence
     Gargamelle.Evidence.GitBundle
+    Gargamelle.Evidence.Patch.Prim
   hs-source-dirs: src
   default-language: Haskell2010
   ghc-options: -Wall
@@ -50,7 +51,9 @@ library
     gargamelle-core >= 0.1 && < 0.2,
     hs-tree-sitter >= 13.0 && < 14,
     tree-diff >= 0.3 && < 0.5,
-    git-bundle-pure >= 0.1 && < 0.2
+    git-bundle-pure >= 0.1 && < 0.2,
+    darcs-witnesses >= 0.1 && < 0.2,
+    darcs-prim-structural >= 0.1 && < 0.2
 
 test-suite tests
   type: exitcode-stdio-1.0
