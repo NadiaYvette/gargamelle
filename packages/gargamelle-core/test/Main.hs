@@ -29,6 +29,7 @@ import Gargamelle.Core.Institution.Liquid.Polytropos
 import Gargamelle.Core.Institution.Liquid.Penelope
 import Gargamelle.CodeGen.Haskell
 import Gargamelle.CodeGen.OrganIR
+import Gargamelle.HostVM.PgclPushout
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.Text as T
@@ -441,3 +442,12 @@ main = hspec $ do
       T.isInfixOf "__PHI (" gimpleText `shouldBe` True
       T.isInfixOf "return" gimpleText `shouldBe` True
 
+    describe "Gargamelle.HostVM.PgclPushout (Multi-OS Shim Categorical Pushout)" $ do
+      it "sweeps all 5 target kernels (Linux, FreeBSD, illumos, seL4, Zircon)" $ do
+        case sweepAllTargetKernels of
+          Left err -> expectationFailure ("Expected successful kernel sweep, got error: " ++ show err)
+          Right shims -> do
+            length shims `shouldBe` 5
+            let kernels = map sksKernel shims
+            kernels `shouldBe` [KernelLinux, KernelFreeBSD, KernelIllumos, KernelSeL4, KernelZircon]
+            all (T.isInfixOf "struct PolytroposRep" . sksProfunctorFunnelH) shims `shouldBe` True
