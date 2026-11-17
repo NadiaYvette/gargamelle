@@ -15,6 +15,8 @@ import Gargamelle.Sheaf.Diffusion
 import Gargamelle.Sheaf.Cohomology
 import Gargamelle.Sheaf.LiquidMetaSynthesis
 import Gargamelle.Sheaf.LatticeCohomology
+import Gargamelle.Sheaf.FFI
+import Penelope.Perceus (RTSProfile(..))
 
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Polytropos
@@ -416,3 +418,34 @@ main = hspec do
         ObstructionH1 conflicts2 -> expectationFailure ("Expected obstruction to vanish to GlobalSectionH0, but got: " ++ show conflicts2)
         GlobalSectionH0 sections2 -> do
           Map.member edgeId_alloc sections2 `shouldBe` True
+
+  describe "Gargamelle.Sheaf.FFI (H1 Cohomological Obstructions & Synthesized Adapters)" do
+    it "verifies identity zero-copy for compatible stalks" do
+      let baseStalk name lang prof = ModuleStalkSpec
+            { mssModuleName       = name
+            , mssLanguage         = lang
+            , mssRTSProfile       = prof
+            , mssHasMultiShot     = False
+            , mssMutatesInPlace   = False
+            , mssSpawnsThreads    = False
+            , mssProducesLazyList = False
+            }
+          caller = baseStalk "A" "C99" RTSFreestandingLinear
+          callee = baseStalk "B" "C99" RTSFreestandingLinear
+      verifyFFISheafEdge caller callee `shouldBe` Right ()
+      synthesizeFFIBoundaryAdapter caller callee `shouldBe` AdapterIdentityZeroCopy
+
+    it "detects NonDet crossing linear mutation and synthesizes CloneOnBacktrack" do
+      let baseStalk name lang prof = ModuleStalkSpec
+            { mssModuleName       = name
+            , mssLanguage         = lang
+            , mssRTSProfile       = prof
+            , mssHasMultiShot     = False
+            , mssMutatesInPlace   = False
+            , mssSpawnsThreads    = False
+            , mssProducesLazyList = False
+            }
+          caller = (baseStalk "M" "Mercury" RTSLean4ThreadLocal) { mssHasMultiShot = True }
+          callee = (baseStalk "R" "Rust" RTSFreestandingLinear) { mssMutatesInPlace = True }
+      verifyFFISheafEdge caller callee `shouldBe` Left [ObstructionNonDetCrossesLinear "M" "R"]
+      synthesizeFFIBoundaryAdapter caller callee `shouldBe` AdapterCloneOnBacktrack "__organ_ffi_clone_on_backtrack_M_to_R"
