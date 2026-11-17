@@ -103,7 +103,15 @@ data GPatch (wX :: Type) (wY :: Type) = GPatch
   , gpPrims         :: !(FL PrimPatch wX wY)
   , gpSigMorphism   :: !LiquidSigMorphism
   , gpVertexSpec    :: !SheafVertexSpec
-  } deriving stock (Show)
+  }
+
+instance Show (GPatch wX wY) where
+  show p =
+    "GPatch { gpPatchId = " ++ show p.gpPatchId
+    ++ ", gpContextDeps = " ++ show p.gpContextDeps
+    ++ ", gpBaseTreeOid = " ++ show p.gpBaseTreeOid
+    ++ ", gpResultTreeOid = " ++ show p.gpResultTreeOid
+    ++ " }"
 
 instance Eq (GPatch wX wY) where
   p1 == p2 =
