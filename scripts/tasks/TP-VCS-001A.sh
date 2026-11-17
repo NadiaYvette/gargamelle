@@ -301,8 +301,11 @@ prop_commute_involution a b =
   let p = TestDelta a :: TestDelta () ()
       q = TestDelta b :: TestDelta () ()
   in case commute (p :> q) of
-       Just (q' :> p') -> commute (q' :> p') == Just (p :> q)
-       Nothing         -> False
+       Just (q' :> p') ->
+         case commute (q' :> p') of
+           Just (TestDelta a' :> TestDelta b') -> a' == a && b' == b
+           Nothing                             -> False
+       Nothing -> False
 
 -- | Test forward/reverse list roundtrip
 test_list_roundtrip :: Bool
