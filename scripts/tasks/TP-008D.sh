@@ -25,7 +25,6 @@ extra_deps = """    penelope-core >= 0.1 && < 0.2,
     penelope-stage >= 0.1 && < 0.2,
     penelope-backend-mlir >= 0.1 && < 0.2,
     penelope-backend-gimple >= 0.1 && < 0.2,
-    frankenstein,
     primitive >= 0.9 && < 0.10,
 """
 
