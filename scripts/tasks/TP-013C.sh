@@ -78,7 +78,9 @@ import Gargamelle.Evidence.Patch.Prim
   , PatchId(..)
   )
 import Gargamelle.FOL.LiquidHyperdoctrine
-  ( FOLFormula(..)
+  ( Context(..)
+  , QualifierBasis(..)
+  , FOLFormula(..)
   , Hyperdoctrine(..)
   )
 import Gargamelle.Sheaf.LatticeCohomology
@@ -137,7 +139,7 @@ commuteGPatch h (p :> q) = do
             { sheafVertices = Map.fromList [(vP.svVertexId, vP), (vQ.svVertexId, vQ)]
             , sheafEdges    = Map.empty
             }
-      cohom <- solveSheafCohomology h sheaf (\_ _ _ _ -> Nothing)
+      cohom <- solveSheafCohomology h sheaf (\_ _ -> Nothing)
       case cohom of
         ObstructionH1 _ -> pure Nothing
         GlobalSectionH0 _ ->
@@ -161,7 +163,7 @@ mergeGPatchParallel h (p :\/: q) = do
             { sheafVertices = Map.fromList [(vP.svVertexId, vP), (vQ.svVertexId, vQ)]
             , sheafEdges    = Map.empty
             }
-      cohom <- solveSheafCohomology h sheaf (\_ _ _ _ -> Nothing)
+      cohom <- solveSheafCohomology h sheaf (\_ _ -> Nothing)
       case cohom of
         ObstructionH1 _ -> pure Nothing
         GlobalSectionH0 _ ->
@@ -209,8 +211,8 @@ readGPatchBundle path = do
               vspec = SheafVertexSpec
                 { svVertexId = "v_patch"
                 , svSig = emptySig
-                , svContext = Map.empty
-                , svBasis = []
+                , svContext = Context Map.empty
+                , svBasis = QualifierBasis Set.empty
                 , svLocalGuarantee = FTrue
                 , svLocalRequirement = FTrue
                 }
@@ -267,7 +269,7 @@ import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Evidence.GitBundle
 import Gargamelle.Evidence.Patch.Prim
 import Gargamelle.Evidence.Patch.Bundle
-import Gargamelle.FOL.LiquidHyperdoctrine (Z3Hyperdoctrine(..), FOLFormula(..))
+import Gargamelle.FOL.LiquidHyperdoctrine (Z3Hyperdoctrine(..), Context(..), QualifierBasis(..), FOLFormula(..))
 import Gargamelle.Sheaf.LatticeCohomology (SheafVertexSpec(..))
 
 -- Dummy signature for testing EvidenceContext
@@ -345,8 +347,8 @@ main = hspec $ do
     let vspec idName = SheafVertexSpec
           { svVertexId = idName
           , svSig = emptySig
-          , svContext = Map.empty
-          , svBasis = []
+          , svContext = Context Map.empty
+          , svBasis = QualifierBasis Set.empty
           , svLocalGuarantee = FTrue
           , svLocalRequirement = FTrue
           }
