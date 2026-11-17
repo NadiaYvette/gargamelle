@@ -14,6 +14,7 @@ mkdir -p "$EVID_DIR/src/Gargamelle/Evidence/Patch"
 # 1. Write Gargamelle.Evidence.Patch.Bundle
 cat << 'EOF' > "$EVID_DIR/src/Gargamelle/Evidence/Patch/Bundle.hs"
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
