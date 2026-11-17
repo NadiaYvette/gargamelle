@@ -243,23 +243,88 @@ readGPatchBundle path = do
 EOF
 
 # 2. Update gargamelle-evidence.cabal
-python3 -c '
-with open("packages/gargamelle-evidence/gargamelle-evidence.cabal", "r") as f:
-    content = f.read()
+cat << 'EOF' > "$EVID_DIR/gargamelle-evidence.cabal"
+cabal-version: 3.0
+name: gargamelle-evidence
+version: 0.1.0.0
+synopsis: Evidence preservation and structural tree-diff AST tracking
+description:
+  Evidence preservation and structural tree-diff AST tracking for
+  Gargamelle. Provides tree-sitter syntactic integration, parse tree
+  hashing, semantic AST diffing, and proof artifact tracking.
+license: EUPL-1.2
+license-file: LICENSE
+author: Nadia Yvette Chambers
+maintainer: nadia.yvette.chambers@ik.me
+category: Development
+homepage: https://github.com/NadiaYvette/gargamelle
+bug-reports: https://github.com/NadiaYvette/gargamelle/issues
+extra-doc-files:
+  README.md
+  CHANGELOG.md
+build-type: Simple
+tested-with:
+  GHC == 9.6.7,
+  GHC == 9.8.4,
+  GHC == 9.10.3,
+  GHC == 9.12.4,
+  GHC == 9.14.1
 
-if "Gargamelle.Evidence.Patch.Bundle" not in content:
-    content = content.replace("    Gargamelle.Evidence.Patch.Prim\n", "    Gargamelle.Evidence.Patch.Prim\n    Gargamelle.Evidence.Patch.Bundle\n")
+source-repository head
+  type: git
+  location: https://github.com/NadiaYvette/gargamelle
+  subdir: packages/gargamelle-evidence
 
-if "gargamelle-sheaf" not in content:
-    content = content.replace("    darcs-prim-structural >= 0.1 && < 0.2\n", "    darcs-prim-structural >= 0.1 && < 0.2,\n    gargamelle-sheaf >= 0.1 && < 0.2,\n    gargamelle-fol >= 0.1 && < 0.2\n")
+library
+  exposed-modules:
+    Evidence
+    Gargamelle.Evidence.GitBundle
+    Gargamelle.Evidence.Patch.Prim
+    Gargamelle.Evidence.Patch.Bundle
+  hs-source-dirs: src
+  default-language: Haskell2010
+  ghc-options: -Wall
+  build-depends:
+    base >= 4.14 && < 5,
+    containers >= 0.6 && < 0.9,
+    unordered-containers >= 0.2 && < 0.3,
+    hashable >= 1.4 && < 1.6,
+    text >= 2.0 && < 2.2,
+    bytestring >= 0.10 && < 0.13,
+    zlib >= 0.6 && < 0.8,
+    cryptohash-sha1 >= 0.11 && < 0.12,
+    cryptohash-sha256 >= 0.6 && < 0.7,
+    polytropos-core >= 0.1.0.1 && < 0.2,
+    gargamelle-core >= 0.1 && < 0.2,
+    hs-tree-sitter >= 13.0 && < 14,
+    tree-diff >= 0.3 && < 0.5,
+    git-bundle-pure >= 0.1 && < 0.2,
+    darcs-witnesses >= 0.1 && < 0.2,
+    darcs-prim-structural >= 0.1 && < 0.2,
+    gargamelle-sheaf >= 0.1 && < 0.2,
+    gargamelle-fol >= 0.1 && < 0.2
 
-if "gargamelle-sheaf" not in content:
-    # Also add to test suite dependencies
-    content = content.replace("    darcs-prim-structural\n", "    darcs-prim-structural,\n    gargamelle-sheaf,\n    gargamelle-fol,\n    process\n")
-
-with open("packages/gargamelle-evidence/gargamelle-evidence.cabal", "w") as f:
-    f.write(content)
-'
+test-suite tests
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  hs-source-dirs: test
+  default-language: Haskell2010
+  ghc-options: -Wall
+  build-depends:
+    base >= 4.14 && < 5,
+    gargamelle-evidence,
+    gargamelle-core >= 0.1 && < 0.2,
+    containers >= 0.6 && < 0.9,
+    unordered-containers >= 0.2 && < 0.3,
+    tree-diff >= 0.3 && < 0.5,
+    hspec >= 2.10 && < 2.12,
+    git-bundle-pure >= 0.1 && < 0.2,
+    darcs-witnesses >= 0.1 && < 0.2,
+    darcs-prim-structural >= 0.1 && < 0.2,
+    gargamelle-sheaf >= 0.1 && < 0.2,
+    gargamelle-fol >= 0.1 && < 0.2,
+    bytestring
+EOF
 
 # 3. Update test/Main.hs
 cat << 'EOF' > "$EVID_DIR/test/Main.hs"
@@ -275,9 +340,6 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import qualified Data.ByteString as BS
 import Data.TreeDiff.Tree (treeDiff)
-import System.Process (callProcess)
-import System.IO (hClose)
-import System.IO.Error (tryIOError)
 import Evidence
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Evidence.GitBundle
