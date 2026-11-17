@@ -329,6 +329,7 @@ EOF
 # 3. Update test/Main.hs
 cat << 'EOF' > "$EVID_DIR/test/Main.hs"
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 
 module Main (main) where
 
@@ -460,18 +461,18 @@ main = hspec $ do
       mRes <- commuteGPatch Z3Hyperdoctrine (p1 :> p2)
       case mRes of
         Just (p2' :> p1') -> do
-          p2'.gpPatchId `shouldBe` PatchId "P2"
-          p1'.gpPatchId `shouldBe` PatchId "P1"
+          gpPatchId p2' `shouldBe` PatchId "P2"
+          gpPatchId p1' `shouldBe` PatchId "P1"
         Nothing -> expectationFailure "Expected commuteGPatch to succeed"
 
     it "clean-merges two parallel GPatch bundles under Z3Hyperdoctrine" $ do
       mRes <- mergeGPatchParallel Z3Hyperdoctrine (p1 :\/: p2)
       case mRes of
         Just (p2' :/\: p1') -> do
-          p2'.gpPatchId `shouldBe` PatchId "P2"
-          p1'.gpPatchId `shouldBe` PatchId "P1"
-          Set.member (PatchId "P1") p2'.gpContextDeps `shouldBe` True
-          Set.member (PatchId "P2") p1'.gpContextDeps `shouldBe` True
+          gpPatchId p2' `shouldBe` PatchId "P2"
+          gpPatchId p1' `shouldBe` PatchId "P1"
+          Set.member (PatchId "P1") (gpContextDeps p2') `shouldBe` True
+          Set.member (PatchId "P2") (gpContextDeps p1') `shouldBe` True
         Nothing -> expectationFailure "Expected mergeGPatchParallel to succeed"
 
     it "serializes and round-trips a .gpatch bundle file" $ do
@@ -481,7 +482,7 @@ main = hspec $ do
       -- sealed restores GPatch
       case sealed of
         Sealed2 pRestored -> do
-          pRestored.gpPatchId `shouldBe` PatchId "P1"
+          gpPatchId pRestored `shouldBe` PatchId "P1"
 EOF
 
 echo "=== [TP-013C] Completed successfully ==="
