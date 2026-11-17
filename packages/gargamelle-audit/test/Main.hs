@@ -14,9 +14,16 @@ import Gargamelle.Audit.Baseline
   , loadBaseline
   , saveBaseline
   )
+import Gargamelle.Audit.DocTier
+  ( verifyModuleDocs
+  )
+import Gargamelle.Audit.Scent
+  ( computeNovelStemRatio
+  )
 import Gargamelle.Audit.Types
   ( AuditViolation (..)
   , BaselineFingerprints (..)
+  , KnowledgeSlot (..)
   , RatchetVerdict (..)
   , SubstrateMode (..)
   , ViolationCategory (..)
@@ -35,6 +42,7 @@ tests = testGroup "gargamelle-audit tests"
   , testParameterArityGate
   , testRatchetBaseline
   , testBaselinePersistence
+  , testDocTierVerifier
   ]
 
 --------------------------------------------------------------------------------
@@ -242,4 +250,58 @@ testBaselinePersistence = testGroup "Baseline Persistence"
             ]
       assertEqual "Loaded fingerprints must match saved" (BaselineFingerprints expectedFps) loaded
       removeFile tmpPath
+  ]
+
+--------------------------------------------------------------------------------
+-- 5. DocTier Verifier Test Group
+--------------------------------------------------------------------------------
+
+testDocTierVerifier :: TestTree
+testDocTierVerifier = testGroup "DocTier"
+  [ testCase "Tautology Rejection for rcast docstring ratio < 0.5 vs. >= 1.5" $ do
+      let badDoc = "-- | Casts a record from t to s."
+          badRatio = computeNovelStemRatio "rcast" "SubRow s t => Record f t -> Record f s" badDoc
+      assertBool ("badRatio should be < 0.5, got: " ++ show badRatio) (badRatio < 0.5)
+
+      let goodDoc = "-- | Projects a narrower target row in O(1) via SmallArray index slicing; preserves field invariants."
+          goodRatio = computeNovelStemRatio "rcast" "SubRow s t => Record f t -> Record f s" goodDoc
+      assertBool ("goodRatio should be >= 1.5, got: " ++ show goodRatio) (goodRatio >= 1.5)
+
+  , testCase "Substrate Safety Slot" $ do
+      let src = T.unlines
+            [ "{-# ANN module \"audit:substrate\" #-}"
+            , "module SubModule where"
+            , ""
+            , "{-|"
+            , "@purpose Core low-level memory block"
+            , "@behavior Direct memory allocations"
+            , "@theory Linear address spaces"
+            , "@contracts Total"
+            , "@pattern Allocate and free"
+            , "@example alloc 1024"
+            , "-}"
+            ]
+          violations = verifyModuleDocs defaultAuditThresholds SubstrateModule "src/SubModule.hs" src
+          missingSlots = [ s | AuditViolation{ avCategory = MissingKnowledgeSlots ms } <- violations, s <- ms ]
+      assertEqual "Substrate module missing @safety_invariant must trigger MissingKnowledgeSlots [SlotSafetyInvariant]"
+        [SlotSafetyInvariant] missingSlots
+
+  , testCase "Exported ADT Check with MissingKnowledgeSlots [SlotTheory, SlotExample]" $ do
+      let src = T.unlines
+            [ "module MyTypes where"
+            , ""
+            , "{-|"
+            , "@purpose High level domain entity"
+            , "@behavior Wraps values"
+            , "@contracts Pure"
+            , "@pattern Value object"
+            , "-}"
+            , "data Entity = Entity Int"
+            ]
+          violations = verifyModuleDocs defaultAuditThresholds StandardModule "src/MyTypes.hs" src
+          typeViolations = [ v | v <- violations, avSymbol v == "Entity" ]
+      case typeViolations of
+        [AuditViolation{ avCategory = MissingKnowledgeSlots ms }] ->
+          assertEqual "Expected [SlotTheory, SlotExample]" [SlotTheory, SlotExample] ms
+        _ -> assertFailure ("Expected MissingKnowledgeSlots for Entity, got: " ++ show typeViolations)
   ]

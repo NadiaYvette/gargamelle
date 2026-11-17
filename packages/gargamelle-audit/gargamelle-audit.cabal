@@ -13,6 +13,8 @@ library
     Gargamelle.Audit.Types
     Gargamelle.Audit.Baseline
     Gargamelle.Audit.WorkingMemory
+    Gargamelle.Audit.Scent
+    Gargamelle.Audit.DocTier
   hs-source-dirs: src
   default-language: GHC2021
   ghc-options: -Wall -Werror
