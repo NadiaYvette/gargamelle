@@ -66,7 +66,7 @@ measure centroidWeight :: Int -> Int
 
 invariant {v: a | stepsConsumed v >= 0 && fuelRemaining v >= 0 && stepsConsumed v + fuelRemaining v <= grantedFuel v}
 invariant {v: a | centroidCount v <= maxCentroids v}
-@-}`
+@-}
 
 -- -----------------------------------------------------------------------------
 -- 1. Fuel & ResourceBudget Conservation Measures & Qualifiers
