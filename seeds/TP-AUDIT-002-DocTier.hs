@@ -30,6 +30,7 @@ verifyModuleDocs defaultAuditThresholds StandardModule "src/Foo.hs" content
 
 module Gargamelle.Audit.DocTier
   ( verifyModuleDocs
+  , checkModuleHeader
   ) where
 
 import Data.Char (isSpace)
@@ -181,7 +182,7 @@ checkTypeDecl mode path lineNum sym doc =
                , avStartLine   = lineNum
                , avEndLine     = lineNum
                , avCategory    = MissingKnowledgeSlots ms
-               , avRemediation = "Provide missing knowledge slots in docblock for exported type: " <> sym
+               , avRemediation = "Exported type must document Maalej-Robillard knowledge slots"
                }]
 
 checkFuncSig :: AuditThresholds -> SubstrateMode -> FilePath -> Int -> Text -> Text -> Text -> [AuditViolation]
