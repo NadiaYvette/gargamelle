@@ -3,6 +3,11 @@ set -euo pipefail
 
 echo "=== [TP-007F] Deploying Gargamelle.Sheaf.FFI ==="
 
+# 0. Ensure cabal.project.local exists
+if [ ! -f cabal.project.local ] && [ -f /home/nyc/src/gargamelle/cabal.project.local ]; then
+  cp -f /home/nyc/src/gargamelle/cabal.project.local ./cabal.project.local
+fi
+
 mkdir -p packages/gargamelle-sheaf/src/Gargamelle/Sheaf
 
 # 1. Mount seed
@@ -18,6 +23,7 @@ if "Gargamelle.Sheaf.FFI" not in content:
 
 if "penelope-core" not in content:
     content = content.replace("    proarrow >= 0.2 && < 0.3\n", "    proarrow >= 0.2 && < 0.3,\n    penelope-core >= 0.1 && < 0.2\n")
+    content = content.replace("    hspec >= 2.10 && < 2.12", "    penelope-core >= 0.1 && < 0.2,\n    hspec >= 2.10 && < 2.12")
 
 with open("packages/gargamelle-sheaf/gargamelle-sheaf.cabal", "w") as f:
     f.write(content)
