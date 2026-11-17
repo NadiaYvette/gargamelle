@@ -47,7 +47,7 @@ library
     bytestring >= 0.10 && < 0.13,
     zlib >= 0.6 && < 0.8,
     cryptohash-sha1 >= 0.11 && < 0.12,
-    cryptohash-sha256 >= 0.6 && < 0.7,
+    cryptohash-sha256 >= 0.11 && < 0.12,
     polytropos-core >= 0.1.0.1 && < 0.2,
     gargamelle-core >= 0.1 && < 0.2,
     hs-tree-sitter >= 13.0 && < 14,
