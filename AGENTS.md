@@ -34,6 +34,12 @@ guidance is subdivided into modular rules loaded on demand:
   Precedence rule ("code wins at runtime; notes corrected regardless") and the two-file loop.
 - [`.agents/rules/plugin-invariants.md`](.agents/rules/plugin-invariants.md) —
   TcPlugin literal index calculation, Core AST synthesis, and selector safety.
+- [`.agents/rules/hls-housekeeping.md`](.agents/rules/hls-housekeeping.md) —
+  Zero-token mechanical code repairs via `hls-autoheal`.
+- [`.agents/rules/kioku-context.md`](.agents/rules/kioku-context.md) —
+  Durable memory offloading (`kioku-remember`) and `/compact` cadence.
+- [`.agents/rules/task-execution.md`](.agents/rules/task-execution.md) —
+  Yamaarashi runner invariants, `executor: auto` preference, and zero-polling discipline.
 
 ## Operational advisories
 

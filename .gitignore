@@ -14,3 +14,6 @@ TAGS
 docs/haddock/
 docs/textbook/book/
 external/Jukebox/
+
+.stack-work/
+stack.yaml.lock

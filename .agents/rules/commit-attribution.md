@@ -1,5 +1,5 @@
 <!--
-SPDX-License-Identifier: BSD-3-Clause
+SPDX-License-Identifier: EUPL-1.2 OR Apache-2.0
 -->
 # Commit Authoring & AI Attribution Rules
 
@@ -12,7 +12,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 ## 1. Commit Message Structure
 
-Every commit in `programming-in-the-large` must follow the imperative-subject plus explanatory HEREDOC body structure:
+Every commit in `polytropos` must follow the imperative-subject plus explanatory HEREDOC body structure:
 
 ```gitcommit
 Short (<=72 chars) imperative subject line describing the change

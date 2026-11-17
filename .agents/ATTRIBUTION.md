@@ -1,6 +1,6 @@
 # AI Coding Assistant Attribution Configuration
 
-This configuration specifies the commit attribution schema for AI coding assistants and orchestration engines operating in `programming-in-the-large`, adopting the convention established in `sarutahiko`.
+This configuration specifies the commit attribution schema for AI coding assistants and orchestration engines operating in `polytropos`, adopting the convention established in `sarutahiko`.
 
 ## 1. Commit Trailers
 
