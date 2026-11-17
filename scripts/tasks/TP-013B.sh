@@ -14,6 +14,7 @@ mkdir -p "$EVID_DIR/src/Gargamelle/Evidence/Patch"
 # 1. Write Gargamelle.Evidence.Patch.Prim
 cat << 'EOF' > "$EVID_DIR/src/Gargamelle/Evidence/Patch/Prim.hs"
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE KindSignatures #-}
