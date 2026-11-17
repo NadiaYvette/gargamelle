@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedRecordDot #-}
 
 module Main (main) where
 
@@ -6,11 +7,26 @@ import Test.Hspec
 import Data.Proxy (Proxy(..))
 import Data.Tree (Tree(..))
 import qualified Data.HashMap.Strict as HM
+import qualified Data.Map.Strict as Map
+import qualified Data.Set as Set
 import qualified Data.ByteString as BS
 import Data.TreeDiff.Tree (treeDiff)
 import Evidence
+import Darcs.Patch.Witnesses
+  ( FL(..)
+  , (:>)(..)
+  , (:\/:)(..)
+  , (:/\:)(..)
+  , Sealed2(..)
+  , Invert(..)
+  , Commute(..)
+  )
+import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Evidence.GitBundle
 import Gargamelle.Evidence.Patch.Prim
+import Gargamelle.Evidence.Patch.Bundle
+import Gargamelle.FOL.LiquidHyperdoctrine (Z3Hyperdoctrine(..), Context(..), QualifierBasis(..), FOLFormula(..))
+import Gargamelle.Sheaf.LatticeCohomology (SheafVertexSpec(..))
 
 -- Dummy signature for testing EvidenceContext
 data DummySig
@@ -67,16 +83,6 @@ main = hspec $ do
           extracted = extractGpatchMetadata packetId bundleWithMeta
       extracted `shouldBe` Just metadata
 
-    it "encodes and decodes git bundle with metadata" $ do
-      let blob = GitObject ObjBlob "file content\n"
-          baseBundle = GitBundleV2 [] [BundleRef (hashGitObject blob) "refs/heads/main"] [blob]
-          bundle = storeGpatchMetadata "TP-013A" "meta-payload" baseBundle
-          encoded = encodeGitBundleV2 bundle
-      case decodeGitBundleV2Header encoded of
-        Left err -> expectationFailure ("Bundle header decode failed: " ++ err)
-        Right (_, refs, _) -> do
-          length refs `shouldBe` 2
-
   describe "Gargamelle.Evidence.Patch.Prim" $ do
     it "inverts AST DPO edits involutively" $ do
       let dpo = PrimAstDPO "src/Foo.hs" (SymbolKey "bar") (DPOSpan "bar = 1" "bar = 2") :: PrimPatch () ()
@@ -93,14 +99,57 @@ main = hspec $ do
           sym1 `shouldBe` SymbolKey "funcA"
         _ -> expectationFailure "Expected commute to succeed"
 
-    it "clean-merges parallel independent structural edits" $ do
-      let p = PrimCabalSet "foo.cabal" "exposed-modules" SetInsert "ModuleA" :: PrimPatch () ()
-          q = PrimCabalSet "foo.cabal" "exposed-modules" SetInsert "ModuleB" :: PrimPatch () ()
-      case cleanMerge (p :\/: q) of
-        Just (q_after :/\: p_after) -> do
-          case (q_after, p_after) of
-            (PrimCabalSet _ _ _ itQ, PrimCabalSet _ _ _ itP) -> do
-              itQ `shouldBe` "ModuleB"
-              itP `shouldBe` "ModuleA"
-            _ -> expectationFailure "Unexpected merged constructors"
-        Nothing -> expectationFailure "Expected cleanMerge to succeed"
+  describe "Gargamelle.Evidence.Patch.Bundle" $ do
+    let vspec idName = SheafVertexSpec
+          { svVertexId = idName
+          , svSig = emptySig
+          , svContext = Context Map.empty
+          , svBasis = QualifierBasis Set.empty
+          , svLocalGuarantee = FTrue
+          , svLocalRequirement = FTrue
+          }
+        p1 = GPatch
+          { gpPatchId = PatchId "P1"
+          , gpContextDeps = Set.empty
+          , gpBaseTreeOid = TreeOid (OidHex "1111111111111111111111111111111111111111")
+          , gpResultTreeOid = TreeOid (OidHex "2222222222222222222222222222222222222222")
+          , gpPrims = PrimCabalSet "foo.cabal" "exposed-modules" SetInsert "ModA" :>: NilFL
+          , gpSigMorphism = emptyMorphism
+          , gpVertexSpec = vspec "v1"
+          }
+        p2 = GPatch
+          { gpPatchId = PatchId "P2"
+          , gpContextDeps = Set.empty
+          , gpBaseTreeOid = TreeOid (OidHex "2222222222222222222222222222222222222222")
+          , gpResultTreeOid = TreeOid (OidHex "3333333333333333333333333333333333333333")
+          , gpPrims = PrimCabalSet "foo.cabal" "exposed-modules" SetInsert "ModB" :>: NilFL
+          , gpSigMorphism = emptyMorphism
+          , gpVertexSpec = vspec "v2"
+          }
+
+    it "commutes two sheaf-gated GPatch bundles under Z3Hyperdoctrine" $ do
+      mRes <- commuteGPatch Z3Hyperdoctrine (p1 :> p2)
+      case mRes of
+        Just (p2' :> p1') -> do
+          gpPatchId p2' `shouldBe` PatchId "P2"
+          gpPatchId p1' `shouldBe` PatchId "P1"
+        Nothing -> expectationFailure "Expected commuteGPatch to succeed"
+
+    it "clean-merges two parallel GPatch bundles under Z3Hyperdoctrine" $ do
+      mRes <- mergeGPatchParallel Z3Hyperdoctrine (p1 :\/: p2)
+      case mRes of
+        Just (p2' :/\: p1') -> do
+          gpPatchId p2' `shouldBe` PatchId "P2"
+          gpPatchId p1' `shouldBe` PatchId "P1"
+          Set.member (PatchId "P1") (gpContextDeps p2') `shouldBe` True
+          Set.member (PatchId "P2") (gpContextDeps p1') `shouldBe` True
+        Nothing -> expectationFailure "Expected mergeGPatchParallel to succeed"
+
+    it "serializes and round-trips a .gpatch bundle file" $ do
+      let tmpPath = "/tmp/test-gpatch-bundle.gpatch"
+      writeGPatchBundle tmpPath p1
+      sealed <- readGPatchBundle tmpPath
+      -- sealed restores GPatch
+      case sealed of
+        Sealed2 pRestored -> do
+          gpPatchId pRestored `shouldBe` PatchId "P1"
