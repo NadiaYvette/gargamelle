@@ -9,6 +9,9 @@ import System.FilePath ((</>))
 import Test.Tasty
 import Test.Tasty.HUnit
 
+import Gargamelle.Audit.ApiGraph
+  ( verifyApiExplorationGraph
+  )
 import Gargamelle.Audit.Baseline
   ( evaluateRatchet
   , loadBaseline
@@ -16,6 +19,9 @@ import Gargamelle.Audit.Baseline
   )
 import Gargamelle.Audit.DocTier
   ( verifyModuleDocs
+  )
+import Gargamelle.Audit.Pedagogy
+  ( verifyDocumentationCorpus
   )
 import Gargamelle.Audit.Scent
   ( computeNovelStemRatio
@@ -43,6 +49,7 @@ tests = testGroup "gargamelle-audit tests"
   , testRatchetBaseline
   , testBaselinePersistence
   , testDocTierVerifier
+  , testPedagogyVerifier
   ]
 
 --------------------------------------------------------------------------------
@@ -185,13 +192,11 @@ testRatchetBaseline = testGroup "Ratchet Baseline Engine"
           fingerprint = (avFilePath violation, avSymbol violation, avCategory violation)
           baseline = BaselineFingerprints (Set.singleton fingerprint)
 
-      -- Case A: Untouched file -> grandfathered
       let verdictUntouched = evaluateRatchet baseline Set.empty [violation]
       assertEqual "Blocking violations should be empty for untouched file" [] (rvBlockingViolations verdictUntouched)
       assertEqual "Grandfathered count should be 1" 1 (rvGrandfatheredCount verdictUntouched)
       assertEqual "Resolved baseline count should be 0" 0 (rvResolvedBaselineCount verdictUntouched)
 
-      -- Case B: Touched file -> zero grandfathering, blocked!
       let verdictTouched = evaluateRatchet baseline (Set.singleton "src/MyPkg/Foo.hs") [violation]
       assertEqual "Blocking violations should contain the violation" [violation] (rvBlockingViolations verdictTouched)
       assertEqual "Grandfathered count should be 0 for touched file" 0 (rvGrandfatheredCount verdictTouched)
@@ -201,7 +206,6 @@ testRatchetBaseline = testGroup "Ratchet Baseline Engine"
       let fp1 = ("src/A.hs", "funcA", WorkingMemoryPeakExceeded 8 7 20)
           fp2 = ("src/B.hs", "funcB", ExcessiveParameterArity 5 4)
           baseline = BaselineFingerprints (Set.fromList [fp1, fp2])
-          -- Only funcA is still present
           currentViolation = AuditViolation
             { avFilePath    = "src/A.hs"
             , avSymbol      = "funcA"
@@ -304,4 +308,99 @@ testDocTierVerifier = testGroup "DocTier"
         [AuditViolation{ avCategory = MissingKnowledgeSlots ms }] ->
           assertEqual "Expected [SlotTheory, SlotExample]" [SlotTheory, SlotExample] ms
         _ -> assertFailure ("Expected MissingKnowledgeSlots for Entity, got: " ++ show typeViolations)
+  ]
+
+--------------------------------------------------------------------------------
+-- 6. Pedagogy & ApiGraph Verifier Test Group
+--------------------------------------------------------------------------------
+
+testPedagogyVerifier :: TestTree
+testPedagogyVerifier = testGroup "Pedagogy"
+  [ testCase "API Graph Diameter" $ do
+      let src = T.unlines
+            [ "module MyAPI where"
+            , ""
+            , "data PrimaryRope = PrimaryRope"
+            , "data Adapter1 = Adapter1"
+            , "data Adapter2 = Adapter2"
+            , "data OrphanConfig = OrphanConfig"
+            , ""
+            , "hop1 :: PrimaryRope -> Adapter1"
+            , "hop1 _ = Adapter1"
+            , ""
+            , "hop2 :: Adapter1 -> Adapter2"
+            , "hop2 _ = Adapter2"
+            , ""
+            , "hop3 :: Adapter2 -> OrphanConfig"
+            , "hop3 _ = OrphanConfig"
+            ]
+          violations = verifyApiExplorationGraph defaultAuditThresholds StandardModule "src/MyAPI.hs" src
+          orphanViolations = [ v | v <- violations, avSymbol v == "OrphanConfig" ]
+      case orphanViolations of
+        [AuditViolation{ avCategory = ApiReachabilityExceeded _ (Just 3) 2 }] -> pure ()
+        _ -> assertFailure ("Expected ApiReachabilityExceeded with measuredHops = Just 3, got: " ++ show orphanViolations)
+
+  , testCase "Forward-Reference Detection and @spiral escape hatch" $ do
+      let corpus =
+            [ ( "docs/01-intro.md"
+              , T.unlines
+                  [ "<!-- @uses: TambaraModule -->"
+                  , "# Introduction"
+                  , "Here we introduce TambaraModule."
+                  ]
+              )
+            , ( "docs/03-optics.md"
+              , T.unlines
+                  [ "<!-- @defines: TambaraModule -->"
+                  , "# Optics"
+                  , "Definition of TambaraModule."
+                  ]
+              )
+            ]
+          viols = verifyDocumentationCorpus defaultAuditThresholds "docs" corpus
+          fwdViol = [ v | v <- viols, avSymbol v == "TambaraModule" ]
+      assertEqual "Referencing TambaraModule in intro triggers PedagogicalForwardRef" 1 (length fwdViol)
+
+      let corpusFixed =
+            [ ( "docs/01-intro.md"
+              , T.unlines
+                  [ "<!-- @uses: TambaraModule -->"
+                  , "<!-- @spiral: TambaraModule -->"
+                  , "# Introduction"
+                  , "Here we spiral-reference TambaraModule."
+                  ]
+              )
+            , ( "docs/03-optics.md"
+              , T.unlines
+                  [ "<!-- @defines: TambaraModule -->"
+                  , "# Optics"
+                  , "Definition of TambaraModule."
+                  ]
+              )
+            ]
+          violsFixed = verifyDocumentationCorpus defaultAuditThresholds "docs" corpusFixed
+          fwdViolFixed = [ v | v <- violsFixed, avSymbol v == "TambaraModule" ]
+      assertEqual "Spiral escape hatch resolves PedagogicalForwardRef" 0 (length fwdViolFixed)
+
+  , testCase "Paragraph Definition-Use Gap" $ do
+      let docText = T.unlines
+            [ "# Chapter"
+            , ""
+            , "Paragraph 1 with @use{tarskiCoboundary}."
+            , ""
+            , "Paragraph 2."
+            , ""
+            , "Paragraph 3."
+            , ""
+            , "Paragraph 4."
+            , ""
+            , "Paragraph 5."
+            , ""
+            , "Paragraph 6."
+            , ""
+            , "Paragraph 7 with @def{tarskiCoboundary}."
+            ]
+          viols = verifyDocumentationCorpus defaultAuditThresholds "docs" [("docs/chapter.md", docText)]
+          gapViols = [ v | v <- viols, case avCategory v of ExcessiveDefUseGap {} -> True; _ -> False ]
+      assertEqual "6 paragraphs gap triggers ExcessiveDefUseGap" 1 (length gapViols)
   ]
