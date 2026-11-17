@@ -341,6 +341,15 @@ import qualified Data.Set as Set
 import qualified Data.ByteString as BS
 import Data.TreeDiff.Tree (treeDiff)
 import Evidence
+import Darcs.Patch.Witnesses
+  ( FL(..)
+  , (:>)(..)
+  , (:\/:)(..)
+  , (:/\:)(..)
+  , Sealed2(..)
+  , Invert(..)
+  , Commute(..)
+  )
 import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Evidence.GitBundle
 import Gargamelle.Evidence.Patch.Prim
