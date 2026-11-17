@@ -1,0 +1,33 @@
+cabal-version:      3.0
+name:               darcs-witnesses
+version:            0.1.0.0
+synopsis:           GADT-witnessed patch algebra primitives (FL, RL, :\\/:, :/\\:, Invert, Commute, CleanMerge)
+description:        Standalone zero-dependency typed patch category witnesses for Darcs, Gargamelle, and Yamaarashi.
+license:            BSD-3-Clause
+author:             Nadia Yvette Chambers
+maintainer:         nadia.yvette.chambers@ik.me
+category:           Data, Development
+build-type:         Simple
+
+library
+    exposed-modules:
+        Darcs.Patch.Witnesses
+        Darcs.Patch.Witnesses.Ordered
+        Darcs.Patch.Witnesses.Sealed
+        Darcs.Patch.Witnesses.Class
+    build-depends:
+        base >= 4.18 && < 5
+    hs-source-dirs:   src
+    default-language: GHC2021
+    ghc-options:      -Wall -O2
+
+test-suite darcs-witnesses-test
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:   test
+    build-depends:
+        base >= 4.18 && < 5,
+        darcs-witnesses,
+        QuickCheck >= 2.14
+    default-language: GHC2021
+    ghc-options:      -Wall
