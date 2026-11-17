@@ -82,6 +82,7 @@ import Gargamelle.FOL.LiquidHyperdoctrine
   , QualifierBasis(..)
   , FOLFormula(..)
   , Hyperdoctrine(..)
+  , LiquidSubHyperdoctrine(..)
   )
 import Gargamelle.Sheaf.LatticeCohomology
   ( SheafVertexSpec(..)
@@ -122,10 +123,21 @@ instance Eq (GPatch wX wY) where
     && p1.gpBaseTreeOid == p2.gpBaseTreeOid
     && p1.gpResultTreeOid == p2.gpResultTreeOid
 
+-- | Clean merge for forward lists of primitive patches via inversion and commutation.
+cleanMergeFL
+  :: (:\/:) (FL PrimPatch) (FL PrimPatch) wA wB
+  -> Maybe ((:/\:) (FL PrimPatch) (FL PrimPatch) wA wB)
+cleanMergeFL (xs :\/: ys) = do
+  ys' :> inv_xs' <- commute (invert xs :> ys)
+  pure (ys' :/\: invert inv_xs')
+
+instance CleanMerge (FL PrimPatch) where
+  cleanMerge = cleanMergeFL
+
 -- | Commutes two sequential GPatch bundles iff both primitive AST edits commute
 --   and cellular sheaf cohomology obstruction H^1 = 0.
 commuteGPatch
-  :: Hyperdoctrine h
+  :: (Hyperdoctrine h, LiquidSubHyperdoctrine h)
   => h
   -> (:>) GPatch GPatch wX wZ
   -> IO (Maybe ((:>) GPatch GPatch wX wZ))
@@ -149,12 +161,12 @@ commuteGPatch h (p :> q) = do
 
 -- | Parallel merger of two GPatch bundles requiring syntactic cleanMerge and H^1 = 0.
 mergeGPatchParallel
-  :: Hyperdoctrine h
+  :: (Hyperdoctrine h, LiquidSubHyperdoctrine h)
   => h
   -> (:\/:) GPatch GPatch wX wY
   -> IO (Maybe ((:/\:) GPatch GPatch wX wY))
 mergeGPatchParallel h (p :\/: q) = do
-  case cleanMerge (p.gpPrims :\/: q.gpPrims) of
+  case cleanMergeFL (p.gpPrims :\/: q.gpPrims) of
     Nothing -> pure Nothing
     Just (qPrims' :/\: pPrims') -> do
       let vP = p.gpVertexSpec
