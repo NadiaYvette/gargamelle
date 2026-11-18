@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-effect
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Penelope polycategorical effect orchestration with Polytropos routers
 description:
   Penelope polycategorical effect orchestration layer with Polytropos O(1)

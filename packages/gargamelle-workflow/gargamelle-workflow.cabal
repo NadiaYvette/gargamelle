@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-workflow
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Synthesis workflow, Crem state machine, and end-to-end integration
 description:
   Synthesis workflow orchestration, Crem verified state machine integration,

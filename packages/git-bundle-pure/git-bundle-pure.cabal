@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               git-bundle-pure
-version:            0.1.0.0
+version:            0.1.1.0
 synopsis:           Pure-Haskell Git Object Hashing, PACK v2, and gitformat-bundle(5) Codec
 description:        Standalone zero-FFI implementation of Git loose object hashing, PACK v2 encoding, and gitformat-bundle(5) v2 codec.
 license:            BSD-3-Clause

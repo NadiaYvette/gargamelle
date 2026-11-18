@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-fol
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: First-order logic institution and streaming Z3 SMT pipe for Gargamelle
 description:
   First-order logic institution and streaming Z3 SMT solver pipeline for

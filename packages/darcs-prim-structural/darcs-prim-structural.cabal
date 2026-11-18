@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               darcs-prim-structural
-version:            0.1.0.0
+version:            0.1.1.0
 synopsis:           Set-Commutative Cabal Stanzas, Haskell Export/Import Sets, & AST DPO Primitives
 description:        Beyond-Darcs structural patch primitives that eliminate false-positive line conflicts.
 license:            BSD-3-Clause

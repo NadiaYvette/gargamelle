@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               darcs-witnesses
-version:            0.1.0.0
+version:            0.1.1.0
 synopsis:           GADT-witnessed patch algebra primitives (FL, RL, :\\/:, :/\\:, Invert, Commute, CleanMerge)
 description:        Standalone zero-dependency typed patch category witnesses for Darcs, Gargamelle, and Yamaarashi.
 license:            BSD-3-Clause

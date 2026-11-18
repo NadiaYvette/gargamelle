@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-equational
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Equational logic institution and presheaf DPO rewriting for Gargamelle
 description:
   Equational logic institution and presheaf double-pushout (DPO)

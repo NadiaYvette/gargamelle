@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-audit
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Core Audit Schema, Ratchet Baseline & CST Working-Memory Analyzer
 license: EUPL-1.2
 author: Nadia Yvette Chambers

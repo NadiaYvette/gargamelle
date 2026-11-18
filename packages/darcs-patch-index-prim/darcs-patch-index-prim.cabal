@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               darcs-patch-index-prim
-version:            0.1.0.0
+version:            0.1.1.0
 synopsis:           Unboxed PrimArray Word64 Bitset & SmallArray Footprint Index
 license:            BSD-3-Clause
 author:             Nadia Yvette Chambers

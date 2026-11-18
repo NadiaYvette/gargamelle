@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-persistence
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Beam SQLite database persistence for evidence and run tracking
 description:
   Beam SQLite database persistence for evidence and run tracking in

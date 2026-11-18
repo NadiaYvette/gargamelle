@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-evidence
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Evidence preservation and structural tree-diff AST tracking
 description:
   Evidence preservation and structural tree-diff AST tracking for

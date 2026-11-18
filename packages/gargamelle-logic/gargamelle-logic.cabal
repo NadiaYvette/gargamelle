@@ -1,6 +1,6 @@
 cabal-version: 3.0
 name: gargamelle-logic
-version: 0.1.0.0
+version: 0.1.1.0
 synopsis: Pure syntax, order theory, and refinement calculi for Gargamelle
 description:
   Pure syntax, defunctionalized arrows, order theory, and refinement
