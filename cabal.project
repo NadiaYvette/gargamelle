@@ -57,28 +57,38 @@ source-repository-package
 source-repository-package
   type: git
   location: https://github.com/NadiaYvette/polytropos
-  tag: 0.1.0.3
+  tag: 0.1.1.0
   subdir: packages/polytropos-core
 
 source-repository-package
   type: git
   location: https://github.com/NadiaYvette/polytropos
-  tag: 0.1.0.3
+  tag: 0.1.1.0
   subdir: packages/polytropos-plugin
 
 source-repository-package
   type: git
   location: https://github.com/NadiaYvette/polytropos
-  tag: 0.1.0.3
+  tag: 0.1.1.0
   subdir: packages/polytropos-reader-soup
 
 source-repository-package
   type: git
   location: https://github.com/NadiaYvette/polytropos
-  tag: 0.1.0.3
+  tag: 0.1.1.0
   subdir: packages/polytropos-profunctors
 
--- penelope packages provided via local checkout in cabal.project.local / packages
+source-repository-package
+  type: git
+  location: https://github.com/NadiaYvette/penelope
+  tag: 0.1.1.0
+  subdir:
+    packages/penelope-core
+    packages/penelope-effects
+    packages/penelope-static
+    packages/penelope-stage
+    packages/penelope-backend-mlir
+    packages/penelope-backend-gimple
 
 source-repository-package
   type: git
