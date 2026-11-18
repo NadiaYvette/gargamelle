@@ -36,6 +36,7 @@ library
     Gargamelle.Core.Institution.Liquid
     Gargamelle.Core.Institution.Liquid.Instance
     Gargamelle.Core.Institution.Liquid.Polytropos
+    Gargamelle.Core.Institution.Liquid.Smirk
     Gargamelle.Core.Institution.Liquid.Penelope
     Gargamelle.Core.Weaving
     Gargamelle.Core.Discovery

@@ -27,6 +27,7 @@ import Gargamelle.Core.Institution.Liquid
 import Gargamelle.Core.Institution.Liquid.Instance (checkSatisfactionCondition)
 import Gargamelle.Core.Institution.Liquid.Polytropos
 import Gargamelle.Core.Institution.Liquid.Penelope
+import Gargamelle.Core.Institution.Liquid.Smirk
 import Gargamelle.CodeGen.Haskell
 import Gargamelle.CodeGen.OrganIR
 import Gargamelle.HostVM.PgclPushout
@@ -77,6 +78,33 @@ instance CategoricalInstitution TestInst where
 
 main :: IO ()
 main = hspec $ do
+
+  describe "Smirk and dunning-t-digest Liquid Measures (TP-SMIRK-007A)" $ do
+    let emptySig = LiquidSig mempty mempty [] mempty mempty []
+        smirkSig = registerAllSmirkMeasures emptySig
+
+    it "registers Fuel conservation measures and budget qualifiers" $ do
+      Map.member "stepsConsumed" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "fuelRemaining" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "grantedFuel" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "effectiveFuel" (sigMeasures smirkSig) `shouldBe` True
+      Set.member "Fuel" (sigSorts smirkSig) `shouldBe` True
+      Set.size (fuelBudgetQualifiers) `shouldBe` 5
+
+    it "registers Evacuable non-empty matching and termination qualifiers" $ do
+      Map.member "isNullableAST" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "matchLength" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "remainingInputLen" (sigMeasures smirkSig) `shouldBe` True
+      Set.member "AST" (sigSorts smirkSig) `shouldBe` True
+      Set.size (evacuableQualifiers) `shouldBe` 2
+
+    it "registers dunning-t-digest capacity and monotonic qualifiers" $ do
+      Map.member "centroidCount" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "maxCentroids" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "centroidMean" (sigMeasures smirkSig) `shouldBe` True
+      Map.member "centroidWeight" (sigMeasures smirkSig) `shouldBe` True
+      Set.member "TDigest" (sigSorts smirkSig) `shouldBe` True
+      Set.size (tDigestQualifiers) `shouldBe` 3
   -- Tested against Note [Categorical Pushout Feature Weaving] [ref:note-pushout-feature-weaving]
   describe "Pushout Feature Weaving (B ⨿_C W)" $ do
     it "weaves aspect into base signature over a shared interface in Unit category" $ do
