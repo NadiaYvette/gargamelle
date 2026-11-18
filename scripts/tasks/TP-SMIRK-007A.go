@@ -65,8 +65,8 @@ func main() {
 	cabalStr := string(cabalBytes)
 	if !strings.Contains(cabalStr, "Gargamelle.Core.Institution.Liquid.Smirk") {
 		cabalStr = strings.Replace(cabalStr,
-			"        Gargamelle.Core.Institution.Liquid.Polytropos\n",
-			"        Gargamelle.Core.Institution.Liquid.Polytropos\n        Gargamelle.Core.Institution.Liquid.Smirk\n", 1)
+			"    Gargamelle.Core.Institution.Liquid.Polytropos\n",
+			"    Gargamelle.Core.Institution.Liquid.Polytropos\n    Gargamelle.Core.Institution.Liquid.Smirk\n", 1)
 		if err := os.WriteFile(cabalPath, []byte(cabalStr), 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", cabalPath, err)
 			os.Exit(1)
@@ -74,26 +74,7 @@ func main() {
 		fmt.Println("  [+] Updated gargamelle-core.cabal")
 	}
 
-	// 3. Update packages/gargamelle-core/src/Gargamelle/Core/Institution/Liquid.hs
-	liqPath := "packages/gargamelle-core/src/Gargamelle/Core/Institution/Liquid.hs"
-	liqBytes, err := os.ReadFile(liqPath)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to read %s: %v\n", liqPath, err)
-		os.Exit(1)
-	}
-	liqStr := string(liqBytes)
-	if !strings.Contains(liqStr, "Gargamelle.Core.Institution.Liquid.Smirk") {
-		liqStr = strings.Replace(liqStr,
-			"  -- * Synthesized Program AST\n  , SynTerm (..)\n  , termToLiquidPred\n  ) where",
-			"  -- * Synthesized Program AST\n  , SynTerm (..)\n  , termToLiquidPred\n  -- * Smirk & t-Digest Measures\n  , module Gargamelle.Core.Institution.Liquid.Smirk\n  ) where\n\nimport Gargamelle.Core.Institution.Liquid.Smirk", 1)
-		if err := os.WriteFile(liqPath, []byte(liqStr), 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", liqPath, err)
-			os.Exit(1)
-		}
-		fmt.Println("  [+] Updated Liquid.hs")
-	}
-
-	// 4. Update packages/gargamelle-core/test/Main.hs
+	// 3. Update packages/gargamelle-core/test/Main.hs
 	testPath := "packages/gargamelle-core/test/Main.hs"
 	testBytes, err := os.ReadFile(testPath)
 	if err != nil {
@@ -101,6 +82,11 @@ func main() {
 		os.Exit(1)
 	}
 	testStr := string(testBytes)
+	if !strings.Contains(testStr, "Gargamelle.Core.Institution.Liquid.Smirk") {
+		testStr = strings.Replace(testStr,
+			"import Gargamelle.Core.Institution.Liquid.Penelope\n",
+			"import Gargamelle.Core.Institution.Liquid.Penelope\nimport Gargamelle.Core.Institution.Liquid.Smirk\n", 1)
+	}
 	if !strings.Contains(testStr, "Smirk and dunning-t-digest Liquid Measures") {
 		testSnippet := `
   describe "Smirk and dunning-t-digest Liquid Measures (TP-SMIRK-007A)" $ do
@@ -133,12 +119,12 @@ func main() {
 		testStr = strings.Replace(testStr,
 			"main :: IO ()\nmain = hspec $ do\n",
 			"main :: IO ()\nmain = hspec $ do\n"+testSnippet, 1)
-		if err := os.WriteFile(testPath, []byte(testStr), 0644); err != nil {
-			fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", testPath, err)
-			os.Exit(1)
-		}
-		fmt.Println("  [+] Updated test/Main.hs")
 	}
+	if err := os.WriteFile(testPath, []byte(testStr), 0644); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", testPath, err)
+		os.Exit(1)
+	}
+	fmt.Println("  [+] Updated test/Main.hs")
 
 	fmt.Println("=== [TP-SMIRK-007A Task Runner Complete] ===")
 }
